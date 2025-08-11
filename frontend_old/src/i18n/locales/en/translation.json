@@ -1,0 +1,24 @@
+{
+  "language": "English",
+  "theme": {
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "email": "Email",
+    "emailPlaceholder": "example@email.com",
+    "password": "Password",
+    "passwordPlaceholder": "••••••",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "dontHaveAccount": "Don't have an account? ",
+    "signUp": "Sign Up",
+    "or": "or",
+    "signInWith": "Sign in with",
+    "signInWithGoogle": "Sign in with Google",
+    "signInWithFacebook": "Sign in with Facebook",
+    "signingInWithGoogle": "Signing in with Google...",
+    "signingInWithFacebook": "Signing in with Facebook..."
+  }
+}

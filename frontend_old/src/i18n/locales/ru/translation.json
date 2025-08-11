@@ -1,0 +1,24 @@
+{
+  "language": "Русский",
+  "theme": {
+    "light": "Светлый",
+    "dark": "Темный"
+  },
+  "auth": {
+    "signIn": "Войти",
+    "email": "Эл. почта",
+    "emailPlaceholder": "example@email.com",
+    "password": "Пароль",
+    "passwordPlaceholder": "••••••",
+    "rememberMe": "Запомнить меня",
+    "forgotPassword": "Забыли пароль?",
+    "dontHaveAccount": "Нет аккаунта? ",
+    "signUp": "Зарегистрируйтесь",
+    "or": "или",
+    "signInWith": "Войти с помощью",
+    "signInWithGoogle": "Войти с Google",
+    "signInWithFacebook": "Войти с Facebook",
+    "signingInWithGoogle": "Вход с помощью Google...",
+    "signingInWithFacebook": "Вход с помощью Facebook..."
+  }
+}
