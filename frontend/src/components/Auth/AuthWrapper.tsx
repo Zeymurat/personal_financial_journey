@@ -1,7 +1,8 @@
+// src/components/AuthWrapper.tsx
 import React, { useState } from 'react';
 import Login from './Login';
 import Register from './Register';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -23,17 +24,16 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     }
   };
 
-  const handleRegister = async (email: string, password: string, name: string) => {
+  const handleRegister = async (name: string, email: string, password: string) => {
     setAuthLoading(true);
     try {
-      await signup(email, password);
-      // Note: The name update should be handled by the AuthProvider
+      await signup(email, password, name);
     } finally {
       setAuthLoading(false);
     }
   };
 
-  // Show loading spinner while checking auth status
+  // ... (Geri kalan JSX kodları aynı)
   if (currentUser === undefined) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center">
@@ -45,7 +45,6 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     );
   }
 
-  // Show auth screens if not authenticated
   if (!currentUser) {
     return (
       <>
@@ -66,10 +65,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     );
   }
 
-  // Render children if authenticated
   return <>{children}</>;
 };
-
-// Use the main AuthContext from context/AuthContext
 
 export default AuthWrapper;

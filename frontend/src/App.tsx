@@ -1,3 +1,4 @@
+// src/App.tsx
 import React, { useState } from 'react';
 import AuthWrapper from './components/Auth/AuthWrapper';
 import Sidebar from './components/Sidebar';
@@ -7,6 +8,7 @@ import Investments from './components/Investments';
 import Reports from './components/Reports';
 import CurrencyConverter from './components/CurrencyConverter';
 import Settings from './components/Settings';
+import { AuthProvider } from './contexts/AuthContext'; // <-- AuthProvider'ı import edin!
 
 const MainApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -42,9 +44,14 @@ const MainApp: React.FC = () => {
 
 function App() {
   return (
-    <AuthWrapper>
-      <MainApp />
-    </AuthWrapper>
+    // AuthProvider, tüm kimlik doğrulama bağlamını sağlar
+    // AuthWrapper ve MainApp onun içinde olmalı
+    <AuthProvider> {/* <-- Buraya AuthProvider'ı ekledik! */}
+      <AuthWrapper>
+        {/* AuthWrapper, kullanıcının oturum açıp açmadığına göre içeriği render eder */}
+        <MainApp />
+      </AuthWrapper>
+    </AuthProvider>
   );
 }
 

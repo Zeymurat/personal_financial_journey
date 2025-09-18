@@ -1,0 +1,1 @@
+# Django management commands için __init__.py 

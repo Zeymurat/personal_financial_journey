@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
-import { Plus, Search, Filter, ArrowUpRight, ArrowDownRight, Edit, Trash2, Calendar, Eye, Download, TrendingUp } from 'lucide-react';
-import { mockTransactions } from '../data/mockData';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Filter, ArrowUpRight, ArrowDownRight, Edit, Trash2, Calendar, Eye, Download, TrendingUp, Loader2 } from 'lucide-react';
 import { Transaction } from '../types';
+import { transactionAPI } from '../services/apiService';
+import { useAuth } from '../contexts/AuthContext';
 
 const Transactions: React.FC = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
+  const { currentUser } = useAuth();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -13,7 +16,7 @@ const Transactions: React.FC = () => {
 
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.category.toLowerCase().includes(searchTerm.toLowerCase());
+                          transaction.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType === 'all' || transaction.type === filterType;
     
     let matchesDate = true;
@@ -38,6 +41,26 @@ const Transactions: React.FC = () => {
     
     return matchesSearch && matchesFilter && matchesDate;
   });
+  console.log("currentUser",currentUser)
+  // Veri yükleme
+  useEffect(() => {
+    if (currentUser) {
+      loadTransactions();
+    }
+  }, [currentUser]);
+
+  const loadTransactions = async () => {
+    try {
+      setLoading(true);
+      const data = await transactionAPI.getAll();
+      setTransactions(data);
+    } catch (error) {
+      console.error('İşlemler yüklenirken hata:', error);
+      // Hata durumunda kullanıcıya bilgi ver
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const totalIncome = transactions
     .filter(t => t.type === 'income')
@@ -61,26 +84,39 @@ const Transactions: React.FC = () => {
       expense: ['Kira', 'Market', 'Ulaşım', 'Eğlence', 'Sağlık', 'Eğitim', 'Teknoloji', 'Giyim', 'Diğer Gider']
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      const newTransaction: Transaction = {
-        id: Date.now().toString(),
-        type: formData.type,
-        amount: parseFloat(formData.amount),
-        category: formData.category,
-        description: formData.description,
-        date: formData.date,
-        currency: 'TRY'
-      };
-      setTransactions([newTransaction, ...transactions]);
-      setShowAddModal(false);
-      setFormData({
-        type: 'expense',
-        amount: '',
-        category: '',
-        description: '',
-        date: new Date().toISOString().split('T')[0]
-      });
+      try {
+        const newTransactionData = {
+          type: formData.type,
+          amount: parseFloat(formData.amount),
+          category: formData.category,
+          description: formData.description,
+          date: formData.date,
+          currency: 'TRY'
+        };
+
+        const result = await transactionAPI.create(newTransactionData);
+        
+        // Yeni işlemi listeye ekle
+        const newTransaction: Transaction = {
+          id: result.id || Date.now().toString(),
+          ...newTransactionData
+        };
+        
+        setTransactions([newTransaction, ...transactions]);
+        setShowAddModal(false);
+        setFormData({
+          type: 'expense',
+          amount: '',
+          category: '',
+          description: '',
+          date: new Date().toISOString().split('T')[0]
+        });
+      } catch (error) {
+        console.error('İşlem eklenirken hata:', error);
+        alert('İşlem eklenirken bir hata oluştu. Lütfen tekrar deneyin.');
+      }
     };
 
     return (
@@ -443,12 +479,12 @@ const Transactions: React.FC = () => {
               <div>
                 <h2 className="text-3xl font-black text-slate-900 dark:text-white">Tüm İşlemler</h2>
                 <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                  {filteredTransactions.length} işlem gösteriliyor
+                  {loading ? 'Yükleniyor...' : `${filteredTransactions.length} işlem gösteriliyor`}
                 </p>
               </div>
               <div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-4 py-2 rounded-full">
                 <Calendar className="w-4 h-4" />
-                <span>Son güncelleme: Bugün</span>
+                <span>Son güncelleme: {loading ? 'Yükleniyor...' : 'Bugün'}</span>
               </div>
             </div>
           </div>
@@ -475,76 +511,112 @@ const Transactions: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {filteredTransactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200">
-                    <td className="px-8 py-6 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className={`p-3 rounded-2xl mr-4 shadow-lg ${
-                          transaction.type === 'income' 
-                            ? 'bg-gradient-to-r from-emerald-500 to-green-600' 
-                            : 'bg-gradient-to-r from-rose-500 to-red-600'
-                        }`}>
-                          {transaction.type === 'income' ? (
-                            <ArrowUpRight className="w-6 h-6 text-white" />
-                          ) : (
-                            <ArrowDownRight className="w-6 h-6 text-white" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-lg font-black text-slate-900 dark:text-white">
-                            {transaction.description}
-                          </p>
-                          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
-                            ID: {transaction.id}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6 whitespace-nowrap">
-                      <span className="px-4 py-2 text-sm font-bold bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-full">
-                        {transaction.category}
-                      </span>
-                    </td>
-                    <td className="px-8 py-6 whitespace-nowrap">
-                      <div>
-                        <p className="text-lg font-black text-slate-900 dark:text-white">
-                          {new Date(transaction.date).toLocaleDateString('tr-TR')}
-                        </p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                          {new Date(transaction.date).toLocaleDateString('tr-TR', { weekday: 'long' })}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6 whitespace-nowrap">
-                      <div>
-                        <span className={`text-xl font-black ${
-                          transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'
-                        }`}>
-                          {transaction.type === 'income' ? '+' : '-'}₺{transaction.amount.toLocaleString()}
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="px-8 py-12 text-center">
+                      <div className="flex items-center justify-center space-x-3">
+                        <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                        <span className="text-lg font-semibold text-slate-600 dark:text-slate-400">
+                          İşlemler yükleniyor...
                         </span>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
-                          {transaction.currency}
-                        </p>
                       </div>
                     </td>
-                    <td className="px-8 py-6 whitespace-nowrap">
-                      <div className="flex items-center space-x-3">
+                  </tr>
+                ) : filteredTransactions.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-8 py-12 text-center">
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Calendar className="w-8 h-8 text-slate-400" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                          Henüz işlem bulunmuyor
+                        </h3>
+                        <p className="text-slate-500 dark:text-slate-500 mb-4">
+                          İlk işleminizi ekleyerek başlayın
+                        </p>
                         <button
-                          onClick={() => setSelectedTransaction(transaction)}
-                          className="text-blue-600 hover:text-blue-800 transition-colors p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl"
+                          onClick={() => setShowAddModal(true)}
+                          className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors"
                         >
-                          <Eye className="w-5 h-5" />
-                        </button>
-                        <button className="text-emerald-600 hover:text-emerald-800 transition-colors p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-xl">
-                          <Edit className="w-5 h-5" />
-                        </button>
-                        <button className="text-rose-600 hover:text-rose-800 transition-colors p-2 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl">
-                          <Trash2 className="w-5 h-5" />
+                          <Plus className="w-5 h-5" />
+                          <span>İlk İşlemi Ekle</span>
                         </button>
                       </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredTransactions.map((transaction) => (
+                    <tr key={transaction.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200">
+                      <td className="px-8 py-6 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className={`p-3 rounded-2xl mr-4 shadow-lg ${
+                            transaction.type === 'income' 
+                              ? 'bg-gradient-to-r from-emerald-500 to-green-600' 
+                              : 'bg-gradient-to-r from-rose-500 to-red-600'
+                          }`}>
+                            {transaction.type === 'income' ? (
+                              <ArrowUpRight className="w-6 h-6 text-white" />
+                            ) : (
+                              <ArrowDownRight className="w-6 h-6 text-white" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-lg font-black text-slate-900 dark:text-white">
+                              {transaction.description}
+                            </p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
+                              ID: {transaction.id}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6 whitespace-nowrap">
+                        <span className="px-4 py-2 text-sm font-bold bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-full">
+                          {transaction.category}
+                        </span>
+                      </td>
+                      <td className="px-8 py-6 whitespace-nowrap">
+                        <div>
+                          <p className="text-lg font-black text-slate-900 dark:text-white">
+                            {new Date(transaction.date).toLocaleDateString('tr-TR')}
+                          </p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                            {new Date(transaction.date).toLocaleDateString('tr-TR', { weekday: 'long' })}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6 whitespace-nowrap">
+                        <div>
+                          <span className={`text-xl font-black ${
+                            transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'
+                          }`}>
+                            {transaction.type === 'income' ? '+' : '-'}₺{transaction.amount.toLocaleString()}
+                          </span>
+                          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
+                            {transaction.currency}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6 whitespace-nowrap">
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={() => setSelectedTransaction(transaction)}
+                            className="text-blue-600 hover:text-blue-800 transition-colors p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl"
+                          >
+                            <Eye className="w-5 h-5" />
+                          </button>
+                          <button className="text-emerald-600 hover:text-emerald-800 transition-colors p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-xl">
+                            <Edit className="w-5 h-5" />
+                          </button>
+                          <button className="text-rose-600 hover:text-rose-800 transition-colors p-2 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl">
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

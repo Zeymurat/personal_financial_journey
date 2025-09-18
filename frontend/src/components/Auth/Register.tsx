@@ -114,7 +114,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-blue-600/20 backdrop-blur-sm"></div>
-        <div className="relative z-10 flex flex-col justify-center items-center p-12 text-white">
+        <div className="relative z-10 flex flex-col justify-center items-center p-12 pl-60 text-white">
           <div className="mb-8">
             <div className="flex items-center space-x-4 mb-6">
               <div className="p-4 bg-gradient-to-r from-purple-500 to-blue-600 rounded-2xl shadow-2xl">

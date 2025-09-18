@@ -1,3 +1,4 @@
+// src/contexts/AuthContext.tsx
 import { createContext, useContext, useEffect, useState, useMemo, ReactNode } from 'react';
 import { 
   User as FirebaseUser,
@@ -10,68 +11,60 @@ import {
   signInWithPopup,
   UserCredential
 } from 'firebase/auth';
-import { auth } from '../../firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase'; // Firestore instance'ı (db) buradan gelmeli
 import { User } from '../types';
 
-// Define the shape of our context
+
+// AuthContext tipi
 interface AuthContextType {
-  currentUser: User | null;
+  currentUser: User | null | undefined; // currentUser'ın üç farklı durumu olabilir
   login: (email: string, password: string) => Promise<UserCredential>;
-  signup: (email: string, password: string) => Promise<UserCredential>;
+  signup: (email: string, password: string, name: string) => Promise<UserCredential>;
   logout: () => Promise<void>;
   signInWithGoogle: () => Promise<UserCredential>;
   loading: boolean;
 }
 
-// Create and export the context with a default value
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Custom hook to use the auth context
-// Define props type for AuthProvider
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
-  // Update user profile with display name and photo URL
-  const updateUserProfile = async (user: FirebaseUser, displayName?: string, photoURL?: string) => {
-    if (displayName || photoURL) {
-      await updateProfile(user, {
-        displayName: displayName || user.displayName || user.email?.split('@')[0] || 'User',
-        photoURL: photoURL || user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email?.split('@')[0] || 'User')}&background=random`
+  // Firebase Auth profilini ve yerel state'i aynı anda güncellemek için yardımcı fonksiyon
+  const updateUserProfileAndState = async (firebaseUser: FirebaseUser, displayName?: string, photoURL?: string) => {
+    const finalDisplayName = displayName || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User';
+    const finalPhotoURL = photoURL || firebaseUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(finalDisplayName)}&background=random`;
+
+    if (firebaseUser.displayName !== finalDisplayName || firebaseUser.photoURL !== finalPhotoURL) {
+      await updateProfile(firebaseUser, {
+        displayName: finalDisplayName,
+        photoURL: finalPhotoURL
       });
     }
     
-    // Create a new user object with the updated profile
     const updatedUser: User = {
-      id: user.uid,
-      email: user.email || '',
-      name: user.displayName || user.email?.split('@')[0] || 'User',
-      avatar: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email?.split('@')[0] || 'User')}&background=random`,
-      createdAt: user.metadata.creationTime || new Date().toISOString()
+      id: firebaseUser.uid,
+      email: firebaseUser.email || '',
+      name: finalDisplayName,
+      avatar: finalPhotoURL,
+      createdAt: firebaseUser.metadata.creationTime || new Date().toISOString()
     };
     
-    // Update the current user state
     setCurrentUser(updatedUser);
-    
     return updatedUser;
   };
 
-  // Track user state
+  // Kullanıcı oturum durumunu takip et
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const user: User = {
-          id: firebaseUser.uid,
-          email: firebaseUser.email || '',
-          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
-          avatar: firebaseUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User')}&background=random`,
-          createdAt: firebaseUser.metadata.creationTime || new Date().toISOString()
-        };
-        setCurrentUser(user);
+        await updateUserProfileAndState(firebaseUser);
       } else {
         setCurrentUser(null);
       }
@@ -81,69 +74,58 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => unsubscribe();
   }, []);
 
-  // Register with email/password
-  const signup = async (email: string, password: string, displayName?: string) => {
+  // E-posta ve şifre ile kayıt
+  const signup = async (email: string, password: string, name: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    if (userCredential.user) {
-      await updateUserProfile(userCredential.user, displayName);
+    const user = userCredential.user;
+
+    if (user) {
+      await updateUserProfileAndState(user, name); 
+      await setDoc(doc(db, 'users', user.uid), {
+        name: name,
+        email: email,
+        createdAt: new Date().toISOString(),
+      });
     }
     return userCredential;
   };
 
-  // Login with email/password
+  // E-posta ve şifre ile giriş
   const login = (email: string, password: string) => {
     return signInWithEmailAndPassword(auth, email, password);
   };
 
-  // Sign in with Google
+  // Google ile giriş
   const signInWithGoogle = async () => {
     try {
-      console.log('Google ile giriş başlatılıyor...');
       const provider = new GoogleAuthProvider();
-      provider.addScope('profile');
-      provider.addScope('email');
-      
-      console.log('Google Auth Provider oluşturuldu, popup açılıyor...');
       const result = await signInWithPopup(auth, provider);
-      console.log('Google ile giriş başarılı:', result.user?.email);
       
+      // Hata veren satır yerine bu kod bloğunu kullanın
+      // 'result' objesini 'additionalUserInfo' özelliğine sahip olduğunu varsayarak kullanıyoruz
+      const { user, additionalUserInfo } = result as {
+        user: FirebaseUser,
+        additionalUserInfo?: { isNewUser: boolean }
+      };
+
+      if (user && additionalUserInfo?.isNewUser) { 
+        await setDoc(doc(db, 'users', user.uid), {
+          name: user.displayName || user.email?.split('@')[0] || 'User',
+          email: user.email || '',
+          createdAt: new Date().toISOString(),
+        });
+      }
+
       return result;
     } catch (error: any) {
-      console.error('Google ile giriş hatası:', error);
-      
-      let errorMessage = 'Google ile giriş yapılırken bir hata oluştu.';
-      
-      if (error.code === 'auth/account-exists-with-different-credential') {
-        errorMessage = 'Bu e-posta adresiyle zaten bir hesap oluşturulmuş. Lütfen farklı bir yöntemle giriş yapın.';
-      } else if (error.code === 'auth/popup-closed-by-user') {
-        errorMessage = 'Google giriş penceresi kapatıldı.';
-      } else if (error.code === 'auth/popup-blocked') {
-        errorMessage = 'Tarayıcınız Google giriş penceresini engelledi. Lütfen pop-up engelleyicinizi kontrol edin.';
-      } else if (error.code === 'auth/cancelled-popup-request') {
-        errorMessage = 'Giriş işlemi iptal edildi.';
-      } else if (error.code) {
-        errorMessage = `Hata kodu: ${error.code}`;
-      }
-      
-      console.error('Google giriş hatası detayları:', {
-        code: error.code,
-        message: error.message,
-        email: error.email,
-        credential: error.credential
-      });
-      
-      throw new Error(errorMessage);
+      throw new Error(error.message);
     }
-  };
+};
 
-  // Logout
+
+  // Çıkış yap
   const logout = async (): Promise<void> => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error("Çıkış yapılırken hata oluştu:", error);
-      throw error;
-    }
+    await signOut(auth);
   };
 
   const value = useMemo(() => ({

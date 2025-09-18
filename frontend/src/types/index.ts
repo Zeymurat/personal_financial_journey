@@ -30,6 +30,8 @@ export interface InvestmentTransaction {
   totalAmount: number;
   date: string;
   fees?: number;
+  createdAt?: Date | string | { toDate: () => Date };
+  updatedAt?: Date | string | { toDate: () => Date };
 }
 
 export interface Currency {

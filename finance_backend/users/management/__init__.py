@@ -1,0 +1,1 @@
+# Management commands için __init__.py 
