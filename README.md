@@ -174,7 +174,7 @@ service cloud.firestore {
 
 ## 📄 **Lisans**
 
-Bu proje MIT lisansı altında lisanslanmıştır.
+
 
 ## 🤝 **İletişim**
 
