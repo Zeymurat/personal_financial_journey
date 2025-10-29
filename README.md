@@ -178,8 +178,8 @@ service cloud.firestore {
 
 ## 🤝 **İletişim**
 
-- **Proje Linki:** [https://github.com/username/finance](https://github.com/username/finance)
-- **Issues:** [https://github.com/username/finance/issues](https://github.com/username/finance/issues)
+- **Proje Linki:** [https://github.com/Zeymurat/personal_financial_journey](https://github.com/Zeymurat/personal_financial_journey)
+- **Issues:** [https://zeynelcmurat.com](https://zeynelcmurat.com)
 
 ---
 
