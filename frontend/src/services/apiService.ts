@@ -5,16 +5,20 @@ const API_BASE_URL = 'http://localhost:8000/api';
 
 // JWT token'ı localStorage'dan al
 const getAuthToken = (): string | null => {
-  return localStorage.getItem('access_token');
+  const token = localStorage.getItem('access_token');
+  console.log("🔍 getAuthToken:", token ? "Token var" : "Token yok");
+  return token;
 };
 
 // API headers'ı hazırla
 const getHeaders = (): HeadersInit => {
   const token = getAuthToken();
-  return {
+  const headers = {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` }),
   };
+  console.log("🔧 Headers:", headers);
+  return headers;
 };
 
 // API isteği yap
@@ -148,6 +152,9 @@ export const authAPI = {
       localStorage.setItem('access_token', response.access);
       localStorage.setItem('refreshToken', response.refresh);
       console.log("🔑 Tokens saved to localStorage");
+      console.log("🔑 Access token:", response.access.substring(0, 50) + "...");
+    } else {
+      console.log("❌ No access token in response:", response);
     }
     
     return response;

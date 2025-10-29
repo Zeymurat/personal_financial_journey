@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
-import asyncio
 import json
 from datetime import datetime, timedelta
 
@@ -25,15 +24,10 @@ class Command(BaseCommand):
         
         self.stdout.write(f'🚀 Mock datalar {user_id} kullanıcısı için Firestore\'a gönderiliyor...')
         
-        # Async fonksiyonu çalıştır
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            loop.run_until_complete(self.seed_data(user_id))
-        finally:
-            loop.close()
+        # Sync fonksiyonu çalıştır
+        self.seed_data(user_id)
 
-    async def seed_data(self, user_id):
+    def seed_data(self, user_id):
         """Mock dataları Firestore'a gönder"""
         db = settings.FIRESTORE_DB
         
@@ -217,7 +211,7 @@ class Command(BaseCommand):
                 transaction_data['createdAt'] = datetime.now()
                 transaction_data['updatedAt'] = datetime.now()
                 
-                await doc_ref.set(transaction_data)
+                doc_ref.set(transaction_data)
                 self.stdout.write(f'  ✅ {transaction_data["description"]} eklendi')
 
             # Investments ekle
@@ -229,7 +223,7 @@ class Command(BaseCommand):
                 investment_data['createdAt'] = datetime.now()
                 investment_data['updatedAt'] = datetime.now()
                 
-                await doc_ref.set(investment_data)
+                doc_ref.set(investment_data)
                 self.stdout.write(f'  ✅ {investment_data["symbol"]} ({investment_data["name"]}) eklendi')
 
                 # Investment transactions ekle
@@ -239,7 +233,7 @@ class Command(BaseCommand):
                         trans_data['id'] = trans_doc_ref.id
                         trans_data['createdAt'] = datetime.now()
                         
-                        await trans_doc_ref.set(trans_data)
+                        trans_doc_ref.set(trans_data)
                         self.stdout.write(f'    📝 {trans_data["type"]} işlemi eklendi')
 
             self.stdout.write(

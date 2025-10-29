@@ -7,26 +7,35 @@ class FirestoreService:
     def __init__(self):
         self.db = settings.FIRESTORE_DB
         if not self.db:
-            raise Exception("Firestore veritabanı bağlantısı bulunamadı")
+            print("⚠️  Firestore veritabanı bağlantısı bulunamadı. Firebase kimlik bilgilerini kontrol edin.")
+            # Don't raise exception here, let individual methods handle it
     
     def get_user_doc(self, user_id: str):
         """Kullanıcı dokümanını getir"""
+        if not self.db:
+            raise Exception("Firestore veritabanı bağlantısı bulunamadı")
         return self.db.collection('users').document(user_id)
     
     def get_user_transactions_ref(self, user_id: str):
         """Kullanıcının işlemler koleksiyonunu getir"""
+        if not self.db:
+            raise Exception("Firestore veritabanı bağlantısı bulunamadı")
         if not user_id or not isinstance(user_id, str):
             raise ValueError('Geçersiz user_id')
         return self.db.collection('users').document(user_id).collection('transactions')
     
     def get_user_investments_ref(self, user_id: str):
         """Kullanıcının yatırımlar koleksiyonunu getir"""
+        if not self.db:
+            raise Exception("Firestore veritabanı bağlantısı bulunamadı")
         if not user_id or not isinstance(user_id, str):
             raise ValueError('Geçersiz user_id')
         return self.db.collection('users').document(user_id).collection('investments')
     
     def get_user_investment_transactions_ref(self, user_id: str, investment_id: str):
         """Kullanıcının belirli yatırımının işlemlerini getir"""
+        if not self.db:
+            raise Exception("Firestore veritabanı bağlantısı bulunamadı")
         if not user_id or not isinstance(user_id, str):
             raise ValueError('Geçersiz user_id')
         if not investment_id or not isinstance(investment_id, str):
