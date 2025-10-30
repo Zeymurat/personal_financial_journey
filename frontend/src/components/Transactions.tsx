@@ -120,7 +120,7 @@ const Transactions: React.FC = () => {
     };
 
     return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 !mt-0 !mb-0">
         <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl border border-slate-200/50 dark:border-slate-700/50">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -252,8 +252,14 @@ const Transactions: React.FC = () => {
     if (!selectedTransaction) return null;
 
     return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-lg shadow-2xl border border-slate-200/50 dark:border-slate-700/50">
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 !mt-0 !mb-0"
+        onClick={() => setSelectedTransaction(null)}
+      >
+        <div
+          className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-lg shadow-2xl border border-slate-200/50 dark:border-slate-700/50"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex justify-between items-start mb-8">
             <div>
               <h3 className="text-2xl font-black text-slate-900 dark:text-white">İşlem Detayları</h3>
@@ -268,20 +274,20 @@ const Transactions: React.FC = () => {
           </div>
           
           <div className="space-y-6">
-            <div className="flex items-center space-x-4 p-6 bg-slate-50 dark:bg-slate-700/50 rounded-2xl">
+            <div className="flex items-center space-x-4 px-6 py-3 bg-slate-50 dark:bg-slate-700/50 rounded-2xl">
               <div className={`p-4 rounded-2xl shadow-lg ${
                 selectedTransaction.type === 'income' 
                   ? 'bg-gradient-to-r from-emerald-500 to-green-600' 
                   : 'bg-gradient-to-r from-rose-500 to-red-600'
               }`}>
                 {selectedTransaction.type === 'income' ? (
-                  <ArrowUpRight className="w-8 h-8 text-white" />
+                  <ArrowUpRight className="w-5 h-5 text-white" />
                 ) : (
-                  <ArrowDownRight className="w-8 h-8 text-white" />
+                  <ArrowDownRight className="w-5 h-5 text-white" />
                 )}
               </div>
               <div>
-                <p className="font-black text-slate-900 dark:text-white text-xl">
+                <p className="font-black text-slate-900 dark:text-white text-lg">
                   {selectedTransaction.description}
                 </p>
                 <p className="text-slate-500 dark:text-slate-400 font-semibold">
@@ -291,26 +297,26 @@ const Transactions: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl p-6">
-                <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Tutar</p>
-                <p className={`text-2xl font-black ${
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl px-6 py-3">
+                <p className="text-sm font-bold text-slate-500 dark:text-slate-400 tracking-wide mb-2">Tutar</p>
+                <p className={`text-xl font-black ${
                   selectedTransaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'
                 }`}>
                   {selectedTransaction.type === 'income' ? '+' : '-'}₺{selectedTransaction.amount.toLocaleString()}
                 </p>
               </div>
               
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl p-6">
-                <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Kategori</p>
-                <p className="text-xl font-black text-slate-900 dark:text-white">
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl px-6 py-3">
+                <p className="text-sm font-bold text-slate-500 dark:text-slate-400  tracking-wide mb-2">Kategori</p>
+                <p className="text-sm font-black text-slate-900 dark:text-white">
                   {selectedTransaction.category}
                 </p>
               </div>
             </div>
 
-            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl p-6">
-              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Tarih</p>
-              <p className="text-xl font-black text-slate-900 dark:text-white">
+            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl px-6 py-3">
+              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 tracking-wide mb-2">Tarih</p>
+              <p className="text-sm font-black text-slate-900 dark:text-white">
                 {new Date(selectedTransaction.date).toLocaleDateString('tr-TR', {
                   year: 'numeric',
                   month: 'long',
@@ -320,9 +326,9 @@ const Transactions: React.FC = () => {
               </p>
             </div>
 
-            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl p-6">
-              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Para Birimi</p>
-              <p className="text-xl font-black text-slate-900 dark:text-white">
+            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl px-6 py-3">
+              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 tracking-wide mb-2">Para Birimi</p>
+              <p className="text-sm font-black text-slate-900 dark:text-white">
                 {selectedTransaction.currency} - Türk Lirası
               </p>
             </div>
@@ -548,7 +554,7 @@ const Transactions: React.FC = () => {
                 ) : (
                   filteredTransactions.map((transaction) => (
                     <tr key={transaction.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200">
-                      <td className="px-8 py-6 whitespace-nowrap">
+                      <td className="px-8 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className={`p-3 rounded-2xl mr-4 shadow-lg ${
                             transaction.type === 'income' 
@@ -556,49 +562,50 @@ const Transactions: React.FC = () => {
                               : 'bg-gradient-to-r from-rose-500 to-red-600'
                           }`}>
                             {transaction.type === 'income' ? (
-                              <ArrowUpRight className="w-6 h-6 text-white" />
+                              <ArrowUpRight className="w-4 h-4 text-white" />
                             ) : (
-                              <ArrowDownRight className="w-6 h-6 text-white" />
+                              <ArrowDownRight className="w-4 h-4 text-white" />
                             )}
                           </div>
                           <div>
-                            <p className="text-lg font-black text-slate-900 dark:text-white">
+                            {/* <p className="text-lg font-black text-slate-900 dark:text-white"> */}
+                            <p className="text-sm md:text-base font-semibold text-slate-900 dark:text-white">
                               {transaction.description}
                             </p>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
+                            {/* <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
                               ID: {transaction.id}
-                            </p>
+                            </p> */}
                           </div>
                         </div>
                       </td>
-                      <td className="px-8 py-6 whitespace-nowrap">
+                      <td className="px-8 py-4 whitespace-nowrap">
                         <span className="px-4 py-2 text-sm font-bold bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-full">
                           {transaction.category}
                         </span>
                       </td>
-                      <td className="px-8 py-6 whitespace-nowrap">
-                        <div>
-                          <p className="text-lg font-black text-slate-900 dark:text-white">
+                      <td className="px-8 py-4 whitespace-nowrap">
+                        <div className="flex items-center space-x-2">
+                          <p className="text-sm font-black text-slate-900 dark:text-white">
                             {new Date(transaction.date).toLocaleDateString('tr-TR')}
                           </p>
                           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                            {new Date(transaction.date).toLocaleDateString('tr-TR', { weekday: 'long' })}
+                            ({new Date(transaction.date).toLocaleDateString('tr-TR', { weekday: 'long' })})
                           </p>
                         </div>
                       </td>
-                      <td className="px-8 py-6 whitespace-nowrap">
-                        <div>
+                      <td className="px-8 py-4 whitespace-nowrap">
+                        <div className="flex items-center space-x-2">
                           <span className={`text-xl font-black ${
                             transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'
                           }`}>
                             {transaction.type === 'income' ? '+' : '-'}₺{transaction.amount.toLocaleString()}
                           </span>
                           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
-                            {transaction.currency}
+                            ({transaction.currency})
                           </p>
                         </div>
                       </td>
-                      <td className="px-8 py-6 whitespace-nowrap">
+                      <td className="px-8 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-3">
                           <button
                             onClick={() => setSelectedTransaction(transaction)}

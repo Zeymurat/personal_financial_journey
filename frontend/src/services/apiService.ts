@@ -1,4 +1,6 @@
 import { Transaction, Investment, InvestmentTransaction } from '../types';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase';
 
 // HTTP kullan, HTTPS değil!
 const API_BASE_URL = 'http://localhost:8000/api';
@@ -39,6 +41,18 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
     console.log("📨 Response headers:", Object.fromEntries(response.headers.entries()));
     
     if (!response.ok) {
+      // 401/403 durumunda kullanıcıyı login ekranına yönlendirmek için oturumu temizle
+      if (response.status === 401 || response.status === 403) {
+        try {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refreshToken');
+          await signOut(auth);
+          console.warn('🔒 Unauthorized/Forbidden. User signed out and tokens cleared.');
+        } catch (e) {
+          console.error('Error during forced sign out:', e);
+        }
+      }
+
       const errorData = await response.json().catch(() => ({}));
       console.error("❌ API Error:", errorData);
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);

@@ -50,7 +50,7 @@ class FirestoreService:
         transaction_data['createdAt'] = firestore.SERVER_TIMESTAMP
         transaction_data['updatedAt'] = firestore.SERVER_TIMESTAMP
         
-        await doc_ref.set(transaction_data)
+        doc_ref.set(transaction_data)
         return doc_ref.id
     
     async def get_user_transactions(self, user_id: str, filters: Optional[Dict] = None) -> List[Dict]:
@@ -71,13 +71,13 @@ class FirestoreService:
         doc_ref = self.get_user_transactions_ref(user_id).document(transaction_id)
         updates['updatedAt'] = firestore.SERVER_TIMESTAMP
         
-        await doc_ref.update(updates)
+        doc_ref.update(updates)
         return True
     
     async def delete_transaction(self, user_id: str, transaction_id: str) -> bool:
         """İşlem sil"""
         doc_ref = self.get_user_transactions_ref(user_id).document(transaction_id)
-        await doc_ref.delete()
+        doc_ref.delete()
         return True
     
     # Investment işlemleri
@@ -89,7 +89,7 @@ class FirestoreService:
         investment_data['createdAt'] = firestore.SERVER_TIMESTAMP
         investment_data['updatedAt'] = firestore.SERVER_TIMESTAMP
         
-        await doc_ref.set(investment_data)
+        doc_ref.set(investment_data)
         return doc_ref.id
     
     async def get_user_investments(self, user_id: str) -> List[Dict]:
@@ -102,13 +102,13 @@ class FirestoreService:
         doc_ref = self.get_user_investments_ref(user_id).document(investment_id)
         updates['updatedAt'] = firestore.SERVER_TIMESTAMP
         
-        await doc_ref.update(updates)
+        doc_ref.update(updates)
         return True
     
     async def delete_investment(self, user_id: str, investment_id: str) -> bool:
         """Yatırım sil"""
         doc_ref = self.get_user_investments_ref(user_id).document(investment_id)
-        await doc_ref.delete()
+        doc_ref.delete()
         return True
     
     # Investment transaction işlemleri
@@ -118,7 +118,7 @@ class FirestoreService:
         transaction_data['id'] = doc_ref.id
         transaction_data['createdAt'] = firestore.SERVER_TIMESTAMP
         
-        await doc_ref.set(transaction_data)
+        doc_ref.set(transaction_data)
         return doc_ref.id
     
     async def get_investment_transactions(self, user_id: str, investment_id: str) -> List[Dict]:
@@ -133,7 +133,7 @@ class FirestoreService:
         user_data['createdAt'] = firestore.SERVER_TIMESTAMP
         user_data['updatedAt'] = firestore.SERVER_TIMESTAMP
         
-        await doc_ref.set(user_data)
+        doc_ref.set(user_data)
         return doc_ref.id
     
     async def get_user(self, user_id: str) -> Optional[Dict]:
@@ -148,7 +148,7 @@ class FirestoreService:
         doc_ref = self.db.collection('users').document(user_id)
         updates['updatedAt'] = firestore.SERVER_TIMESTAMP
         
-        await doc_ref.update(updates)
+        doc_ref.update(updates)
         return True
 
 # Global Firestore service instance
