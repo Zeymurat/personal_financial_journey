@@ -452,6 +452,203 @@ class FirestoreTransactionView(BaseFirestoreView):
             logger.error(f"Yeni işlem oluşturulurken beklenmedik hata: {e}")
             return Response({'error': 'Sunucu hatası: İşlem oluşturulamadı.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# --- 1.1. İşlem Detay View'i (/api/auth/transactions/<id>/) ---
+
+class FirestoreTransactionDetailView(BaseFirestoreView):
+    
+    def put(self, request, transaction_id):
+        """İşlem günceller."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            transaction_data = request.data
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                success = loop.run_until_complete(
+                    firestore_service.update_transaction(firebase_uid, transaction_id, transaction_data)
+                )
+            finally:
+                loop.close()
+            
+            if success:
+                return Response(
+                    {'message': 'İşlem başarıyla güncellendi'}, 
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {'error': 'İşlem bulunamadı'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"İşlem güncellenirken beklenmedik hata: {e}")
+            return Response({'error': 'Sunucu hatası: İşlem güncellenemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def delete(self, request, transaction_id):
+        """İşlem siler."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                success = loop.run_until_complete(
+                    firestore_service.delete_transaction(firebase_uid, transaction_id)
+                )
+            finally:
+                loop.close()
+            
+            if success:
+                return Response(
+                    {'message': 'İşlem başarıyla silindi'}, 
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {'error': 'İşlem bulunamadı'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"İşlem silinirken beklenmedik hata: {e}")
+            return Response({'error': 'Sunucu hatası: İşlem silinemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# --- 1.2. Hızlı İşlemler View'i (/api/auth/quick-transactions/) ---
+
+class FirestoreQuickTransactionView(BaseFirestoreView):
+    
+    def get(self, request):
+        """Kullanıcının hızlı işlemlerini getirir."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                quick_transactions = loop.run_until_complete(
+                    firestore_service.get_user_quick_transactions(firebase_uid)
+                )
+            finally:
+                loop.close()
+            
+            return Response(quick_transactions)
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Hızlı işlemler getirilirken beklenmedik hata: {e}")
+            return Response({'error': 'Sunucu hatası: Hızlı işlemler getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def post(self, request):
+        """Yeni hızlı işlem oluşturur."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            quick_transaction_data = request.data
+            required_fields = ['name', 'type', 'amount', 'category', 'description']
+            
+            for field in required_fields:
+                if not quick_transaction_data.get(field):
+                    return Response(
+                        {'error': f'{field} alanı gerekli'}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                quick_transaction_id = loop.run_until_complete(
+                    firestore_service.create_quick_transaction(firebase_uid, quick_transaction_data)
+                )
+            finally:
+                loop.close()
+            
+            return Response(
+                {'id': quick_transaction_id, 'message': 'Hızlı işlem başarıyla oluşturuldu'}, 
+                status=status.HTTP_201_CREATED
+            )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Hızlı işlem oluşturulurken beklenmedik hata: {e}")
+            return Response({'error': 'Sunucu hatası: Hızlı işlem oluşturulamadı.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class FirestoreQuickTransactionDetailView(BaseFirestoreView):
+    
+    def put(self, request, quick_transaction_id):
+        """Hızlı işlem günceller."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            quick_transaction_data = request.data
+            
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                success = loop.run_until_complete(
+                    firestore_service.update_quick_transaction(firebase_uid, quick_transaction_id, quick_transaction_data)
+                )
+            finally:
+                loop.close()
+            
+            if success:
+                return Response(
+                    {'message': 'Hızlı işlem başarıyla güncellendi'}, 
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {'error': 'Hızlı işlem bulunamadı'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Hızlı işlem güncellenirken beklenmedik hata: {e}")
+            return Response({'error': 'Sunucu hatası: Hızlı işlem güncellenemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def delete(self, request, quick_transaction_id):
+        """Hızlı işlem siler."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                success = loop.run_until_complete(
+                    firestore_service.delete_quick_transaction(firebase_uid, quick_transaction_id)
+                )
+            finally:
+                loop.close()
+            
+            if success:
+                return Response(
+                    {'message': 'Hızlı işlem başarıyla silindi'}, 
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {'error': 'Hızlı işlem bulunamadı'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Hızlı işlem silinirken beklenmedik hata: {e}")
+            return Response({'error': 'Sunucu hatası: Hızlı işlem silinemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 # --- 2. Yatırımlar View'i (/api/auth/investments/) ---
 
 class FirestoreInvestmentView(BaseFirestoreView):

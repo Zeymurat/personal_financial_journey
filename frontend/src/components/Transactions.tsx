@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, ArrowUpRight, ArrowDownRight, Edit, Trash2, Calendar, Eye, Download, TrendingUp, Loader2 } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2, Calendar, Eye, Download, TrendingUp, Loader2, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { Transaction } from '../types';
 import { transactionAPI } from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
+import { getExchangeRates } from '../services/currencyService';
+import AddTransactionModal from './Transactions/AddTransactionModal';
+import EditTransactionModal from './Transactions/EditTransactionModal';
+import TransactionDetailModal from './Transactions/TransactionDetailModal';
+import DeleteConfirmationModal from './Transactions/DeleteConfirmationModal';
+import QuickActions from './Transactions/QuickActions';
 
 const Transactions: React.FC = () => {
   const { currentUser } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exchangeRates, setExchangeRates] = useState<Record<string, { rate: number }>>({});
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
@@ -16,14 +27,14 @@ const Transactions: React.FC = () => {
 
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          transaction.category.toLowerCase().includes(searchTerm.toLowerCase());
+      transaction.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType === 'all' || transaction.type === filterType;
-    
+
     let matchesDate = true;
     if (dateFilter !== 'all') {
       const transactionDate = new Date(transaction.date);
       const now = new Date();
-      
+
       switch (dateFilter) {
         case 'today':
           matchesDate = transactionDate.toDateString() === now.toDateString();
@@ -38,10 +49,41 @@ const Transactions: React.FC = () => {
           break;
       }
     }
-    
+
     return matchesSearch && matchesFilter && matchesDate;
   });
-  console.log("currentUser",currentUser)
+
+  // Döviz kurlarını yükle
+  useEffect(() => {
+    const loadRates = async () => {
+      try {
+        const rates = await getExchangeRates('TRY');
+        // Sadece rate değerlerini sakla
+        const rateMap: Record<string, { rate: number }> = {};
+        Object.keys(rates).forEach(code => {
+          rateMap[code] = { rate: rates[code].rate };
+        });
+        setExchangeRates(rateMap);
+      } catch (error) {
+        console.error('Döviz kurları yüklenirken hata:', error);
+        // Hata durumunda varsayılan kurlar (TR yaklaşık değerler - 1 birim = kaç TRY)
+        // Örnek: 1 USD = 30 TRY ise rate = 30
+        setExchangeRates({
+          'TRY': { rate: 1 },
+          'USD': { rate: 30 }, // 1 USD = 30 TRY yaklaşık
+          'EUR': { rate: 29 }, // 1 EUR = 29 TRY yaklaşık
+          'GBP': { rate: 37 },
+          'JPY': { rate: 0.20 }, // 1 JPY = 0.20 TRY yaklaşık (100 JPY = 20 TRY)
+          'CHF': { rate: 32 },
+          'AUD': { rate: 20 },
+          'CAD': { rate: 22 },
+          'CNY': { rate: 4.2 } // 1 CNY = 4.2 TRY yaklaşık
+        });
+      }
+    };
+    loadRates();
+  }, []);
+
   // Veri yükleme
   useEffect(() => {
     if (currentUser) {
@@ -62,292 +104,174 @@ const Transactions: React.FC = () => {
     }
   };
 
-  const totalIncome = transactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + t.amount, 0);
-  
-  const totalExpense = transactions
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + t.amount, 0);
+  const handleDeleteClick = (transaction: Transaction) => {
+    setTransactionToDelete(transaction);
+    setShowDeleteModal(true);
+  };
 
-  const AddTransactionModal = () => {
-    const [formData, setFormData] = useState({
-      type: 'expense' as 'income' | 'expense',
-      amount: '',
-      category: '',
-      description: '',
-      date: new Date().toISOString().split('T')[0]
-    });
+  const handleConfirmDelete = async () => {
+    if (!transactionToDelete) return;
 
-    const categories = {
-      income: ['Maaş', 'Freelance', 'Yatırım', 'Bonus', 'Kira Geliri', 'Diğer Gelir'],
-      expense: ['Kira', 'Market', 'Ulaşım', 'Eğlence', 'Sağlık', 'Eğitim', 'Teknoloji', 'Giyim', 'Diğer Gider']
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      try {
-        const newTransactionData = {
-          type: formData.type,
-          amount: parseFloat(formData.amount),
-          category: formData.category,
-          description: formData.description,
-          date: formData.date,
-          currency: 'TRY'
-        };
-
-        const result = await transactionAPI.create(newTransactionData);
-        
-        // Yeni işlemi listeye ekle
-        const newTransaction: Transaction = {
-          id: result.id || Date.now().toString(),
-          ...newTransactionData
-        };
-        
-        setTransactions([newTransaction, ...transactions]);
-        setShowAddModal(false);
-        setFormData({
-          type: 'expense',
-          amount: '',
-          category: '',
-          description: '',
-          date: new Date().toISOString().split('T')[0]
-        });
-      } catch (error) {
-        console.error('İşlem eklenirken hata:', error);
-        alert('İşlem eklenirken bir hata oluştu. Lütfen tekrar deneyin.');
+    try {
+      await transactionAPI.delete(transactionToDelete.id);
+      // Listeyi güncelle
+      setTransactions(transactions.filter(t => t.id !== transactionToDelete.id));
+      // Eğer silinen transaction detay modalında açıksa, modalı kapat
+      if (selectedTransaction?.id === transactionToDelete.id) {
+        setSelectedTransaction(null);
       }
+      // Delete modal'ı kapat
+      setShowDeleteModal(false);
+      setTransactionToDelete(null);
+    } catch (error) {
+      console.error('İşlem silinirken hata:', error);
+      alert('İşlem silinirken bir hata oluştu. Lütfen tekrar deneyin.');
+    }
+  };
+
+  const handleTransactionAdded = (newTransaction: Transaction) => {
+    setTransactions([newTransaction, ...transactions]);
+  };
+
+  const handleTransactionUpdated = (updatedTransaction: Transaction) => {
+    setTransactions(transactions.map(t =>
+      t.id === updatedTransaction.id ? updatedTransaction : t
+    ));
+  };
+
+  const handleEditClick = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    setShowEditModal(true);
+  };
+
+  // Bu ayın başlangıç ve bitiş tarihleri
+  const now = new Date();
+  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+  // Geçen ayın başlangıç ve bitiş tarihleri
+  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+
+  // Para birimini TRY'ye çevir
+  // Öncelikle kaydedilmiş amountInTRY değerini kullan, yoksa mevcut kur ile hesapla
+  const convertToTRY = (transaction: Transaction): number => {
+    // Eğer daha önce kaydedilmiş TL karşılığı varsa, onu kullan (sabit değer)
+    if (transaction.amountInTRY !== undefined && transaction.amountInTRY !== null) {
+      return transaction.amountInTRY;
+    }
+
+    // Geriye dönük uyumluluk için: Eğer amountInTRY yoksa, mevcut kur ile hesapla
+    // (Bu, eski kayıtlar için geçici bir çözümdür)
+    const currency = transaction.currency || 'TRY';
+    if (currency === 'TRY') return transaction.amount;
+
+    const rate = exchangeRates[currency]?.rate;
+    if (!rate || rate === 0) {
+      console.warn(`Döviz kuru bulunamadı: ${currency}, varsayılan değer kullanılıyor`);
+      return transaction.amount; // Eğer kur yoksa olduğu gibi döndür
+    }
+    // currencyService.ts'deki mantığa göre: toCurrency === 'TRY' ise amount * rate
+    // rate değeri "1 [currency] = rate TRY" formatında (örn: 1 USD = 30 TRY ise rate = 30)
+    return transaction.amount * rate;
+  };
+
+  // Bu ayın gelir/gider/net durumu (Özet kartlar için) - TRY'ye çevrilmiş
+  const thisMonthIncome = transactions
+    .filter(t => {
+      const tDate = new Date(t.date);
+      return t.type === 'income' && tDate >= thisMonthStart && tDate <= thisMonthEnd;
+    })
+    .reduce((sum, t) => sum + convertToTRY(t), 0);
+
+  const thisMonthExpense = transactions
+    .filter(t => {
+      const tDate = new Date(t.date);
+      return t.type === 'expense' && tDate >= thisMonthStart && tDate <= thisMonthEnd;
+    })
+    .reduce((sum, t) => sum + convertToTRY(t), 0);
+
+  const thisMonthNet = thisMonthIncome - thisMonthExpense;
+
+  // Bu ayın işlem sayısı
+  const thisMonthTransactions = transactions.filter(t => {
+    const tDate = new Date(t.date);
+    return tDate >= thisMonthStart && tDate <= thisMonthEnd;
+  });
+
+  // Özet kartlar için (bu ayın verileri)
+  const totalIncome = thisMonthIncome;
+  const totalExpense = thisMonthExpense;
+
+  // Tüm zamanların toplam net durumu (şimdiye kadarki tüm gelir - gider) - TRY'ye çevrilmiş
+  const totalNetWorth = transactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + convertToTRY(t), 0) -
+    transactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + convertToTRY(t), 0);
+
+  // Geçen ayın gelir/gider/net durumu - TRY'ye çevrilmiş
+  const lastMonthIncome = transactions
+    .filter(t => {
+      const tDate = new Date(t.date);
+      return t.type === 'income' && tDate >= lastMonthStart && tDate <= lastMonthEnd;
+    })
+    .reduce((sum, t) => sum + convertToTRY(t), 0);
+
+  const lastMonthExpense = transactions
+    .filter(t => {
+      const tDate = new Date(t.date);
+      return t.type === 'expense' && tDate >= lastMonthStart && tDate <= lastMonthEnd;
+    })
+    .reduce((sum, t) => sum + convertToTRY(t), 0);
+
+  const lastMonthNet = lastMonthIncome - lastMonthExpense;
+
+  // Yüzde değişimi hesapla
+  const calculatePercentageChange = (current: number, previous: number): number => {
+    if (previous === 0) return current > 0 ? 100 : 0;
+    return ((current - previous) / previous) * 100;
+  };
+
+  const incomePercentageChange = calculatePercentageChange(thisMonthIncome, lastMonthIncome);
+  const expensePercentageChange = calculatePercentageChange(thisMonthExpense, lastMonthExpense);
+  const netPercentageChange = calculatePercentageChange(thisMonthNet, lastMonthNet);
+
+  // Net durum değişimi (bu ay - geçen ay)
+  const netChangeAmount = thisMonthNet - lastMonthNet;
+
+  // Debug: Net durum karşılaştırması (sadece transactions değiştiğinde)
+  useEffect(() => {
+    console.log('📊 Net Durum Karşılaştırması:');
+    console.log('  Geçen ay (lastMonthNet):', lastMonthNet.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }));
+    console.log('  Bu ay (thisMonthNet):', thisMonthNet.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }));
+    console.log('  Değişim (netChangeAmount):', netChangeAmount.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transactions]);
+
+  // Yüzde formatı (işaret ile)
+  const formatPercentage = (value: number): string => {
+    const sign = value >= 0 ? '+' : '';
+    return `${sign}${value.toFixed(1)}%`;
+  };
+
+  // Currency sembolü getir
+  const getCurrencySymbol = (currency: string): string => {
+    const symbols: Record<string, string> = {
+      'TRY': '₺',
+      'USD': '$',
+      'EUR': '€',
+      'GBP': '£',
+      'JPY': '¥',
+      'CHF': 'CHF ',
+      'AUD': 'A$',
+      'CAD': 'C$',
+      'CNY': '¥'
     };
-
-    return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 !mt-0 !mb-0">
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl border border-slate-200/50 dark:border-slate-700/50">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white">Yeni İşlem Ekle</h3>
-              <p className="text-slate-500 dark:text-slate-400 mt-1">Gelir veya gider işlemi ekleyin</p>
-            </div>
-            <button
-              onClick={() => setShowAddModal(false)}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-2xl font-bold"
-            >
-              ×
-            </button>
-          </div>
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
-                İşlem Türü
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setFormData({...formData, type: 'income'})}
-                  className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                    formData.type === 'income'
-                      ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
-                      : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
-                  }`}
-                >
-                  <ArrowUpRight className="w-6 h-6 mx-auto mb-2" />
-                  <span className="font-semibold">Gelir</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({...formData, type: 'expense'})}
-                  className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                    formData.type === 'expense'
-                      ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300'
-                      : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
-                  }`}
-                >
-                  <ArrowDownRight className="w-6 h-6 mx-auto mb-2" />
-                  <span className="font-semibold">Gider</span>
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                Miktar (₺)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.amount}
-                onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                className="w-full p-4 text-xl font-bold border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
-                placeholder="0.00"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                Kategori
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({...formData, category: e.target.value})}
-                className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
-                required
-              >
-                <option value="">Kategori Seçin</option>
-                {categories[formData.type].map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                Açıklama
-              </label>
-              <input
-                type="text"
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
-                placeholder="İşlem açıklaması"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                Tarih
-              </label>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
-                className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
-                required
-              />
-            </div>
-
-            <div className="flex space-x-4 pt-4">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 px-6 py-4 border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 font-semibold"
-              >
-                İptal
-              </button>
-              <button
-                type="submit"
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold"
-              >
-                Ekle
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
+    return symbols[currency] || currency;
   };
 
-  const TransactionDetailModal = () => {
-    if (!selectedTransaction) return null;
-
-    return (
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 !mt-0 !mb-0"
-        onClick={() => setSelectedTransaction(null)}
-      >
-        <div
-          className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-lg shadow-2xl border border-slate-200/50 dark:border-slate-700/50"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex justify-between items-start mb-8">
-            <div>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white">İşlem Detayları</h3>
-              <p className="text-slate-500 dark:text-slate-400 mt-1">Detaylı işlem bilgileri</p>
-            </div>
-            <button
-              onClick={() => setSelectedTransaction(null)}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-2xl font-bold"
-            >
-              ×
-            </button>
-          </div>
-          
-          <div className="space-y-6">
-            <div className="flex items-center space-x-4 px-6 py-3 bg-slate-50 dark:bg-slate-700/50 rounded-2xl">
-              <div className={`p-4 rounded-2xl shadow-lg ${
-                selectedTransaction.type === 'income' 
-                  ? 'bg-gradient-to-r from-emerald-500 to-green-600' 
-                  : 'bg-gradient-to-r from-rose-500 to-red-600'
-              }`}>
-                {selectedTransaction.type === 'income' ? (
-                  <ArrowUpRight className="w-5 h-5 text-white" />
-                ) : (
-                  <ArrowDownRight className="w-5 h-5 text-white" />
-                )}
-              </div>
-              <div>
-                <p className="font-black text-slate-900 dark:text-white text-lg">
-                  {selectedTransaction.description}
-                </p>
-                <p className="text-slate-500 dark:text-slate-400 font-semibold">
-                  {selectedTransaction.type === 'income' ? 'Gelir İşlemi' : 'Gider İşlemi'}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl px-6 py-3">
-                <p className="text-sm font-bold text-slate-500 dark:text-slate-400 tracking-wide mb-2">Tutar</p>
-                <p className={`text-xl font-black ${
-                  selectedTransaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'
-                }`}>
-                  {selectedTransaction.type === 'income' ? '+' : '-'}₺{selectedTransaction.amount.toLocaleString()}
-                </p>
-              </div>
-              
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl px-6 py-3">
-                <p className="text-sm font-bold text-slate-500 dark:text-slate-400  tracking-wide mb-2">Kategori</p>
-                <p className="text-sm font-black text-slate-900 dark:text-white">
-                  {selectedTransaction.category}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl px-6 py-3">
-              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 tracking-wide mb-2">Tarih</p>
-              <p className="text-sm font-black text-slate-900 dark:text-white">
-                {new Date(selectedTransaction.date).toLocaleDateString('tr-TR', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  weekday: 'long'
-                })}
-              </p>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl px-6 py-3">
-              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 tracking-wide mb-2">Para Birimi</p>
-              <p className="text-sm font-black text-slate-900 dark:text-white">
-                {selectedTransaction.currency} - Türk Lirası
-              </p>
-            </div>
-
-            <div className="flex space-x-4 pt-4">
-              <button className="flex-1 px-6 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 hover:scale-105 transition-all duration-200 font-semibold flex items-center justify-center space-x-2">
-                <Edit className="w-5 h-5" />
-                <span>Düzenle</span>
-              </button>
-              <button className="flex-1 px-6 py-4 bg-rose-600 text-white rounded-xl hover:bg-rose-700 hover:scale-105 transition-all duration-200 font-semibold flex items-center justify-center space-x-2">
-                <Trash2 className="w-5 h-5" />
-                <span>Sil</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900">
@@ -378,16 +302,18 @@ const Transactions: React.FC = () => {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           <div className="bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 backdrop-blur-sm rounded-3xl p-8 border border-emerald-200/50 dark:border-emerald-700/30 shadow-xl hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Toplam Gelir</p>
                 <p className="text-3xl font-black text-emerald-700 dark:text-emerald-300 mt-2">₺{totalIncome.toLocaleString()}</p>
-                <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-1">+12.5% bu ay</p>
+                <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
+                  {formatPercentage(incomePercentageChange)} bu ay
+                </p>
               </div>
               <div className="p-4 bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl shadow-lg">
-                <ArrowUpRight className="w-8 h-8 text-white" />
+                <ArrowUpRight className="w-7 h-7 text-white" />
               </div>
             </div>
           </div>
@@ -397,10 +323,12 @@ const Transactions: React.FC = () => {
               <div>
                 <p className="text-sm font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide">Toplam Gider</p>
                 <p className="text-3xl font-black text-rose-700 dark:text-rose-300 mt-2">₺{totalExpense.toLocaleString()}</p>
-                <p className="text-sm font-semibold text-rose-600 dark:text-rose-400 mt-1">-8.2% bu ay</p>
+                <p className="text-sm font-semibold text-rose-600 dark:text-rose-400 mt-1">
+                  {formatPercentage(expensePercentageChange)} bu ay
+                </p>
               </div>
               <div className="p-4 bg-gradient-to-r from-rose-500 to-red-600 rounded-2xl shadow-lg">
-                <ArrowDownRight className="w-8 h-8 text-white" />
+                <ArrowDownRight className="w-7 h-7 text-white" />
               </div>
             </div>
           </div>
@@ -408,16 +336,17 @@ const Transactions: React.FC = () => {
           <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 backdrop-blur-sm rounded-3xl p-8 border border-blue-200/50 dark:border-blue-700/30 shadow-xl hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wide">Net Durum</p>
-                <p className={`text-3xl font-black mt-2 ${
-                  totalIncome - totalExpense >= 0 ? 'text-blue-700 dark:text-blue-300' : 'text-rose-700 dark:text-rose-300'
-                }`}>
-                  ₺{(totalIncome - totalExpense).toLocaleString()}
+                <p className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wide">Aylık Durum</p>
+                <p className={`text-3xl font-black mt-2 ${thisMonthNet >= 0 ? 'text-blue-700 dark:text-blue-300' : 'text-rose-700 dark:text-rose-300'
+                  }`}>
+                  ₺{thisMonthNet.toLocaleString()}
                 </p>
-                <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 mt-1">+15.8% bu ay</p>
+                <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 mt-1">
+                  {formatPercentage(netPercentageChange)} bu ay
+                </p>
               </div>
               <div className="p-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
-                <TrendingUp className="w-8 h-8 text-white" />
+                <TrendingUp className="w-7 h-7 text-white" />
               </div>
             </div>
           </div>
@@ -426,11 +355,29 @@ const Transactions: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wide">İşlem Sayısı</p>
-                <p className="text-3xl font-black text-violet-700 dark:text-violet-300 mt-2">{filteredTransactions.length}</p>
-                <p className="text-sm font-semibold text-violet-600 dark:text-violet-400 mt-1">Bu dönem</p>
+                <p className="text-3xl font-black text-violet-700 dark:text-violet-300 mt-2">{thisMonthTransactions.length}</p>
+                <p className="text-sm font-semibold text-violet-600 dark:text-violet-400 mt-1">Bu ay</p>
               </div>
               <div className="p-4 bg-gradient-to-r from-violet-500 to-purple-600 rounded-2xl shadow-lg">
-                <Calendar className="w-8 h-8 text-white" />
+                <Calendar className="w-7 h-7 text-white" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-900/20 dark:to-yellow-900/20 backdrop-blur-sm rounded-3xl p-8 border border-amber-200/50 dark:border-amber-700/30 shadow-xl hover:shadow-2xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">Net Durum</p>
+                <p className={`text-3xl font-black mt-2 ${totalNetWorth >= 0 ? 'text-amber-700 dark:text-amber-300' : 'text-rose-700 dark:text-rose-300'
+                  }`}>
+                  ₺{totalNetWorth.toLocaleString()}
+                </p>
+                <p className={`text-sm font-semibold mt-1 ${netChangeAmount >= 0 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'
+                  }`}>
+                  {netChangeAmount >= 0 ? '+' : ''}₺{netChangeAmount.toLocaleString()} bu ay
+                </p>
+              </div>
+              <div className="p-4 bg-gradient-to-r from-amber-500 to-yellow-600 rounded-2xl shadow-lg">
+                <TrendingUp className="w-7 h-7 text-white" />
               </div>
             </div>
           </div>
@@ -450,7 +397,7 @@ const Transactions: React.FC = () => {
                   className="pl-12 pr-4 py-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white w-full sm:w-64 transition-all duration-200"
                 />
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <Filter className="w-5 h-5 text-slate-400" />
                 <select
@@ -478,6 +425,9 @@ const Transactions: React.FC = () => {
           </div>
         </div>
 
+        {/* Quick Actions */}
+        <QuickActions onTransactionAdded={handleTransactionAdded} />
+
         {/* Transactions List */}
         <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl border border-slate-200/50 dark:border-slate-700/50 overflow-hidden shadow-2xl">
           <div className="px-8 py-6 border-b border-slate-200 dark:border-slate-700">
@@ -494,7 +444,7 @@ const Transactions: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-slate-50 dark:bg-slate-700">
@@ -556,11 +506,10 @@ const Transactions: React.FC = () => {
                     <tr key={transaction.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200">
                       <td className="px-8 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className={`p-3 rounded-2xl mr-4 shadow-lg ${
-                            transaction.type === 'income' 
-                              ? 'bg-gradient-to-r from-emerald-500 to-green-600' 
+                          <div className={`p-3 rounded-2xl mr-4 shadow-lg ${transaction.type === 'income'
+                              ? 'bg-gradient-to-r from-emerald-500 to-green-600'
                               : 'bg-gradient-to-r from-rose-500 to-red-600'
-                          }`}>
+                            }`}>
                             {transaction.type === 'income' ? (
                               <ArrowUpRight className="w-4 h-4 text-white" />
                             ) : (
@@ -594,15 +543,26 @@ const Transactions: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-8 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-2">
-                          <span className={`text-xl font-black ${
-                            transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'
-                          }`}>
-                            {transaction.type === 'income' ? '+' : '-'}₺{transaction.amount.toLocaleString()}
-                          </span>
-                          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
-                            ({transaction.currency})
-                          </p>
+                        <div className="flex flex-col">
+                          <div className="flex flex-row items-center space-x-2">
+                            <span className={`text-xl font-black ${transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'
+                              }`}>
+                              {transaction.type === 'income' ? '+' : '-'}
+                              {getCurrencySymbol(transaction.currency)}
+                              {transaction.amount.toLocaleString()}
+                            </span>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+                              {transaction.currency}
+                            </p>
+                          </div>
+                          {transaction.currency !== 'TRY' && (
+                          <div className="flex flex-row items-center space-x-2">
+                            <span className={`text-sm font-black ${transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'
+                              }`}>
+                             ₺ {transaction.amountInTRY?.toLocaleString()}
+                            </span>
+                          </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-8 py-4 whitespace-nowrap">
@@ -613,10 +573,16 @@ const Transactions: React.FC = () => {
                           >
                             <Eye className="w-5 h-5" />
                           </button>
-                          <button className="text-emerald-600 hover:text-emerald-800 transition-colors p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-xl">
+                          <button
+                            onClick={() => handleEditClick(transaction)}
+                            className="text-emerald-600 hover:text-emerald-800 transition-colors p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-xl"
+                          >
                             <Edit className="w-5 h-5" />
                           </button>
-                          <button className="text-rose-600 hover:text-rose-800 transition-colors p-2 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl">
+                          <button
+                            onClick={() => handleDeleteClick(transaction)}
+                            className="text-rose-600 hover:text-rose-800 transition-colors p-2 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl"
+                          >
                             <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
@@ -629,8 +595,35 @@ const Transactions: React.FC = () => {
           </div>
         </div>
 
-        {showAddModal && <AddTransactionModal />}
-        {selectedTransaction && <TransactionDetailModal />}
+        <AddTransactionModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          onTransactionAdded={handleTransactionAdded}
+        />
+        <EditTransactionModal
+          isOpen={showEditModal}
+          transaction={editingTransaction}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditingTransaction(null);
+          }}
+          onTransactionUpdated={handleTransactionUpdated}
+        />
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          transaction={transactionToDelete}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setTransactionToDelete(null);
+          }}
+          onConfirm={handleConfirmDelete}
+        />
+        <TransactionDetailModal
+          transaction={selectedTransaction}
+          onClose={() => setSelectedTransaction(null)}
+          onEdit={handleEditClick}
+          onDelete={handleDeleteClick}
+        />
       </div>
     </div>
   );

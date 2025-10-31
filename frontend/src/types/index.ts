@@ -6,6 +6,7 @@ export interface Transaction {
   description: string;
   date: string;
   currency: string;
+  amountInTRY?: number; // O günkü kur ile hesaplanmış TL karşılığı (sabit kalır)
 }
 
 export interface Investment {
@@ -20,6 +21,19 @@ export interface Investment {
   profitLoss: number;
   profitLossPercentage: number;
   transactions: InvestmentTransaction[];
+}
+
+export interface QuickTransaction {
+  id: string;
+  name: string;
+  type: 'income' | 'expense';
+  amount: number;
+  category: string;
+  description: string;
+  currency: string;
+  order?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface InvestmentTransaction {

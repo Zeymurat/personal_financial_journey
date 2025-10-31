@@ -99,6 +99,74 @@ class Command(BaseCommand):
             }
         ]
 
+        # Eylül 2025 için mock transactions (9. ay - geçen ay karşılaştırması için)
+        september_2025_transactions = [
+            {
+                'type': 'income',
+                'amount': 14500,
+                'category': 'Maaş',
+                'description': 'Eylül maaşı',
+                'date': '2025-09-15',
+                'currency': 'TRY'
+            },
+            {
+                'type': 'income',
+                'amount': 2200,
+                'category': 'Freelance',
+                'description': 'Eylül freelance projesi',
+                'date': '2025-09-20',
+                'currency': 'TRY'
+            },
+            {
+                'type': 'expense',
+                'amount': 3500,
+                'category': 'Kira',
+                'description': 'Eylül kira ödemesi',
+                'date': '2025-09-05',
+                'currency': 'TRY'
+            },
+            {
+                'type': 'expense',
+                'amount': 1350,
+                'category': 'Market',
+                'description': 'Eylül market alışverişi',
+                'date': '2025-09-10',
+                'currency': 'TRY'
+            },
+            {
+                'type': 'expense',
+                'amount': 950,
+                'category': 'Ulaşım',
+                'description': 'Eylül ulaşım gideri',
+                'date': '2025-09-08',
+                'currency': 'TRY'
+            },
+            {
+                'type': 'expense',
+                'amount': 650,
+                'category': 'Eğlence',
+                'description': 'Eylül sinema ve eğlence',
+                'date': '2025-09-12',
+                'currency': 'TRY'
+            },
+            {
+                'type': 'expense',
+                'amount': 400,
+                'category': 'Sağlık',
+                'description': 'Eylül sağlık giderleri',
+                'date': '2025-09-18',
+                'currency': 'TRY'
+            },
+            {
+                'type': 'expense',
+                'amount': 1200,
+                'category': 'Teknoloji',
+                'description': 'Eylül teknoloji alışverişi',
+                'date': '2025-09-22',
+                'currency': 'TRY'
+            }
+        ]
+
         # Mock investments
         mock_investments = [
             {
@@ -213,6 +281,17 @@ class Command(BaseCommand):
                 
                 doc_ref.set(transaction_data)
                 self.stdout.write(f'  ✅ {transaction_data["description"]} eklendi')
+            
+            # Eylül 2025 transactions ekle (9. ay - geçen ay karşılaştırması için)
+            self.stdout.write('📊 Eylül 2025 transactions ekleniyor...')
+            for transaction_data in september_2025_transactions:
+                doc_ref = db.collection('users').document(user_id).collection('transactions').document()
+                transaction_data['id'] = doc_ref.id
+                transaction_data['createdAt'] = datetime.now()
+                transaction_data['updatedAt'] = datetime.now()
+                
+                doc_ref.set(transaction_data)
+                self.stdout.write(f'  ✅ {transaction_data["description"]} eklendi')
 
             # Investments ekle
             self.stdout.write('📈 Investments ekleniyor...')
@@ -245,11 +324,20 @@ class Command(BaseCommand):
             total_expense = sum(t['amount'] for t in mock_transactions if t['type'] == 'expense')
             net_income = total_income - total_expense
             
+            sept_income = sum(t['amount'] for t in september_2025_transactions if t['type'] == 'income')
+            sept_expense = sum(t['amount'] for t in september_2025_transactions if t['type'] == 'expense')
+            sept_net = sept_income - sept_expense
+            
             self.stdout.write(f'\n📊 Özet:')
-            self.stdout.write(f'  💰 Toplam Gelir: ₺{total_income:,}')
-            self.stdout.write(f'  💸 Toplam Gider: ₺{total_expense:,}')
-            self.stdout.write(f'  📈 Net Gelir: ₺{net_income:,}')
-            self.stdout.write(f'  📊 Toplam İşlem: {len(mock_transactions)}')
+            self.stdout.write(f'  📅 Ocak 2024 Transactions:')
+            self.stdout.write(f'    💰 Toplam Gelir: ₺{total_income:,}')
+            self.stdout.write(f'    💸 Toplam Gider: ₺{total_expense:,}')
+            self.stdout.write(f'    📈 Net Gelir: ₺{net_income:,}')
+            self.stdout.write(f'\n  📅 Eylül 2025 Transactions (9. ay):')
+            self.stdout.write(f'    💰 Toplam Gelir: ₺{sept_income:,}')
+            self.stdout.write(f'    💸 Toplam Gider: ₺{sept_expense:,}')
+            self.stdout.write(f'    📈 Net Gelir: ₺{sept_net:,}')
+            self.stdout.write(f'\n  📊 Toplam İşlem: {len(mock_transactions) + len(september_2025_transactions)}')
             self.stdout.write(f'  📈 Toplam Yatırım: {len(mock_investments)}')
 
         except Exception as e:

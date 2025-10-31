@@ -1,3 +1,46 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Quick Actions Scrollbar Styling */
+.quick-actions-scroll {
+  scrollbar-width: thin !important;
+  scrollbar-color: #cbd5e1 #f1f5f9 !important;
+}
+
+.quick-actions-scroll::-webkit-scrollbar {
+  height: 8px !important;
+  display: block !important;
+}
+
+.quick-actions-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-radius: 4px !important;
+}
+
+.quick-actions-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+  border-radius: 4px !important;
+  min-width: 20px;
+}
+
+.quick-actions-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8 !important;
+}
+
+/* Dark mode */
+.dark .quick-actions-scroll {
+  scrollbar-color: #475569 #1e293b !important;
+}
+
+.dark .quick-actions-scroll::-webkit-scrollbar-track {
+  background: #1e293b !important;
+}
+
+.dark .quick-actions-scroll::-webkit-scrollbar-thumb {
+  background: #475569 !important;
+}
+
+.dark .quick-actions-scroll::-webkit-scrollbar-thumb:hover {
+  background: #64748b !important;
+}

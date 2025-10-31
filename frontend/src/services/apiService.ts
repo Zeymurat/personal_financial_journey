@@ -1,4 +1,4 @@
-import { Transaction, Investment, InvestmentTransaction } from '../types';
+import { Transaction, Investment, InvestmentTransaction, QuickTransaction } from '../types';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -100,6 +100,37 @@ export const transactionAPI = {
   // İşlem sil
   async delete(id: string) {
     return await apiRequest(`/auth/transactions/${id}/`, {
+      method: 'DELETE'
+    });
+  }
+};
+
+// Quick Transaction API'leri
+export const quickTransactionAPI = {
+  // Tüm hızlı işlemleri getir
+  async getAll() {
+    return await apiRequest('/auth/quick-transactions/');
+  },
+
+  // Yeni hızlı işlem oluştur
+  async create(quickTransaction: Omit<QuickTransaction, 'id' | 'createdAt' | 'updatedAt'>) {
+    return await apiRequest('/auth/quick-transactions/', {
+      method: 'POST',
+      body: JSON.stringify(quickTransaction)
+    });
+  },
+
+  // Hızlı işlem güncelle
+  async update(id: string, updates: Partial<QuickTransaction>) {
+    return await apiRequest(`/auth/quick-transactions/${id}/`, {
+      method: 'PUT',
+      body: JSON.stringify(updates)
+    });
+  },
+
+  // Hızlı işlem sil
+  async delete(id: string) {
+    return await apiRequest(`/auth/quick-transactions/${id}/`, {
       method: 'DELETE'
     });
   }
