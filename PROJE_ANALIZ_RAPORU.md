@@ -1,7 +1,3 @@
-403 durumunda login sayfasına gittiği zaman kullanıcı deneyimi için toast message ile bilgi vermek gerekiyor.
-Quick action eklerken hata olunca konsoldan gördüm. Toast eklenmeli.
-
-
 # 📊 Finans Uygulaması - Detaylı Proje Analiz Raporu
 
 **Tarih:** $(date)  
