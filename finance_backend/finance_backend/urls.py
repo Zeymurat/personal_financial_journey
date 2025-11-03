@@ -8,4 +8,6 @@ from django.urls import path, include
 urlpatterns = [
     # FirebaseLoginView'in bulunduğu 'users.urls' dosyasını dahil eder.
     path('api/auth/', include('users.urls')),
+    # Currencies (döviz kurları, altın, parite) API endpoint'leri
+    path('api/currencies/', include('currencies.urls')),
 ]

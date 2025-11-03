@@ -15,6 +15,7 @@ import {
   getInvestmentTransactions as fetchInvestmentTransactions
 } from '../services/investmentService';
 import { getExchangeRates, convertCurrency } from '../services/currencyService';
+import { altinkaynakAPI } from '../services/apiService';
 import { useAuth } from './AuthContext';
 
 interface FinanceContextType {
@@ -195,16 +196,63 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  // Currency
+  // Currency - Altınkaynak API'den veri çek
   const loadExchangeRates = async () => {
     try {
+      console.log("🚀 Altınkaynak döviz kurları yükleniyor...");
       setLoadingRates(true);
+      
+      // Önce Altınkaynak API'sinden veri çek
+      try {
+        const altinkaynakData = await altinkaynakAPI.getMain();
+        
+        if (altinkaynakData?.success && altinkaynakData?.data?.exchange_rates) {
+          console.log("✅ Altınkaynak verisi başarıyla alındı, döviz kurları güncelleniyor...");
+          
+          // Altınkaynak verilerini Currency formatına dönüştür
+          const formattedRates: Record<string, Currency> = {};
+          
+          Object.entries(altinkaynakData.data.exchange_rates).forEach(([code, rateData]: [string, any]) => {
+            formattedRates[code] = {
+              code: rateData.code || code,
+              name: rateData.name || code,
+              rate: rateData.rate || rateData.buy || 0,
+              change: rateData.change || 0
+            };
+          });
+          
+          // TRY'yi ekle (base currency)
+          formattedRates['TRY'] = {
+            code: 'TRY',
+            name: 'Turkish Lira',
+            rate: 1,
+            change: 0
+          };
+          
+          console.log("📊 Formatlanmış döviz kurları:", formattedRates);
+          setExchangeRates(formattedRates);
+          
+          // Başarılı oldu, return et
+          return;
+        } else {
+          console.warn("⚠️ Altınkaynak API'den beklenen formatta veri gelmedi, Firestore'a fallback yapılıyor...");
+        }
+      } catch (altinkaynakError) {
+        console.warn("⚠️ Altınkaynak API hatası, Firestore'a fallback yapılıyor:", altinkaynakError);
+      }
+      
+      // Fallback: Firestore'dan oku
+      console.log("📚 Firestore'dan döviz kurları okunuyor...");
       const rates = await getExchangeRates();
+      console.log("✅ Firestore döviz kurları yüklendi:", rates);
       setExchangeRates(rates);
+      
     } catch (err) {
+      console.error("❌ Döviz kurları yüklenirken hata:", err);
       handleError(err, 'Failed to load exchange rates');
     } finally {
       setLoadingRates(false);
+      console.log("🏁 Döviz kurları yükleme işlemi tamamlandı");
     }
   };
 
@@ -217,16 +265,29 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  // Initial data loading
+  // Initial data loading - Login olduğunda çalışır
   useEffect(() => {
     if (currentUser?.uid) {
+      console.log("👤 Kullanıcı login oldu, veriler yükleniyor...", currentUser.email);
+      console.log("📊 İşlemler yükleniyor...");
       loadTransactions();
+      console.log("💼 Yatırımlar yükleniyor...");
       loadInvestments();
+      console.log("💱 Döviz kurları Altınkaynak'tan yükleniyor...");
       loadExchangeRates();
       
-      // Refresh rates every hour
-      const interval = setInterval(loadExchangeRates, 60 * 60 * 1000);
-      return () => clearInterval(interval);
+      // Refresh rates every hour (her saat başı Altınkaynak'tan güncelle)
+      const interval = setInterval(() => {
+        console.log("🔄 Döviz kurları otomatik güncelleniyor...");
+        loadExchangeRates();
+      }, 60 * 60 * 1000);
+      
+      return () => {
+        console.log("🧹 Interval temizleniyor...");
+        clearInterval(interval);
+      };
+    } else {
+      console.log("👤 Kullanıcı login olmadı, veriler yüklenmedi");
     }
   }, [currentUser?.uid]);
 

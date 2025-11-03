@@ -270,3 +270,74 @@ export const checkTokenStatus = () => {
     refreshToken: refreshToken
   };
 };
+
+// Altınkaynak Currency API'leri
+export const altinkaynakAPI = {
+  // Tüm verileri getir (döviz + altın + parite)
+  async getMain() {
+    console.log("💰 Altınkaynak API - GetMain çağrılıyor...");
+    const response = await fetch(`${API_BASE_URL}/currencies/getmain/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    console.log("💰 Altınkaynak API Response Status:", response.status);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("❌ Altınkaynak API Hatası:", errorData);
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("✅ Altınkaynak API Başarılı - Veri çekildi:", data);
+    console.log("📊 Çekilen Döviz Kurları:", data.data?.exchange_rates);
+    console.log("🥇 Çekilen Altın Fiyatları:", data.data?.gold_prices);
+    
+    return data;
+  },
+
+  // Sadece döviz kurları
+  async getExchangeRates() {
+    console.log("💱 Altınkaynak API - Exchange Rates çağrılıyor...");
+    const response = await fetch(`${API_BASE_URL}/currencies/exchange-rates/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("❌ Altınkaynak Exchange Rates Hatası:", errorData);
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("✅ Altınkaynak Exchange Rates:", data);
+    return data;
+  },
+
+  // Sadece altın fiyatları
+  async getGoldPrices() {
+    console.log("🥇 Altınkaynak API - Gold Prices çağrılıyor...");
+    const response = await fetch(`${API_BASE_URL}/currencies/gold-prices/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("❌ Altınkaynak Gold Prices Hatası:", errorData);
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("✅ Altınkaynak Gold Prices:", data);
+    return data;
+  }
+};

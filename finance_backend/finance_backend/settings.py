@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'users',
+    'currencies',
     'django.contrib.contenttypes',
     'django.contrib.auth',
 ]

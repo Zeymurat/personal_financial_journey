@@ -4,6 +4,7 @@ import { Transaction } from '../types';
 import { transactionAPI } from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
 import { getExchangeRates } from '../services/currencyService';
+import { altinkaynakAPI } from '../services/apiService';
 import AddTransactionModal from './Transactions/AddTransactionModal';
 import EditTransactionModal from './Transactions/EditTransactionModal';
 import TransactionDetailModal from './Transactions/TransactionDetailModal';
@@ -53,21 +54,51 @@ const Transactions: React.FC = () => {
     return matchesSearch && matchesFilter && matchesDate;
   });
 
-  // Döviz kurlarını yükle
+  // Döviz kurlarını Altınkaynak'tan yükle
   useEffect(() => {
     const loadRates = async () => {
+      console.log("💱 Transactions: Döviz kurları yükleniyor...");
       try {
+        // Önce Altınkaynak API'sinden dene
+        try {
+          console.log("💰 Transactions: Altınkaynak API çağrılıyor...");
+          const altinkaynakData = await altinkaynakAPI.getMain();
+          
+          if (altinkaynakData?.success && altinkaynakData?.data?.exchange_rates) {
+            console.log("✅ Transactions: Altınkaynak verisi alındı!");
+            const rateMap: Record<string, { rate: number }> = {};
+            
+            // Altınkaynak verilerini formatla
+            Object.entries(altinkaynakData.data.exchange_rates).forEach(([code, rateData]: [string, any]) => {
+              rateMap[code] = { 
+                rate: rateData.rate || rateData.buy || 0 
+              };
+            });
+            
+            // TRY'yi ekle (base currency)
+            rateMap['TRY'] = { rate: 1 };
+            
+            console.log("📊 Transactions: Formatlanmış kurlar:", rateMap);
+            setExchangeRates(rateMap);
+            return;
+          }
+        } catch (altinkaynakError) {
+          console.warn("⚠️ Transactions: Altınkaynak API hatası, Firestore'a fallback yapılıyor:", altinkaynakError);
+        }
+        
+        // Fallback: Firestore'dan oku
+        console.log("📚 Transactions: Firestore'dan kurlar okunuyor...");
         const rates = await getExchangeRates('TRY');
-        // Sadece rate değerlerini sakla
         const rateMap: Record<string, { rate: number }> = {};
         Object.keys(rates).forEach(code => {
           rateMap[code] = { rate: rates[code].rate };
         });
         setExchangeRates(rateMap);
+        console.log("✅ Transactions: Firestore kurları yüklendi");
       } catch (error) {
-        console.error('Döviz kurları yüklenirken hata:', error);
+        console.error('❌ Transactions: Döviz kurları yüklenirken hata:', error);
         // Hata durumunda varsayılan kurlar (TR yaklaşık değerler - 1 birim = kaç TRY)
-        // Örnek: 1 USD = 30 TRY ise rate = 30
+        console.warn("⚠️ Transactions: Varsayılan kurlar kullanılıyor");
         setExchangeRates({
           'TRY': { rate: 1 },
           'USD': { rate: 30 }, // 1 USD = 30 TRY yaklaşık

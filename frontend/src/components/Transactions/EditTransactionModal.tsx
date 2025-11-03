@@ -3,6 +3,7 @@ import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { Transaction } from '../../types';
 import { transactionAPI } from '../../services/apiService';
 import { getExchangeRates } from '../../services/currencyService';
+import { altinkaynakAPI } from '../../services/apiService';
 
 interface EditTransactionModalProps {
   isOpen: boolean;
@@ -57,13 +58,28 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     expense: ['Kira', 'Market', 'Ulaşım', 'Eğlence', 'Sağlık', 'Eğitim', 'Teknoloji', 'Giyim', 'Diğer Gider']
   };
 
-  // Döviz kurlarını yükle ve TL karşılığını hesapla
+  // Döviz kurlarını yükle ve TL karşılığını hesapla - Altınkaynak API kullan
   const calculateAmountInTRY = async (amount: number, currency: string): Promise<number> => {
     if (currency === 'TRY') {
       return amount;
     }
     
     try {
+      // Önce Altınkaynak API'sinden dene
+      try {
+        const altinkaynakData = await altinkaynakAPI.getMain();
+        if (altinkaynakData?.success && altinkaynakData?.data?.exchange_rates) {
+          const rateData = altinkaynakData.data.exchange_rates[currency];
+          const rate = rateData?.rate || rateData?.buy || 0;
+          if (rate && rate > 0) {
+            return amount * rate;
+          }
+        }
+      } catch (altinkaynakError) {
+        console.warn('Altınkaynak API hatası, Firestore\'a fallback:', altinkaynakError);
+      }
+      
+      // Fallback: Firestore
       const rates = await getExchangeRates('TRY');
       const rate = rates[currency]?.rate;
       if (!rate || rate === 0) {
