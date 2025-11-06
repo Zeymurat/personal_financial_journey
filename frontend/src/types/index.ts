@@ -52,6 +52,8 @@ export interface Currency {
   code: string;
   name: string;
   rate: number;
+  buy?: number;
+  sell?: number;
   change: number;
 }
 

@@ -1,8 +1,15 @@
 import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useTokenValidation } from '../hooks/useTokenValidation';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Wallet, DollarSign, PieChart, Activity, Target, Calendar, Plus } from 'lucide-react';
 import { mockTransactions, mockInvestments } from '../data/mockData';
 
 const Dashboard: React.FC = () => {
+  const { currentUser } = useAuth();
+  
+  // Token doğrulama - Geçersiz token durumunda login sayfasına yönlendirir
+  useTokenValidation();
+  
   const totalIncome = mockTransactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + t.amount, 0);

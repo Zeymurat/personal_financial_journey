@@ -15,7 +15,7 @@ import {
   getInvestmentTransactions as fetchInvestmentTransactions
 } from '../services/investmentService';
 import { getExchangeRates, convertCurrency } from '../services/currencyService';
-import { altinkaynakAPI } from '../services/apiService';
+import { tcmbAPI } from '../services/apiService';
 import { useAuth } from './AuthContext';
 
 interface FinanceContextType {
@@ -42,6 +42,9 @@ interface FinanceContextType {
   
   // Currency
   exchangeRates: Record<string, Currency>;
+  goldPrices: Record<string, Currency>;
+  cryptoCurrencies: Record<string, Currency>;
+  preciousMetals: Record<string, Currency>;
   loadingRates: boolean;
   convertCurrency: (amount: number, fromCurrency: string, toCurrency: string) => Promise<number>;
   refreshRates: () => Promise<void>;
@@ -60,6 +63,9 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [exchangeRates, setExchangeRates] = useState<Record<string, Currency>>({});
+  const [goldPrices, setGoldPrices] = useState<Record<string, Currency>>({});
+  const [cryptoCurrencies, setCryptoCurrencies] = useState<Record<string, Currency>>({});
+  const [preciousMetals, setPreciousMetals] = useState<Record<string, Currency>>({});
   const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [loadingInvestments, setLoadingInvestments] = useState(false);
   const [loadingRates, setLoadingRates] = useState(false);
@@ -196,57 +202,128 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  // Currency - Altınkaynak API'den veri çek
+  // Currency - Firestore'dan oku (akıllı zaman kontrolü backend'de yapılıyor)
   const loadExchangeRates = async () => {
     try {
-      console.log("🚀 Altınkaynak döviz kurları yükleniyor...");
+      console.log("🚀 Döviz kurları yükleniyor (Backend akıllı kontrol yapıyor)...");
       setLoadingRates(true);
       
-      // Önce Altınkaynak API'sinden veri çek
+      // Backend API'yi çağır (akıllı zaman kontrolü backend'de yapılıyor)
+      // Backend Firestore'u kontrol eder, gerekirse API'den çeker
       try {
-        const altinkaynakData = await altinkaynakAPI.getMain();
+        console.log("💱 FinanceContext: Backend API çağrılıyor...");
+        const tcmbData = await tcmbAPI.getMain();
         
-        if (altinkaynakData?.success && altinkaynakData?.data?.exchange_rates) {
-          console.log("✅ Altınkaynak verisi başarıyla alındı, döviz kurları güncelleniyor...");
+        console.log("💱 FinanceContext: Backend response alındı:", {
+          success: tcmbData?.success,
+          hasData: !!tcmbData?.data,
+          source: tcmbData?.source,
+          exchangeRatesCount: Object.keys(tcmbData?.data?.exchange_rates || {}).length,
+          goldPricesCount: Object.keys(tcmbData?.data?.gold_prices || {}).length,
+          cryptoCount: Object.keys(tcmbData?.data?.crypto_currencies || {}).length,
+          metalsCount: Object.keys(tcmbData?.data?.precious_metals || {}).length
+        });
+        
+        if (tcmbData?.success && tcmbData?.data) {
+          console.log(`✅ Döviz kurları başarıyla alındı (kaynak: ${tcmbData.source || 'API'})`);
           
-          // Altınkaynak verilerini Currency formatına dönüştür
+          // Döviz kurlarını formatla
           const formattedRates: Record<string, Currency> = {};
-          
-          Object.entries(altinkaynakData.data.exchange_rates).forEach(([code, rateData]: [string, any]) => {
-            formattedRates[code] = {
-              code: rateData.code || code,
-              name: rateData.name || code,
-              rate: rateData.rate || rateData.buy || 0,
-              change: rateData.change || 0
-            };
-          });
+          if (tcmbData.data.exchange_rates) {
+            Object.entries(tcmbData.data.exchange_rates).forEach(([code, rateData]: [string, any]) => {
+              formattedRates[code] = {
+                code: rateData.code || code,
+                name: rateData.name || rateData.name_tr || code,
+                rate: rateData.rate || rateData.buy || 0,
+                buy: rateData.buy || rateData.rate || 0,
+                sell: rateData.sell || rateData.rate || 0,
+                change: rateData.change || 0
+              };
+            });
+          }
           
           // TRY'yi ekle (base currency)
           formattedRates['TRY'] = {
             code: 'TRY',
             name: 'Turkish Lira',
             rate: 1,
+            buy: 1,
+            sell: 1,
             change: 0
           };
           
-          console.log("📊 Formatlanmış döviz kurları:", formattedRates);
-          setExchangeRates(formattedRates);
+          // Altın fiyatlarını formatla
+          const formattedGold: Record<string, Currency> = {};
+          if (tcmbData.data.gold_prices) {
+            Object.entries(tcmbData.data.gold_prices).forEach(([code, goldData]: [string, any]) => {
+              formattedGold[code] = {
+                code: goldData.code || code,
+                name: goldData.name || goldData.name_tr || code,
+                rate: goldData.rate || goldData.buy || 0,
+                buy: goldData.buy || goldData.rate || 0,
+                sell: goldData.sell || goldData.rate || 0,
+                change: goldData.change || 0
+              };
+            });
+          }
           
-          // Başarılı oldu, return et
+          // Kripto paraları formatla
+          const formattedCrypto: Record<string, Currency> = {};
+          if (tcmbData.data.crypto_currencies) {
+            Object.entries(tcmbData.data.crypto_currencies).forEach(([code, cryptoData]: [string, any]) => {
+              formattedCrypto[code] = {
+                code: cryptoData.code || code,
+                name: cryptoData.name || cryptoData.name_tr || code,
+                rate: cryptoData.rate || cryptoData.buy || 0,
+                buy: cryptoData.buy || cryptoData.rate || 0,
+                sell: cryptoData.sell || cryptoData.rate || 0,
+                change: cryptoData.change || 0
+              };
+            });
+          }
+          
+          // Değerli metalleri formatla
+          const formattedMetals: Record<string, Currency> = {};
+          if (tcmbData.data.precious_metals) {
+            Object.entries(tcmbData.data.precious_metals).forEach(([code, metalData]: [string, any]) => {
+              formattedMetals[code] = {
+                code: metalData.code || code,
+                name: metalData.name || metalData.name_tr || code,
+                rate: metalData.rate || metalData.buy || 0,
+                buy: metalData.buy || metalData.rate || 0,
+                sell: metalData.sell || metalData.rate || 0,
+                change: metalData.change || 0
+              };
+            });
+          }
+          
+          console.log("📊 Formatlanmış veriler:", {
+            döviz: Object.keys(formattedRates).length,
+            altın: Object.keys(formattedGold).length,
+            kripto: Object.keys(formattedCrypto).length,
+            metaller: Object.keys(formattedMetals).length
+          });
+          
+          setExchangeRates(formattedRates);
+          setGoldPrices(formattedGold);
+          setCryptoCurrencies(formattedCrypto);
+          setPreciousMetals(formattedMetals);
+          
+          // Backend zaten Firestore'a kaydediyor, burada tekrar kaydetmeye gerek yok
           return;
         } else {
-          console.warn("⚠️ Altınkaynak API'den beklenen formatta veri gelmedi, Firestore'a fallback yapılıyor...");
+          console.warn("⚠️ Backend'den beklenen formatta veri gelmedi, Firestore'a fallback yapılıyor...");
         }
-      } catch (altinkaynakError) {
-        console.warn("⚠️ Altınkaynak API hatası, Firestore'a fallback yapılıyor:", altinkaynakError);
+      } catch (tcmbError) {
+        console.warn("⚠️ Backend hatası, Firestore'a fallback yapılıyor:", tcmbError);
       }
-      
-      // Fallback: Firestore'dan oku
+
+      // Fallback: Firestore'dan direkt oku
       console.log("📚 Firestore'dan döviz kurları okunuyor...");
       const rates = await getExchangeRates();
       console.log("✅ Firestore döviz kurları yüklendi:", rates);
       setExchangeRates(rates);
-      
+
     } catch (err) {
       console.error("❌ Döviz kurları yüklenirken hata:", err);
       handleError(err, 'Failed to load exchange rates');
@@ -273,19 +350,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       loadTransactions();
       console.log("💼 Yatırımlar yükleniyor...");
       loadInvestments();
-      console.log("💱 Döviz kurları Altınkaynak'tan yükleniyor...");
+      console.log("💱 Döviz kurları Firestore'dan yükleniyor (akıllı zaman kontrolü backend'de)...");
       loadExchangeRates();
       
-      // Refresh rates every hour (her saat başı Altınkaynak'tan güncelle)
-      const interval = setInterval(() => {
-        console.log("🔄 Döviz kurları otomatik güncelleniyor...");
-        loadExchangeRates();
-      }, 60 * 60 * 1000);
-      
-      return () => {
-        console.log("🧹 Interval temizleniyor...");
-        clearInterval(interval);
-      };
+      // Otomatik güncelleme kaldırıldı - Backend akıllı zaman kontrolü yapıyor
+      // Sadece gerekli durumlarda (10:00, 13:30, 17:00) API çağrısı yapılıyor
     } else {
       console.log("👤 Kullanıcı login olmadı, veriler yüklenmedi");
     }
@@ -312,6 +381,9 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     // Currency
     exchangeRates,
+    goldPrices,
+    cryptoCurrencies,
+    preciousMetals,
     loadingRates,
     convertCurrency: convertCurrencyAmount,
     refreshRates: loadExchangeRates,

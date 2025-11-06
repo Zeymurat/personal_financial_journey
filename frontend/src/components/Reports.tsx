@@ -1,8 +1,15 @@
 import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useTokenValidation } from '../hooks/useTokenValidation';
 import { BarChart3, TrendingUp, Calendar, Download } from 'lucide-react';
 import { mockMonthlyReports } from '../data/mockData';
 
 const Reports: React.FC = () => {
+  const { currentUser } = useAuth();
+  
+  // Token doğrulama - Geçersiz token durumunda login sayfasına yönlendirir
+  useTokenValidation();
+  
   const currentMonth = mockMonthlyReports[0];
   const previousMonth = mockMonthlyReports[1];
 

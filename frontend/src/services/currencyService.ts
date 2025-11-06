@@ -12,40 +12,48 @@ import {
 import { db } from '../firebase';
 import { Currency } from '../types';
 
-// This would typically be called by a scheduled function or admin
-// For demo purposes, we'll include it here
-export const updateExchangeRates = async (rates: Record<string, number>) => {
+// Currencies collection'ına kurları kaydet/güncelle
+// currencies/ collection'ı users/ ile aynı seviyede (root level)
+export const updateExchangeRates = async (rates: Record<string, Currency>) => {
   try {
+    console.log("💾 Currencies Firestore'a kaydediliyor...");
     const batch = [];
     const now = Timestamp.now();
     
-    for (const [code, rate] of Object.entries(rates)) {
-      const currencyRef = doc(db, 'exchange_rates', code);
+    for (const [code, currency] of Object.entries(rates)) {
+      const currencyRef = doc(db, 'currencies', code);
       const docSnap = await getDoc(currencyRef);
       
       if (docSnap.exists()) {
         // Update with change calculation
         const currentRate = docSnap.data().rate;
-        const change = ((rate - currentRate) / currentRate) * 100; // percentage change
+        const change = ((currency.rate - currentRate) / currentRate) * 100; // percentage change
         
         batch.push(updateDoc(currencyRef, {
-          rate,
-          change,
+          code: currency.code,
+          name: currency.name || getCurrencyName(code),
+          rate: currency.rate,
+          buy: currency.buy || currency.rate,
+          sell: currency.sell || currency.rate,
+          change: change,
           lastUpdated: now
         }));
       } else {
         // Create new entry
         batch.push(setDoc(currencyRef, {
-          code,
-          name: getCurrencyName(code),
-          rate,
-          change: 0,
+          code: currency.code,
+          name: currency.name || getCurrencyName(code),
+          rate: currency.rate,
+          buy: currency.buy || currency.rate,
+          sell: currency.sell || currency.rate,
+          change: currency.change || 0,
           lastUpdated: now
         }));
       }
     }
     
     await Promise.all(batch);
+    console.log("✅ Currencies başarıyla Firestore'a kaydedildi");
     return true;
   } catch (error) {
     console.error('Error updating exchange rates:', error);
@@ -55,8 +63,24 @@ export const updateExchangeRates = async (rates: Record<string, number>) => {
 
 export const getExchangeRates = async (baseCurrency: string = 'TRY') => {
   try {
-    const q = query(collection(db, 'exchange_rates'));
-    const querySnapshot = await getDocs(q);
+    // currencies/ collection'ı users/ ile aynı seviyede (root level)
+    // Eğer currencies yoksa, eski exchange_rates'i de dene (backward compatibility)
+    let q = query(collection(db, 'currencies'));
+    let querySnapshot = await getDocs(q);
+    
+    // Eğer currencies boşsa, eski exchange_rates'i dene
+    if (querySnapshot.empty) {
+      console.log("⚠️ currencies collection boş, eski exchange_rates collection'ı deneniyor...");
+      try {
+        q = query(collection(db, 'exchange_rates'));
+        querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          console.log("✅ exchange_rates collection'ından veri bulundu");
+        }
+      } catch (oldError) {
+        console.warn("⚠️ exchange_rates collection'ına da erişilemedi:", oldError);
+      }
+    }
     
     const rates: Record<string, Currency> = {};
     let baseRate = 1; // Default for base currency
@@ -71,6 +95,8 @@ export const getExchangeRates = async (baseCurrency: string = 'TRY') => {
         code: data.code,
         name: data.name || data.code,
         rate: data.rate,
+        buy: data.buy || data.rate,
+        sell: data.sell || data.rate,
         change: data.change || 0
       };
     });

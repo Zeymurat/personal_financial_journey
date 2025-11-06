@@ -271,11 +271,11 @@ export const checkTokenStatus = () => {
   };
 };
 
-// Altınkaynak Currency API'leri
-export const altinkaynakAPI = {
-  // Tüm verileri getir (döviz + altın + parite)
+// Finans API Currency API'leri
+export const tcmbAPI = {
+    // Tüm verileri getir (döviz kurları)
   async getMain() {
-    console.log("💰 Altınkaynak API - GetMain çağrılıyor...");
+    console.log("💰 Finans API - GetMain çağrılıyor...");
     const response = await fetch(`${API_BASE_URL}/currencies/getmain/`, {
       method: 'GET',
       headers: {
@@ -283,25 +283,25 @@ export const altinkaynakAPI = {
       }
     });
     
-    console.log("💰 Altınkaynak API Response Status:", response.status);
+    console.log("💰 Finans API Response Status:", response.status);
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("❌ Altınkaynak API Hatası:", errorData);
+      console.error("❌ Finans API Hatası:", errorData);
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log("✅ Altınkaynak API Başarılı - Veri çekildi:", data);
+    console.log("✅ Finans API Başarılı - Veri çekildi:", data);
     console.log("📊 Çekilen Döviz Kurları:", data.data?.exchange_rates);
-    console.log("🥇 Çekilen Altın Fiyatları:", data.data?.gold_prices);
+    console.log("📅 Finans API Tarihi:", data.data?.date);
     
     return data;
   },
 
   // Sadece döviz kurları
   async getExchangeRates() {
-    console.log("💱 Altınkaynak API - Exchange Rates çağrılıyor...");
+    console.log("💱 Finans API - Exchange Rates çağrılıyor...");
     const response = await fetch(`${API_BASE_URL}/currencies/exchange-rates/`, {
       method: 'GET',
       headers: {
@@ -311,18 +311,18 @@ export const altinkaynakAPI = {
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("❌ Altınkaynak Exchange Rates Hatası:", errorData);
+      console.error("❌ Finans API Exchange Rates Hatası:", errorData);
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log("✅ Altınkaynak Exchange Rates:", data);
+    console.log("✅ Finans API Exchange Rates:", data);
     return data;
   },
 
-  // Sadece altın fiyatları
+  // Sadece altın fiyatları (Finans API'de altın var ama farklı formatta)
   async getGoldPrices() {
-    console.log("🥇 Altınkaynak API - Gold Prices çağrılıyor...");
+    console.log("🥇 Finans API - Gold Prices");
     const response = await fetch(`${API_BASE_URL}/currencies/gold-prices/`, {
       method: 'GET',
       headers: {
@@ -332,12 +332,179 @@ export const altinkaynakAPI = {
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("❌ Altınkaynak Gold Prices Hatası:", errorData);
+      console.error("❌ Finans API Gold Prices Hatası:", errorData);
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log("✅ Altınkaynak Gold Prices:", data);
+    console.log("✅ Finans API Gold Prices:", data);
+    return data;
+  }
+};
+
+// Borsa API'leri
+export const borsaAPI = {
+  // Borsa verilerini getir (akıllı kontrol ile - tetikleme)
+  // Backend akıllı zaman kontrolü yapar: gerekirse API'den çeker, değilse Firestore'dan döndürür
+  async getBorsaData(date?: string) {
+    console.log("📈 Borsa API - GetBorsaData çağrılıyor (akıllı kontrol ile)...");
+    
+    // Önce akıllı kontrolü tetikle (gerekirse API'den çeker)
+    const triggerUrl = `${API_BASE_URL}/currencies/borsa/`;
+    try {
+      const triggerResponse = await fetch(triggerUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getHeaders()
+        }
+      });
+      
+      if (triggerResponse.ok) {
+        const triggerData = await triggerResponse.json();
+        console.log("📈 Borsa akıllı kontrol tetiklendi:", triggerData.source || 'API');
+      }
+    } catch (error) {
+      console.warn("⚠️ Borsa akıllı kontrol tetiklenirken hata:", error);
+    }
+    
+    // Sonra verileri Firestore'dan oku
+    const url = date 
+      ? `${API_BASE_URL}/currencies/borsa/list/?date=${date}`
+      : `${API_BASE_URL}/currencies/borsa/list/`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getHeaders()
+      }
+    });
+    
+    console.log("📈 Borsa API Response Status:", response.status);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("❌ Borsa API Hatası:", errorData);
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("✅ Borsa API Başarılı - Veri çekildi:", data);
+    return data;
+  }
+};
+
+// Funds API'leri
+export const fundsAPI = {
+  // Funds verilerini getir (global havuz)
+  async getFunds() {
+    console.log("💰 Funds API - GetFunds çağrılıyor...");
+    const response = await fetch(`${API_BASE_URL}/currencies/funds/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getHeaders()
+      }
+    });
+    
+    console.log("💰 Funds API Response Status:", response.status);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("❌ Funds API Hatası:", errorData);
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("✅ Funds API:", data);
+    return data;
+  },
+
+  // Quota bilgisini getir (cache'den okur, istek saymaz)
+  async getFundQuota() {
+    console.log('💰 Fund Quota API - GetFundQuota çağrılıyor...');
+    
+    const url = `${API_BASE_URL}/currencies/fund-quota/`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getHeaders()
+      }
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
+  },
+
+  // Fon detay bilgilerini getir (RapidAPI - akıllı cache ile)
+  async getFundDetail(fundCode: string, date?: string) {
+    console.log(`💰 Fund Detail API - GetFundDetail çağrılıyor: ${fundCode}${date ? ` (${date})` : ''}`);
+    
+    const queryParams = new URLSearchParams();
+    queryParams.append('fund_code', fundCode);
+    if (date) {
+      queryParams.append('date', date);
+    }
+    
+    const url = `${API_BASE_URL}/currencies/fund-detail/?${queryParams.toString()}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getHeaders()
+      }
+    });
+    
+    console.log("💰 Fund Detail API Response Status:", response.status);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("❌ Fund Detail API Hatası:", errorData);
+      throw new Error(errorData.error || errorData.message || `HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("✅ Fund Detail API:", {
+      success: data.success,
+      source: data.source,
+      cached: data.cached,
+      quota: data.quota
+    });
+    return data;
+  },
+
+  // Fon fiyat kontrolü (cache'den okur, API'ye istek atmaz)
+  async checkFundPrice(fundCode: string, date?: string) {
+    console.log(`💰 Fund Price Check API - CheckFundPrice çağrılıyor: ${fundCode}${date ? ` (${date})` : ''}`);
+    
+    const queryParams = new URLSearchParams();
+    queryParams.append('fund_code', fundCode);
+    if (date) {
+      queryParams.append('date', date);
+    }
+    
+    const url = `${API_BASE_URL}/currencies/fund-price-check/?${queryParams.toString()}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getHeaders()
+      }
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
     return data;
   }
 };

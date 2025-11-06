@@ -56,6 +56,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // apiService zaten token'ları localStorage'a kaydettiği için
       // burada ekstra bir şey yapmamıza gerek yok.
       console.log("Backend'den token alındı ve kaydedildi.");
+      
+      // Login başarılı - Finans API çağrısı artık FinanceContext'te yapılıyor (akıllı zaman kontrolü ile)
+      // Her login'de API çağrısı yapılmıyor, sadece gerekli durumlarda çağrılıyor
+      
       return backendResponse;
 
     } catch (error) {
@@ -120,9 +124,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (firebaseUser) {
         await updateUserProfileAndState(firebaseUser);
         // Oturum açan her kullanıcı için Firestore dokümanını kontrol et
-        await ensureFirestoreUserDocument(firebaseUser);
+        try {
+          await ensureFirestoreUserDocument(firebaseUser);
+        } catch (error) {
+          // Firestore permission hatası olsa bile login'i engelleme
+          console.warn("Firestore kullanıcı dokümanı kontrolü hatası (devam ediliyor):", error);
+        }
+        
+        // Sayfa yenilendiğinde veya oturum devam ederken backend'e authenticate et
+        // (Sadece token yoksa veya yeni login olduysa)
+        try {
+          const token = localStorage.getItem('access_token');
+          if (!token) {
+            // Token yoksa, backend'e authenticate et
+            await processUserAuthentication(firebaseUser);
+          }
+        } catch (error) {
+          // Sessizce hata yakala, login'i engelleme
+          console.warn("Auth state değişikliğinde authentication hatası:", error);
+        }
       } else {
         setCurrentUser(null);
+        // Logout durumunda token'ları temizle
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refreshToken');
       }
       setLoading(false);
     });

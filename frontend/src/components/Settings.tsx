@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useTokenValidation } from '../hooks/useTokenValidation';
 import { Moon, Sun, Bell, Shield, User, Palette, Globe, Save } from 'lucide-react';
 
 const Settings: React.FC = () => {
+  const { currentUser } = useAuth();
+  
+  // Token doğrulama - Geçersiz token durumunda login sayfasına yönlendirir
+  useTokenValidation();
+  
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [language, setLanguage] = useState('tr');

@@ -5,10 +5,12 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Transactions from './components/Transactions';
 import Investments from './components/Investments';
+import TrackAndCompare from './components/TrackAndCompare';
 import Reports from './components/Reports';
 import CurrencyConverter from './components/CurrencyConverter';
 import Settings from './components/Settings';
-import { AuthProvider } from './contexts/AuthContext'; // <-- AuthProvider'ı import edin!
+import { AuthProvider } from './contexts/AuthContext';
+import { FinanceProvider } from './contexts/FinanceContext';
 
 const MainApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -21,6 +23,8 @@ const MainApp: React.FC = () => {
         return <Transactions />;
       case 'investments':
         return <Investments />;
+      case 'track':
+        return <TrackAndCompare />;
       case 'reports':
         return <Reports />;
       case 'converter':
@@ -45,12 +49,15 @@ const MainApp: React.FC = () => {
 function App() {
   return (
     // AuthProvider, tüm kimlik doğrulama bağlamını sağlar
+    // FinanceProvider, tüm finansal veri bağlamını sağlar
     // AuthWrapper ve MainApp onun içinde olmalı
-    <AuthProvider> {/* <-- Buraya AuthProvider'ı ekledik! */}
-      <AuthWrapper>
-        {/* AuthWrapper, kullanıcının oturum açıp açmadığına göre içeriği render eder */}
-        <MainApp />
-      </AuthWrapper>
+    <AuthProvider>
+      <FinanceProvider>
+        <AuthWrapper>
+          {/* AuthWrapper, kullanıcının oturum açıp açmadığına göre içeriği render eder */}
+          <MainApp />
+        </AuthWrapper>
+      </FinanceProvider>
     </AuthProvider>
   );
 }

@@ -8,7 +8,8 @@ import {
   Settings,
   Wallet,
   LogOut,
-  User
+  User,
+  Eye
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -24,6 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'transactions', label: 'İşlemler', icon: ArrowUpDown },
     { id: 'investments', label: 'Yatırımlar', icon: TrendingUp },
+    { id: 'track', label: 'Takip ve Karşılaştırma', icon: Eye },
     { id: 'reports', label: 'Raporlar', icon: BarChart3 },
     { id: 'converter', label: 'Döviz Çevirici', icon: Repeat },
     { id: 'settings', label: 'Ayarlar', icon: Settings }

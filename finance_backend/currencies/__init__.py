@@ -1,2 +1,2 @@
-# Currencies app for Altinkaynak SOAP service integration
+# Currencies app for TCMB (Türkiye Cumhuriyet Merkez Bankası) XML API integration
 

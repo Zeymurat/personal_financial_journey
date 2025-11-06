@@ -3,8 +3,9 @@ import { Plus, Search, Filter, Edit, Trash2, Calendar, Eye, Download, TrendingUp
 import { Transaction } from '../types';
 import { transactionAPI } from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
+import { useTokenValidation } from '../hooks/useTokenValidation';
 import { getExchangeRates } from '../services/currencyService';
-import { altinkaynakAPI } from '../services/apiService';
+import { tcmbAPI } from '../services/apiService';
 import AddTransactionModal from './Transactions/AddTransactionModal';
 import EditTransactionModal from './Transactions/EditTransactionModal';
 import TransactionDetailModal from './Transactions/TransactionDetailModal';
@@ -13,6 +14,10 @@ import QuickActions from './Transactions/QuickActions';
 
 const Transactions: React.FC = () => {
   const { currentUser } = useAuth();
+  
+  // Token doğrulama - Geçersiz token durumunda login sayfasına yönlendirir
+  useTokenValidation();
+  
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [exchangeRates, setExchangeRates] = useState<Record<string, { rate: number }>>({});
@@ -54,22 +59,22 @@ const Transactions: React.FC = () => {
     return matchesSearch && matchesFilter && matchesDate;
   });
 
-  // Döviz kurlarını Altınkaynak'tan yükle
+  // Döviz kurlarını TCMB'den yükle
   useEffect(() => {
     const loadRates = async () => {
       console.log("💱 Transactions: Döviz kurları yükleniyor...");
       try {
-        // Önce Altınkaynak API'sinden dene
+        // Önce TCMB API'sinden dene
         try {
-          console.log("💰 Transactions: Altınkaynak API çağrılıyor...");
-          const altinkaynakData = await altinkaynakAPI.getMain();
+          console.log("💰 Transactions: TCMB API çağrılıyor...");
+          const tcmbData = await tcmbAPI.getMain();
           
-          if (altinkaynakData?.success && altinkaynakData?.data?.exchange_rates) {
-            console.log("✅ Transactions: Altınkaynak verisi alındı!");
+          if (tcmbData?.success && tcmbData?.data?.exchange_rates) {
+            console.log("✅ Transactions: TCMB verisi alındı!");
             const rateMap: Record<string, { rate: number }> = {};
             
-            // Altınkaynak verilerini formatla
-            Object.entries(altinkaynakData.data.exchange_rates).forEach(([code, rateData]: [string, any]) => {
+            // TCMB verilerini formatla
+            Object.entries(tcmbData.data.exchange_rates).forEach(([code, rateData]: [string, any]) => {
               rateMap[code] = { 
                 rate: rateData.rate || rateData.buy || 0 
               };
@@ -82,8 +87,8 @@ const Transactions: React.FC = () => {
             setExchangeRates(rateMap);
             return;
           }
-        } catch (altinkaynakError) {
-          console.warn("⚠️ Transactions: Altınkaynak API hatası, Firestore'a fallback yapılıyor:", altinkaynakError);
+        } catch (tcmbError) {
+          console.warn("⚠️ Transactions: TCMB API hatası, Firestore'a fallback yapılıyor:", tcmbError);
         }
         
         // Fallback: Firestore'dan oku

@@ -1,11 +1,950 @@
-import React, { useState } from 'react';
-import { TrendingUp, TrendingDown, Plus, DollarSign, PieChart, Calendar, Eye, History, BarChart3, Target } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { TrendingUp, TrendingDown, Plus, DollarSign, PieChart, Calendar, Eye, History, Target, Loader2, GripVertical, X } from 'lucide-react';
 import { mockInvestments } from '../data/mockData';
-import { Investment, InvestmentTransaction } from '../types';
+import { Investment } from '../types';
+import { borsaAPI, fundsAPI } from '../services/apiService';
+import { useAuth } from '../contexts/AuthContext';
+import { useTokenValidation } from '../hooks/useTokenValidation';
+import { useFinance } from '../contexts/FinanceContext';
+import HisseSelectionModal from './Investments/HisseSelectionModal';
+import FundsSelectionModal from './Investments/FundsSelectionModal';
+import AddInvestmentModal from './Investments/AddInvestmentModal';
+import InvestmentDetailModal from './Investments/InvestmentDetailModal';
+import CurrencySelectionModal from './Converter/CurrencySelectionModal';
+import FundDetailModal from './Investments/FundDetailModal';
+import { 
+  getSelectedHisse, 
+  saveSelectedHisse,
+  addSelectedHisse,
+  removeSelectedHisse,
+  SelectedHisse,
+  getSelectedCurrencies,
+  saveSelectedCurrencies,
+  addSelectedCurrency,
+  removeSelectedCurrency,
+  SelectedCurrency,
+  getSelectedFunds,
+  saveSelectedFunds,
+  addSelectedFund,
+  removeSelectedFund,
+  SelectedFund
+} from '../services/userSettingsService';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+  useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+interface StockData {
+  code: string;
+  name: string;
+  last_price: number;
+  rate: number;
+  volume: number;
+  high: number;
+  low: number;
+  time: string;
+  icon?: string;
+}
+
+interface CurrencyRate {
+  code: string;
+  name: string;
+  rate: number;
+  buy: number;
+  sell: number;
+  change: number;
+  type?: 'currency' | 'gold' | 'crypto' | 'metal';
+}
+
+interface SortableCurrencyCardProps {
+  currency: CurrencyRate;
+  onRemove?: (currencyCode: string) => void;
+}
+
+interface SortableStockCardProps {
+  stock: StockData;
+}
+
+interface SortableStockCardPropsWithRemove extends SortableStockCardProps {
+  onRemove?: (stockCode: string) => void;
+}
+
+const SortableCurrencyCard: React.FC<SortableCurrencyCardProps> = ({ currency, onRemove }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: currency.code });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    cursor: isDragging ? 'grabbing' : 'grab'
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-white dark:bg-gray-800 group"
+    >
+      {onRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(currency.code);
+          }}
+          className="absolute top-1 right-28 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 rounded-full text-red-600 dark:text-red-400 z-10"
+          title="Kartı listeden çıkar"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
+
+      {/* Drag Handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="flex items-center justify-between mb-3 cursor-grab active:cursor-grabbing"
+      >
+        <div className="flex items-center space-x-2">
+          <GripVertical className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-white">{currency.code}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{currency.name}</p>
+          </div>
+        </div>
+        <div className={`p-2 rounded-full ${currency.change >= 0
+          ? 'bg-green-100 dark:bg-green-900'
+          : 'bg-red-100 dark:bg-red-900'
+          }`}>
+          {currency.change >= 0 ? (
+            <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+          ) : (
+            <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
+          )}
+        </div>
+      </div>
+
+      {/* Buy ve Sell değerleri - Aynı satırda */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex-1">
+          <span className="text-xs text-gray-600 dark:text-gray-400">Alış:</span>
+          <span className="text-sm font-semibold text-green-600 dark:text-green-400 ml-2">
+            ₺{currency.type === 'crypto'
+              ? currency.buy.toFixed(6)
+              : currency.type === 'gold'
+                ? currency.buy.toFixed(2)
+                : currency.buy.toFixed(3)}
+          </span>
+        </div>
+        <div className="flex-1 text-right">
+          <span className="text-xs text-gray-600 dark:text-gray-400">Satış:</span>
+          <span className="text-sm font-semibold text-red-600 dark:text-red-400 ml-2">
+            ₺{currency.type === 'crypto'
+              ? currency.sell.toFixed(6)
+              : currency.type === 'gold'
+                ? currency.sell.toFixed(2)
+                : currency.sell.toFixed(3)}
+          </span>
+        </div>
+      </div>
+
+      {/* Değişim yüzdesi */}
+      <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+        <span className="text-xs text-gray-500 dark:text-gray-400">Değişim:</span>
+        <span className={`text-sm font-medium ${currency.change >= 0 ? 'text-green-600' : 'text-red-600'
+          }`}>
+          {currency.change >= 0 ? '+' : ''}{currency.change.toFixed(2)}%
+        </span>
+      </div>
+    </div>
+  );
+};
+
+// Sortable Fund Card Component
+interface SortableFundCardProps {
+  fund: { key: string; value: string };
+  onRemove?: (fundKey: string) => void;
+  onViewDetail?: (fundCode: string, fundName: string) => void;
+}
+
+const SortableFundCard: React.FC<SortableFundCardProps> = ({ fund, onRemove, onViewDetail }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: fund.key });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    cursor: isDragging ? 'grabbing' : 'grab'
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-white dark:bg-gray-800 group"
+    >
+      {/* Kaldır butonu - Kartın sağ üst köşesinde */}
+      {onRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(fund.key);
+          }}
+          className="absolute top-1 right-28 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 rounded-full text-red-600 dark:text-red-400 z-10"
+          title="Fonu listeden çıkar"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
+      
+      {/* Drag Handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="flex items-center justify-between mb-3 cursor-grab active:cursor-grabbing"
+      >
+        <div className="flex items-center space-x-2">
+          <GripVertical className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-white">{fund.key}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{fund.value}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Detay Butonu */}
+      {onViewDetail && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onViewDetail(fund.key, fund.value);
+          }}
+          className="w-full mt-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center justify-center space-x-2"
+          title="Fon detay bilgilerini görüntüle"
+        >
+          <Eye className="w-4 h-4" />
+          <span>Detay</span>
+        </button>
+      )}
+    </div>
+  );
+};
+
+const SortableStockCard: React.FC<SortableStockCardPropsWithRemove> = ({ stock, onRemove }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: stock.code });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    cursor: isDragging ? 'grabbing' : 'grab'
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-white dark:bg-gray-800 group"
+    >
+      {/* Kaldır butonu - Kartın sağ üst köşesinde, bağımsız */}
+      {onRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(stock.code);
+          }}
+          className="absolute top-1 right-28 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 rounded-full text-red-600 dark:text-red-400 z-10"
+          title="Kartı listeden çıkar"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
+      
+      {/* Drag Handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="flex items-center justify-between mb-3 cursor-grab active:cursor-grabbing"
+      >
+        <div className="flex items-center space-x-2">
+          <GripVertical className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-white">{stock.code}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{stock.name}</p>
+          </div>
+        </div>
+        <div className={`p-2 rounded-full ${
+          stock.rate >= 0 
+            ? 'bg-green-100 dark:bg-green-900' 
+            : 'bg-red-100 dark:bg-red-900'
+        }`}>
+          {stock.rate >= 0 ? (
+            <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+          ) : (
+            <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
+          )}
+        </div>
+      </div>
+      
+      {/* Son Fiyat */}
+      <div className="mb-3">
+        <span className="text-xs text-gray-600 dark:text-gray-400">Son Fiyat:</span>
+        <span className="text-lg font-semibold text-gray-900 dark:text-white ml-2">
+          ₺{stock.last_price.toFixed(2)}
+        </span>
+      </div>
+      
+      {/* Yüksek/Düşük */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex-1">
+          <span className="text-xs text-gray-600 dark:text-gray-400">Yüksek:</span>
+          <span className="text-sm font-semibold text-green-600 dark:text-green-400 ml-2">
+            ₺{stock.high.toFixed(2)}
+          </span>
+        </div>
+        <div className="flex-1 text-right">
+          <span className="text-xs text-gray-600 dark:text-gray-400">Düşük:</span>
+          <span className="text-sm font-semibold text-red-600 dark:text-red-400 ml-2">
+            ₺{stock.low.toFixed(2)}
+          </span>
+        </div>
+      </div>
+      
+      {/* Değişim ve Hacim */}
+      <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+        <span className="text-xs text-gray-500 dark:text-gray-400">Değişim:</span>
+        <span className={`text-sm font-medium ${
+          stock.rate >= 0 ? 'text-green-600' : 'text-red-600'
+        }`}>
+          {stock.rate >= 0 ? '+' : ''}{stock.rate.toFixed(2)}%
+        </span>
+      </div>
+      {stock.volume > 0 && (
+        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+          <span className="text-xs text-gray-500 dark:text-gray-400">Hacim: </span>
+          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+            ₺{(stock.volume / 1000000).toFixed(2)}M
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Investments: React.FC = () => {
+  const { currentUser } = useAuth();
+  
+  // Token doğrulama - Geçersiz token durumunda login sayfasına yönlendirir
+  useTokenValidation();
+  
+  // Finance context
+  const {
+    exchangeRates,
+    goldPrices,
+    cryptoCurrencies,
+    preciousMetals,
+    loadingRates,
+    refreshRates
+  } = useFinance();
+  
   const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [fundDetailModal, setFundDetailModal] = useState<{ isOpen: boolean; fundCode: string; fundName: string }>({
+    isOpen: false,
+    fundCode: '',
+    fundName: ''
+  });
+  const [borsaData, setBorsaData] = useState<StockData[]>([]);
+  const [loadingBorsa, setLoadingBorsa] = useState<boolean>(false);
+  const [selectedHisse, setSelectedHisse] = useState<SelectedHisse[]>([]);
+  const [isSelectingHisse, setIsSelectingHisse] = useState<boolean>(false);
+  const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
+  const [searchHisseQuery, setSearchHisseQuery] = useState<string>('');
+  
+  // Currency states
+  const [selectedCurrencies, setSelectedCurrencies] = useState<SelectedCurrency[]>([]);
+  const [isSelectingCurrencies, setIsSelectingCurrencies] = useState<boolean>(false);
+  const [isInitialLoadCurrencies, setIsInitialLoadCurrencies] = useState<boolean>(true);
+  
+  // Funds states
+  const [allFunds, setAllFunds] = useState<Array<{ key: string; value: string }>>([]);
+  const [selectedFunds, setSelectedFunds] = useState<SelectedFund[]>([]);
+  const [isSelectingFunds, setIsSelectingFunds] = useState<boolean>(false);
+  const [isInitialLoadFunds, setIsInitialLoadFunds] = useState<boolean>(true);
+  const [searchFundQuery, setSearchFundQuery] = useState<string>('');
+  const [loadingFunds, setLoadingFunds] = useState<boolean>(false);
+
+  // Tüm verileri (döviz, altın, kripto, metaller) CurrencyRate formatına dönüştür
+  const allCurrencies: CurrencyRate[] = React.useMemo(() => {
+    const currencies: CurrencyRate[] = [
+      { code: 'TRY', name: 'Türk Lirası', rate: 1, buy: 1, sell: 1, change: 0, type: 'currency' }
+    ];
+
+    // Döviz kurları
+    Object.entries(exchangeRates).forEach(([code, currency]) => {
+      if (code !== 'TRY') {
+        currencies.push({
+          code: currency.code || code,
+          name: currency.name || code,
+          rate: currency.rate || 0,
+          buy: (currency as any).buy || currency.rate || 0,
+          sell: (currency as any).sell || currency.rate || 0,
+          change: currency.change || 0,
+          type: 'currency'
+        });
+      }
+    });
+
+    // Altın fiyatları
+    Object.entries(goldPrices).forEach(([code, gold]) => {
+      currencies.push({
+        code: gold.code || code,
+        name: gold.name || code,
+        rate: gold.rate || 0,
+        buy: (gold as any).buy || gold.rate || 0,
+        sell: (gold as any).sell || gold.rate || 0,
+        change: gold.change || 0,
+        type: 'gold'
+      });
+    });
+
+    // Kripto paralar
+    Object.entries(cryptoCurrencies).forEach(([code, crypto]) => {
+      currencies.push({
+        code: crypto.code || code,
+        name: crypto.name || code,
+        rate: crypto.rate || 0,
+        buy: (crypto as any).buy || crypto.rate || 0,
+        sell: (crypto as any).sell || crypto.rate || 0,
+        change: crypto.change || 0,
+        type: 'crypto'
+      });
+    });
+
+    // Değerli metaller (Platin, Paladyum)
+    Object.entries(preciousMetals).forEach(([code, metal]) => {
+      currencies.push({
+        code: metal.code || code,
+        name: metal.name || code,
+        rate: metal.rate || 0,
+        buy: (metal as any).buy || metal.rate || 0,
+        sell: (metal as any).sell || metal.rate || 0,
+        change: metal.change || 0,
+        type: 'metal'
+      });
+    });
+
+    return currencies;
+  }, [exchangeRates, goldPrices, cryptoCurrencies, preciousMetals]);
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Sayfa her açıldığında döviz kurları kontrolü yap (CurrencyConverter.tsx gibi)
+  // Backend akıllı zaman kontrolü yapıyor, gereksiz API çağrısı yapmıyor
+  useEffect(() => {
+    const loadRatesOnMount = async () => {
+      console.log("💱 Investments: Sayfa açıldı, döviz kurları kontrol ediliyor (akıllı kontrol ile)...");
+      // Backend akıllı kontrol yapıyor:
+      // - Eğer bugün için veri yoksa veya bir sonraki fetch saatine gelmişse → API'den çeker
+      // - Aksi halde Firestore'dan mevcut veriyi döndürür
+      await refreshRates();
+    };
+
+    loadRatesOnMount();
+  }, []); // Sadece component mount olduğunda çalışır (sayfa her açıldığında)
+
+  // Borsa verilerini yükle - Sayfa her açıldığında akıllı kontrol yapılır
+  // Backend akıllı zaman kontrolü yapıyor: gerekirse API'den çeker, değilse Firestore'dan döndürür
+  useEffect(() => {
+    const loadBorsaData = async () => {
+      try {
+        setLoadingBorsa(true);
+        console.log("📈 Investments: Sayfa açıldı, borsa verileri kontrol ediliyor (akıllı kontrol ile)...");
+        // Backend akıllı kontrol yapıyor:
+        // - Eğer bugün için veri yoksa veya bir sonraki fetch saatine gelmişse → API'den çeker
+        // - Aksi halde Firestore'dan mevcut veriyi döndürür
+        const response = await borsaAPI.getBorsaData();
+        
+        console.log("📈 Investments: Borsa API response alındı:", response);
+        
+        if (response?.success && response?.data?.stocks) {
+          const stocks: StockData[] = response.data.stocks.map((stock: any) => ({
+            code: stock.code,
+            name: stock.name,
+            last_price: stock.last_price || 0,
+            rate: stock.rate || 0,
+            volume: stock.volume || 0,
+            high: stock.high || 0,
+            low: stock.low || 0,
+            time: stock.time || '',
+            icon: stock.icon
+          }));
+          
+          setBorsaData(stocks);
+          console.log(`✅ Investments: Borsa verileri yüklendi (kaynak: ${response.source || 'Firestore'}):`, stocks.length, "adet");
+        } else {
+          console.warn("⚠️ Investments: Borsa response beklenen formatta değil:", response);
+        }
+      } catch (error) {
+        console.error("❌ Investments: Borsa verileri yüklenirken hata:", error);
+        setBorsaData([]); // Hata durumunda boş array set et
+      } finally {
+        setLoadingBorsa(false);
+      }
+    };
+
+    loadBorsaData();
+  }, []); // Sadece component mount olduğunda çalışır (sayfa her açıldığında)
+
+  // İlk yüklemede seçili hisseleri Firestore'dan yükle
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadSelectedHisse = async () => {
+      // Borsa verileri yüklenene kadar bekle
+      if (currentUser?.id && !loadingBorsa && borsaData.length > 0) {
+        // Firestore'dan seçili hisseleri yükle
+        const saved = await getSelectedHisse(currentUser.id);
+        
+        if (!isMounted) return;
+        
+        if (saved && saved.length > 0) {
+          // Firestore'dan gelen seçili hisseleri kullan
+          setSelectedHisse(saved);
+          console.log('✅ Seçili hisse senetleri yüklendi:', saved);
+        } else {
+          // Firestore'da yoksa, varsayılan olarak ilk 10 hisseyi seç
+          const defaultCodes = borsaData.slice(0, 10).map(s => s.code);
+          const initialSelected = defaultCodes.map((code, index) => ({ code, order: index }));
+          
+          if (initialSelected.length > 0 && isMounted) {
+            setSelectedHisse(initialSelected);
+            // İlk yüklemede Firestore'a kaydet
+            try {
+              await saveSelectedHisse(currentUser.id, initialSelected);
+              console.log('📝 Varsayılan seçili hisseler oluşturuldu ve kaydedildi:', initialSelected);
+            } catch (error) {
+              console.error('❌ Varsayılan hisseler kaydedilirken hata:', error);
+            }
+          }
+        }
+        
+        if (isMounted) {
+          setIsInitialLoad(false);
+        }
+      }
+    };
+
+    loadSelectedHisse();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser?.id, borsaData.length, loadingBorsa]);
+
+  // Seçili hisseler değiştiğinde Firestore'a kaydet (sıralama değişiklikleri için)
+  useEffect(() => {
+    // İlk yüklemede kaydetme (loadSelectedHisse zaten kaydediyor)
+    if (isInitialLoad) {
+      return;
+    }
+
+    const saveSelected = async () => {
+      if (currentUser?.id && selectedHisse.length >= 0) {
+        try {
+          await saveSelectedHisse(currentUser.id, selectedHisse);
+          console.log('💾 Seçili hisse senetleri kaydedildi:', selectedHisse);
+        } catch (error) {
+          console.error('❌ Seçili hisse senetleri kaydedilirken hata:', error);
+        }
+      }
+    };
+
+    // Debounce: 500ms bekle, sonra kaydet
+    const timeoutId = setTimeout(() => {
+      saveSelected();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [currentUser?.id, selectedHisse, isInitialLoad]);
+
+  // İlk yüklemede seçili currency'leri Firestore'dan yükle
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadSelectedCurrencies = async () => {
+      // exchangeRates, goldPrices, vb. yüklenene kadar bekle
+      const hasCurrencyData = Object.keys(exchangeRates).length > 0 || 
+                             Object.keys(goldPrices).length > 0 || 
+                             Object.keys(cryptoCurrencies).length > 0 || 
+                             Object.keys(preciousMetals).length > 0;
+      
+      if (currentUser?.id && hasCurrencyData && !loadingRates && allCurrencies.length > 1) {
+        // Firestore'dan seçili currency'leri yükle
+        const saved = await getSelectedCurrencies(currentUser.id);
+
+        if (!isMounted) return;
+
+        if (saved && saved.length > 0) {
+          // Firestore'dan gelen seçili currency'leri kullan
+          setSelectedCurrencies(saved);
+          console.log('✅ Seçili döviz kurları yüklendi:', saved);
+        } else {
+          // Firestore'da yoksa, varsayılan olarak popüler kurları seç (USD, EUR, GBP)
+          const defaultCodes = ['USD', 'EUR', 'GBP'];
+          const initialSelected = defaultCodes
+            .filter(code => allCurrencies.some(c => c.code === code))
+            .map((code, index) => ({ code, order: index }));
+
+          if (initialSelected.length > 0 && isMounted) {
+            setSelectedCurrencies(initialSelected);
+            // İlk yüklemede Firestore'a kaydet (isInitialLoadCurrencies flag'i ile)
+            try {
+              await saveSelectedCurrencies(currentUser.id, initialSelected);
+              console.log('📝 Varsayılan seçili kurlar oluşturuldu ve kaydedildi:', initialSelected);
+            } catch (error) {
+              console.error('❌ Varsayılan kurlar kaydedilirken hata:', error);
+            }
+          }
+        }
+
+        if (isMounted) {
+          setIsInitialLoadCurrencies(false);
+        }
+      }
+    };
+
+    loadSelectedCurrencies();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser?.id, allCurrencies.length, loadingRates, exchangeRates, goldPrices, cryptoCurrencies, preciousMetals]);
+
+  // Seçili currency'ler değiştiğinde Firestore'a kaydet (sıralama değişiklikleri için)
+  useEffect(() => {
+    // İlk yüklemede kaydetme (loadSelectedCurrencies zaten kaydediyor)
+    if (isInitialLoadCurrencies) {
+      return;
+    }
+
+    const saveSelected = async () => {
+      if (currentUser?.id && selectedCurrencies.length >= 0) {
+        try {
+          await saveSelectedCurrencies(currentUser.id, selectedCurrencies);
+          console.log('💾 Seçili döviz kurları kaydedildi:', selectedCurrencies);
+        } catch (error) {
+          console.error('❌ Seçili döviz kurları kaydedilirken hata:', error);
+        }
+      }
+    };
+
+    // Debounce: 500ms bekle, sonra kaydet
+    const timeoutId = setTimeout(() => {
+      saveSelected();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [currentUser?.id, selectedCurrencies, isInitialLoadCurrencies]);
+
+  // Funds verilerini yükle - Sayfa açıldığında ve modal açıldığında
+  useEffect(() => {
+    const loadFunds = async () => {
+      // Eğer zaten yüklendiyse tekrar yükleme
+      if (allFunds.length > 0) {
+        return;
+      }
+      
+      try {
+        setLoadingFunds(true);
+        console.log("💰 Funds verileri yükleniyor...");
+        const response = await fundsAPI.getFunds();
+        
+        console.log("💰 Funds API response alındı:", response);
+        
+        if (response?.success && response?.data?.funds) {
+          const fundsList = response.data.funds.map((fund: any) => ({
+            key: fund.key || fund.id,
+            value: fund.value || ''
+          }));
+          
+          setAllFunds(fundsList);
+          console.log("✅ Funds verileri yüklendi:", fundsList.length, "adet");
+        } else {
+          console.warn("⚠️ Funds response beklenen formatta değil:", response);
+        }
+      } catch (error) {
+        console.error("❌ Funds verileri yüklenirken hata:", error);
+        setAllFunds([]); // Hata durumunda boş array set et
+      } finally {
+        setLoadingFunds(false);
+      }
+    };
+
+    loadFunds();
+  }, []); // Sayfa açıldığında çalışır
+
+  // İlk yüklemede seçili funds'ları Firestore'dan yükle
+  // Funds verileri modal açıldığında yüklenecek, bu yüzden sadece Firestore'dan seçili funds'ları yükle
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadSelectedFunds = async () => {
+      // Funds verileri modal açıldığında yüklenecek, bu yüzden sadece seçili funds'ları yükle
+      if (currentUser?.id) {
+        // Firestore'dan seçili funds'ları yükle
+        const saved = await getSelectedFunds(currentUser.id);
+
+        if (!isMounted) return;
+
+        if (saved && saved.length > 0) {
+          // Firestore'dan gelen seçili funds'ları kullan
+          setSelectedFunds(saved);
+          console.log('✅ Seçili yatırım fonları yüklendi:', saved);
+        }
+
+        if (isMounted) {
+          setIsInitialLoadFunds(false);
+        }
+      }
+    };
+
+    loadSelectedFunds();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser?.id]); // Funds verileri modal açıldığında yüklenecek
+
+  // Seçili funds'lar değiştiğinde Firestore'a kaydet (sıralama değişiklikleri için)
+  useEffect(() => {
+    // İlk yüklemede kaydetme (loadSelectedFunds zaten kaydediyor)
+    if (isInitialLoadFunds || isSelectingFunds) {
+      return;
+    }
+
+    const saveSelected = async () => {
+      if (currentUser?.id && selectedFunds.length >= 0) {
+        try {
+          await saveSelectedFunds(currentUser.id, selectedFunds);
+          console.log('💾 Seçili yatırım fonları kaydedildi:', selectedFunds);
+        } catch (error) {
+          console.error('❌ Seçili yatırım fonları kaydedilirken hata:', error);
+        }
+      }
+    };
+
+    // Debounce: 500ms bekle, sonra kaydet
+    const timeoutId = setTimeout(() => {
+      saveSelected();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [currentUser?.id, selectedFunds, isInitialLoadFunds, isSelectingFunds]);
+
+  // Sıralanmış ve seçili kurları oluştur
+  const sortedCurrencies = React.useMemo(() => {
+    if (selectedCurrencies.length === 0) {
+      return [];
+    }
+
+    // selectedCurrencies'a göre sırala (order field'ına göre)
+    return selectedCurrencies
+      .sort((a, b) => a.order - b.order)
+      .map(selected => allCurrencies.find(c => c.code === selected.code))
+      .filter((c): c is CurrencyRate => c !== undefined && c.code !== 'TRY');
+  }, [allCurrencies, selectedCurrencies]);
+
+  // Sıralanmış ve seçili funds'ları oluştur
+  const sortedFunds = React.useMemo(() => {
+    if (selectedFunds.length === 0) {
+      return [];
+    }
+    
+    // selectedFunds'a göre sırala (order field'ına göre)
+    return selectedFunds
+      .sort((a, b) => a.order - b.order)
+      .map(selected => {
+        const fund = allFunds.find(f => f.key === selected.key);
+        return fund ? { key: fund.key, value: fund.value } : null;
+      })
+      .filter((f): f is { key: string; value: string } => f !== null);
+  }, [allFunds, selectedFunds]);
+
+  // Sıralanmış ve seçili hisseleri oluştur
+  const sortedStocks = React.useMemo(() => {
+    if (selectedHisse.length === 0) {
+      return [];
+    }
+    
+    // selectedHisse'a göre sırala (order field'ına göre)
+    return selectedHisse
+      .sort((a, b) => a.order - b.order)
+      .map(selected => borsaData.find(s => s.code === selected.code))
+      .filter((s): s is StockData => s !== undefined);
+  }, [borsaData, selectedHisse]);
+
+  // Currency drag end handler
+  const handleCurrencyDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setSelectedCurrencies((items) => {
+        const oldIndex = items.findIndex(item => item.code === active.id);
+        const newIndex = items.findIndex(item => item.code === over.id);
+        
+        if (oldIndex === -1 || newIndex === -1) return items;
+        
+        const reordered = arrayMove(items, oldIndex, newIndex);
+        // Order değerlerini güncelle
+        return reordered.map((item, index) => ({
+          ...item,
+          order: index
+        }));
+      });
+    }
+  };
+
+  // Funds drag end handler
+  const handleFundDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setSelectedFunds((items) => {
+        const oldIndex = items.findIndex(item => item.key === active.id);
+        const newIndex = items.findIndex(item => item.key === over.id);
+        
+        if (oldIndex === -1 || newIndex === -1) return items;
+        
+        const reordered = arrayMove(items, oldIndex, newIndex);
+        // Order değerlerini güncelle
+        return reordered.map((item, index) => ({
+          ...item,
+          order: index
+        }));
+      });
+    }
+  };
+
+  // Hisse drag end handler
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setSelectedHisse((items) => {
+        const oldIndex = items.findIndex(item => item.code === active.id);
+        const newIndex = items.findIndex(item => item.code === over.id);
+        
+        if (oldIndex === -1 || newIndex === -1) return items;
+        
+        const reordered = arrayMove(items, oldIndex, newIndex);
+        // Order değerlerini güncelle
+        return reordered.map((item, index) => ({
+          ...item,
+          order: index
+        }));
+      });
+    }
+  };
+
+  // Currency seç/çıkar (CurrencyConverter'daki gibi direkt Firestore'a kaydeder)
+  const toggleCurrencySelection = async (currencyCode: string) => {
+    if (!currentUser?.id) return;
+
+    const isSelected = selectedCurrencies.some(sc => sc.code === currencyCode);
+    
+    if (isSelected) {
+      // Çıkar
+      await removeSelectedCurrency(currentUser.id, currencyCode);
+      setSelectedCurrencies(prev => prev.filter(sc => sc.code !== currencyCode));
+    } else {
+      // Ekle (en sona)
+      const maxOrder = selectedCurrencies.length > 0 
+        ? Math.max(...selectedCurrencies.map(sc => sc.order)) 
+        : -1;
+      await addSelectedCurrency(currentUser.id, currencyCode, maxOrder + 1);
+      setSelectedCurrencies(prev => [...prev, { code: currencyCode, order: maxOrder + 1 }]);
+    }
+  };
+
+  // Hisse seç/çıkar (CurrencyConverter'daki gibi direkt Firestore'a kaydeder)
+  const toggleHisseSelection = async (hisseCode: string) => {
+    if (!currentUser?.id) return;
+
+    const isSelected = selectedHisse.some(sh => sh.code === hisseCode);
+    
+    if (isSelected) {
+      // Çıkar
+      await removeSelectedHisse(currentUser.id, hisseCode);
+      setSelectedHisse(prev => prev.filter(sh => sh.code !== hisseCode));
+    } else {
+      // Ekle (en sona)
+      const maxOrder = selectedHisse.length > 0 
+        ? Math.max(...selectedHisse.map(sh => sh.order)) 
+        : -1;
+      await addSelectedHisse(currentUser.id, hisseCode, maxOrder + 1);
+      setSelectedHisse(prev => [...prev, { code: hisseCode, order: maxOrder + 1 }]);
+    }
+  };
+
+  // Fund seç/çıkar (CurrencyConverter'daki gibi direkt Firestore'a kaydeder)
+  const toggleFundSelection = async (fundKey: string) => {
+    if (!currentUser?.id) return;
+
+    const isSelected = selectedFunds.some(sf => sf.key === fundKey);
+    
+    if (isSelected) {
+      // Çıkar
+      await removeSelectedFund(currentUser.id, fundKey);
+      setSelectedFunds(prev => prev.filter(sf => sf.key !== fundKey));
+    } else {
+      // Ekle (en sona)
+      const maxOrder = selectedFunds.length > 0 
+        ? Math.max(...selectedFunds.map(sf => sf.order)) 
+        : -1;
+      await addSelectedFund(currentUser.id, fundKey, maxOrder + 1);
+      setSelectedFunds(prev => [...prev, { key: fundKey, order: maxOrder + 1 }]);
+    }
+  };
 
   const totalValue = mockInvestments.reduce((sum, inv) => sum + inv.totalValue, 0);
   const totalGain = mockInvestments.reduce((sum, inv) => sum + inv.profitLoss, 0);
@@ -14,309 +953,19 @@ const Investments: React.FC = () => {
   const stockInvestments = mockInvestments.filter(inv => inv.type === 'stock');
   const cryptoInvestments = mockInvestments.filter(inv => inv.type === 'crypto');
 
-  const AddInvestmentModal = () => {
-    const [formData, setFormData] = useState({
-      symbol: '',
-      name: '',
-      type: 'stock' as 'stock' | 'crypto',
-      quantity: '',
-      price: '',
-      date: new Date().toISOString().split('T')[0]
-    });
-
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      // Add investment logic would go here
-      setShowAddModal(false);
-      setFormData({
-        symbol: '',
-        name: '',
-        type: 'stock',
-        quantity: '',
-        price: '',
-        date: new Date().toISOString().split('T')[0]
-      });
-    };
-
-    return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl border border-slate-200/50 dark:border-slate-700/50">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white">Yeni Yatırım Ekle</h3>
-              <p className="text-slate-500 dark:text-slate-400 mt-1">Portföyünüze yeni varlık ekleyin</p>
-            </div>
-            <button
-              onClick={() => setShowAddModal(false)}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-2xl font-bold"
-            >
-              ×
-            </button>
-          </div>
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
-                Yatırım Türü
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setFormData({...formData, type: 'stock'})}
-                  className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                    formData.type === 'stock'
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                      : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
-                  }`}
-                >
-                  <BarChart3 className="w-6 h-6 mx-auto mb-2" />
-                  <span className="font-semibold">Hisse Senedi</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({...formData, type: 'crypto'})}
-                  className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                    formData.type === 'crypto'
-                      ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
-                      : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
-                  }`}
-                >
-                  <TrendingUp className="w-6 h-6 mx-auto mb-2" />
-                  <span className="font-semibold">Kripto Para</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Sembol
-                </label>
-                <input
-                  type="text"
-                  value={formData.symbol}
-                  onChange={(e) => setFormData({...formData, symbol: e.target.value.toUpperCase()})}
-                  className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
-                  placeholder="AAPL"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Miktar
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.quantity}
-                  onChange={(e) => setFormData({...formData, quantity: e.target.value})}
-                  className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
-                  placeholder="10"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                Şirket/Varlık Adı
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
-                placeholder="Apple Inc."
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Alış Fiyatı (₺)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => setFormData({...formData, price: e.target.value})}
-                  className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
-                  placeholder="150.00"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Tarih
-                </label>
-                <input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({...formData, date: e.target.value})}
-                  className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="flex space-x-4 pt-4">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 px-6 py-4 border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 font-semibold"
-              >
-                İptal
-              </button>
-              <button
-                type="submit"
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold"
-              >
-                Ekle
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
+  // Currency selection change handler
+  const handleCurrencySelectionChange = (currencies: SelectedCurrency[]) => {
+    setSelectedCurrencies(currencies);
   };
 
-  const InvestmentDetailModal = () => {
-    if (!selectedInvestment) return null;
+  // Hisse selection change handler  
+  const handleHisseSelectionChange = (hisse: SelectedHisse[]) => {
+    setSelectedHisse(hisse);
+  };
 
-    return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-6xl max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200/50 dark:border-slate-700/50">
-          <div className="flex justify-between items-start mb-8">
-            <div>
-              <h3 className="text-3xl font-black text-slate-900 dark:text-white">
-                {selectedInvestment.symbol} - {selectedInvestment.name}
-              </h3>
-              <p className="text-slate-600 dark:text-slate-400 mt-2 text-lg font-medium">Yatırım Detayları ve İşlem Geçmişi</p>
-            </div>
-            <button
-              onClick={() => setSelectedInvestment(null)}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-3xl font-bold"
-            >
-              ×
-            </button>
-          </div>
-
-          {/* Investment Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-blue-200/50 dark:border-blue-700/30">
-              <p className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wide">Toplam Değer</p>
-              <p className="text-3xl font-black text-blue-700 dark:text-blue-300 mt-2">
-                ₺{selectedInvestment.totalValue.toLocaleString()}
-              </p>
-            </div>
-            <div className="bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-2xl p-6 border border-emerald-200/50 dark:border-emerald-700/30">
-              <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Ortalama Maliyet</p>
-              <p className="text-3xl font-black text-emerald-700 dark:text-emerald-300 mt-2">
-                ₺{selectedInvestment.averagePrice.toLocaleString()}
-              </p>
-            </div>
-            <div className="bg-gradient-to-br from-violet-50 to-purple-100 dark:from-violet-900/20 dark:to-purple-900/20 rounded-2xl p-6 border border-violet-200/50 dark:border-violet-700/30">
-              <p className="text-sm font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wide">Güncel Fiyat</p>
-              <p className="text-3xl font-black text-violet-700 dark:text-violet-300 mt-2">
-                ₺{selectedInvestment.currentPrice.toLocaleString()}
-              </p>
-            </div>
-            <div className={`rounded-2xl p-6 border ${
-              selectedInvestment.profitLoss >= 0 
-                ? 'bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200/50 dark:border-emerald-700/30'
-                : 'bg-gradient-to-br from-rose-50 to-red-100 dark:from-rose-900/20 dark:to-red-900/20 border-rose-200/50 dark:border-rose-700/30'
-            }`}>
-              <p className={`text-sm font-bold uppercase tracking-wide ${
-                selectedInvestment.profitLoss >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-              }`}>
-                Kazanç/Kayıp
-              </p>
-              <p className={`text-3xl font-black mt-2 ${
-                selectedInvestment.profitLoss >= 0 ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'
-              }`}>
-                {selectedInvestment.profitLoss >= 0 ? '+' : ''}₺{selectedInvestment.profitLoss.toLocaleString()}
-              </p>
-              <p className={`text-sm font-bold mt-1 ${
-                selectedInvestment.profitLoss >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-              }`}>
-                {selectedInvestment.profitLossPercentage >= 0 ? '+' : ''}{selectedInvestment.profitLossPercentage.toFixed(2)}%
-              </p>
-            </div>
-          </div>
-
-          {/* Transaction History */}
-          <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl p-6">
-            <h4 className="text-2xl font-black text-slate-900 dark:text-white mb-6 flex items-center">
-              <History className="w-6 h-6 mr-3" />
-              İşlem Geçmişi
-            </h4>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-100 dark:bg-slate-600 rounded-xl">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 dark:text-slate-300 uppercase tracking-wider rounded-tl-xl">
-                      Tarih
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 dark:text-slate-300 uppercase tracking-wider">
-                      İşlem Türü
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 dark:text-slate-300 uppercase tracking-wider">
-                      Miktar
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 dark:text-slate-300 uppercase tracking-wider">
-                      Birim Fiyat
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 dark:text-slate-300 uppercase tracking-wider">
-                      Toplam Tutar
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 dark:text-slate-300 uppercase tracking-wider rounded-tr-xl">
-                      Komisyon
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-600">
-                  {selectedInvestment.transactions.map((transaction, index) => (
-                    <tr key={transaction.id} className="hover:bg-slate-100 dark:hover:bg-slate-600/50 transition-colors">
-                      <td className="px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">
-                        {new Date(transaction.date).toLocaleDateString('tr-TR', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 text-xs font-bold rounded-full ${
-                          transaction.type === 'buy' 
-                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200'
-                            : 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200'
-                        }`}>
-                          {transaction.type === 'buy' ? 'ALIŞ' : 'SATIŞ'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">
-                        {transaction.quantity}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">
-                        ₺{transaction.price.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-black text-slate-900 dark:text-white">
-                        ₺{transaction.totalAmount.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-semibold text-slate-500 dark:text-slate-400">
-                        ₺{transaction.fees || 0}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  // Fund selection change handler
+  const handleFundSelectionChange = (funds: SelectedFund[]) => {
+    setSelectedFunds(funds);
   };
 
   return (
@@ -417,6 +1066,209 @@ const Investments: React.FC = () => {
           </div>
         </div>
 
+        {/* Currency Rates */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center">
+              <div className="flex-1">
+                <div className="flex items-center space-x-3">
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Sahip</h2>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                {loadingRates && (
+                  <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                )}
+                <button
+                  onClick={() => setIsSelectingCurrencies(true)}
+                  className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-all duration-200 text-sm"
+                  title="Döviz kurları seç"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Ekle</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleCurrencyDragEnd}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-6">
+              {loadingRates ? (
+                <div className="col-span-full flex justify-center items-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                  <span className="ml-3 text-gray-600 dark:text-gray-400">Kurlar yükleniyor...</span>
+                </div>
+              ) : sortedCurrencies.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">
+                    Henüz seçili döviz kuru yok. Lütfen "Ekle" butonuna tıklayarak görmek istediğiniz döviz kurlarını seçin.
+                  </p>
+                  <button
+                    onClick={() => setIsSelectingCurrencies(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                  >
+                    Döviz Kurları Seç
+                  </button>
+                </div>
+              ) : (
+                <SortableContext items={sortedCurrencies.map(c => c.code)} strategy={rectSortingStrategy}>
+                  {sortedCurrencies.map((currency) => (
+                    <SortableCurrencyCard
+                      key={currency.code}
+                      currency={currency}
+                      onRemove={toggleCurrencySelection}
+                    />
+                  ))}
+                </SortableContext>
+              )}
+            </div>
+          </DndContext>
+        </div>
+
+        {/* Funds Rates */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center">
+              <div className="flex-1">
+                <div className="flex items-center space-x-3">
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Takip Edilen Yatırım Fonları</h2>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                {loadingFunds && (
+                  <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                )}
+                <button
+                  onClick={() => setIsSelectingFunds(true)}
+                  className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-all duration-200 text-sm"
+                  title="Yatırım fonları seç"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Ekle</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleFundDragEnd}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-6">
+              {sortedFunds.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">
+                    Henüz seçili yatırım fonu yok. Lütfen "Ekle" butonuna tıklayarak görmek istediğiniz yatırım fonlarını seçin.
+                  </p>
+                  <button
+                    onClick={() => setIsSelectingFunds(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                  >
+                    Yatırım Fonları Seç
+                  </button>
+                </div>
+              ) : (
+                <SortableContext items={sortedFunds.map(f => f.key)} strategy={rectSortingStrategy}>
+                  {sortedFunds.map((fund) => (
+                    <SortableFundCard
+                      key={fund.key}
+                      fund={fund}
+                      onRemove={toggleFundSelection}
+                      onViewDetail={(code, name) => {
+                        setFundDetailModal({
+                          isOpen: true,
+                          fundCode: code,
+                          fundName: name
+                        });
+                      }}
+                    />
+                  ))}
+                </SortableContext>
+              )}
+            </div>
+          </DndContext>
+        </div>
+
+        {/* Borsa Verileri */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center">
+              <div className="flex-1">
+                <div className="flex items-center space-x-3">
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Güncel Borsa Verileri</h2>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                {loadingBorsa && (
+                  <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                )}
+                <button 
+                  onClick={() => setIsSelectingHisse(true)}
+                  className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-all duration-200 text-sm"
+                  title="Hisse senetleri seç"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Ekle</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-6">
+              {loadingBorsa && borsaData.length === 0 ? (
+                <div className="col-span-full flex justify-center items-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                  <span className="ml-3 text-gray-600 dark:text-gray-400">Borsa verileri yükleniyor...</span>
+                </div>
+              ) : sortedStocks.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">
+                    Henüz seçili hisse senedi yok. Lütfen "Ekle" butonuna tıklayarak görmek istediğiniz hisse senetlerini seçin.
+                  </p>
+                  <button
+                    onClick={() => setIsSelectingHisse(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                  >
+                    Hisse Senetleri Seç
+                  </button>
+                </div>
+              ) : (
+                <SortableContext items={sortedStocks.map(s => s.code)} strategy={rectSortingStrategy}>
+                  {sortedStocks.map((stock) => (
+                    <SortableStockCard 
+                      key={stock.code} 
+                      stock={stock}
+                      onRemove={toggleHisseSelection}
+                    />
+                  ))}
+                </SortableContext>
+              )}
+            </div>
+          </DndContext>
+        </div>
+
+        {/* Hisse Seçim Modal */}
+        <HisseSelectionModal
+          isOpen={isSelectingHisse}
+          onClose={() => {
+            setIsSelectingHisse(false);
+            setSearchHisseQuery('');
+          }}
+          borsaData={borsaData}
+          selectedHisse={selectedHisse}
+          onSelectionChange={handleHisseSelectionChange}
+          searchQuery={searchHisseQuery}
+          onSearchChange={setSearchHisseQuery}
+          toggleHisseSelection={toggleHisseSelection}
+        />
+
         {/* Investment Categories */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {/* Stocks */}
@@ -431,7 +1283,7 @@ const Investments: React.FC = () => {
               </span>
             </div>
             <div className="space-y-4">
-              {stockInvestments.map((investment) => (
+              {stockInvestments.map((investment, _index) => (
                 <div key={investment.id} className="flex items-center justify-between p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-2xl transition-all duration-300 hover:scale-102 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 group cursor-pointer">
                   <div className="flex items-center space-x-4">
                     <div className="p-4 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
@@ -619,8 +1471,59 @@ const Investments: React.FC = () => {
           </div>
         </div>
 
-        {selectedInvestment && <InvestmentDetailModal />}
-        {showAddModal && <AddInvestmentModal />}
+        {/* Currency Selection Modal */}
+        <CurrencySelectionModal
+          isOpen={isSelectingCurrencies}
+          onClose={() => {
+            setIsSelectingCurrencies(false);
+          }}
+          allCurrencies={allCurrencies}
+          selectedCurrencies={selectedCurrencies}
+          onSelectionChange={handleCurrencySelectionChange}
+          exchangeRates={exchangeRates as Record<string, CurrencyRate>}
+          goldPrices={goldPrices as Record<string, CurrencyRate>}
+          cryptoCurrencies={cryptoCurrencies as Record<string, CurrencyRate>}
+          preciousMetals={preciousMetals as Record<string, CurrencyRate>}
+          currentUserId={currentUser?.id}
+        />
+
+        {/* Funds Selection Modal */}
+        <FundsSelectionModal
+          isOpen={isSelectingFunds}
+          onClose={() => {
+            setIsSelectingFunds(false);
+            setSearchFundQuery('');
+          }}
+          allFunds={allFunds}
+          selectedFunds={selectedFunds}
+          onSelectionChange={handleFundSelectionChange}
+          searchQuery={searchFundQuery}
+          onSearchChange={setSearchFundQuery}
+          toggleFundSelection={toggleFundSelection}
+        />
+
+        {/* Investment Detail Modal */}
+        <InvestmentDetailModal
+          investment={selectedInvestment}
+          onClose={() => setSelectedInvestment(null)}
+        />
+
+        {/* Add Investment Modal */}
+        <AddInvestmentModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          allCurrencies={allCurrencies}
+          allFunds={allFunds}
+          allStocks={borsaData}
+        />
+
+        {/* Fund Detail Modal */}
+        <FundDetailModal
+          isOpen={fundDetailModal.isOpen}
+          onClose={() => setFundDetailModal({ isOpen: false, fundCode: '', fundName: '' })}
+          fundCode={fundDetailModal.fundCode}
+          fundName={fundDetailModal.fundName}
+        />
       </div>
     </div>
   );

@@ -340,15 +340,44 @@ npm install
 
 ### Firestore Güvenlik Kuralları
 
-Firebase Console > Firestore Database > Rules sekmesine gidin ve aşağıdaki kuralları ekleyin:
+**⚠️ ÖNEMLİ:** Firestore güvenlik kurallarını mutlaka güncelleyin! Aşağıdaki kuralları Firebase Console'da güncellemeden uygulama çalışmayacaktır.
+
+Firebase Console > Firestore Database > Rules sekmesine gidin ve aşağıdaki kuralları ekleyin/güncelleyin:
+
+**Not:** Eğer `currencies` collection'ı için izin hatası alıyorsanız, güvenlik kurallarını Firebase Console'da güncellemeniz gerekiyor.
 
 ```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Kullanıcı dokümanları - sadece kendi dokümanına erişebilir
+    
+    // ============================================
+    // ROOT LEVEL COLLECTIONS
+    // ============================================
+    
+    // Global döviz kurları - Tüm authenticated kullanıcılar okuyup yazabilir
+    // TCMB API'den güncelleme için gerekli
+    match /currencies/{currencyCode} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // Eski exchange_rates collection'ı (backward compatibility)
+    match /exchange_rates/{rateId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // ============================================
+    // USER-SPECIFIC COLLECTIONS
+    // ============================================
+    
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Kullanıcı dokümanı - Sadece kendi dokümanını okuyup yazabilir
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
       
       // Kullanıcının işlemleri
       match /transactions/{transactionId} {
@@ -359,7 +388,7 @@ service cloud.firestore {
       match /investments/{investmentId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
         
-        // Yatırım işlemleri
+        // Yatırım işlemleri (nested subcollection)
         match /transactions/{transactionId} {
           allow read, write: if request.auth != null && request.auth.uid == userId;
         }
@@ -374,12 +403,19 @@ service cloud.firestore {
       match /quickInvestments/{quickInvestmentId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
+      
+      // Seçili döviz kurları
+      match /selectedCurrency/{currencyCode} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
     
-    // Döviz kurları - herkes okuyabilir
-    match /exchange_rates/{rateId} {
-      allow read: if request.auth != null;
-      allow write: if false; // Sadece admin yazabilir
+    // ============================================
+    // DEFAULT RULE - Tüm diğer path'leri engelle
+    // ============================================
+    
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
@@ -813,15 +849,22 @@ users/
         - order: number
         - createdAt: timestamp
         - updatedAt: timestamp
+    
+    selectedCurrency/  (Kullanıcının seçtiği döviz kurları ve sıralaması)
+      {currencyCode}/
+        - code: string
+        - order: number (sıralama için)
 
-exchange_rates/
+currencies/  (users ile aynı seviyede - root level, global veri)
   {currencyCode}/
     - code: string
     - name: string
-    - rate: number
-    - change: number
+    - rate: number (TRY karşısındaki değer)
+    - change: number (yüzde değişim)
     - lastUpdated: timestamp
 ```
+
+**Not:** `currencies/` collection'ı `users/` ile aynı seviyededir (root level). Tüm kullanıcılar için ortak veridir ve TCMB API'den otomatik olarak güncellenir.
 
 ### Veri İzolasyonu
 

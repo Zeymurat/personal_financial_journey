@@ -3,7 +3,7 @@ import { Plus, Edit2, Zap, Trash2, GripVertical } from 'lucide-react';
 import { transactionAPI, quickTransactionAPI } from '../../services/apiService';
 import { Transaction, QuickTransaction } from '../../types';
 import { getExchangeRates } from '../../services/currencyService';
-import { altinkaynakAPI } from '../../services/apiService';
+import { tcmbAPI } from '../../services/apiService';
 import {
   DndContext,
   closestCenter,
@@ -139,25 +139,25 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onTransactionAdded }) => {
     }
   };
 
-  // Döviz kurlarını yükle ve TL karşılığını hesapla - Altınkaynak API kullan
+  // Döviz kurlarını yükle ve TL karşılığını hesapla - TCMB API kullan
   const calculateAmountInTRY = async (amount: number, currency: string): Promise<number> => {
     if (currency === 'TRY') {
       return amount;
     }
     
     try {
-      // Önce Altınkaynak API'sinden dene
+      // Önce TCMB API'sinden dene
       try {
-        const altinkaynakData = await altinkaynakAPI.getMain();
-        if (altinkaynakData?.success && altinkaynakData?.data?.exchange_rates) {
-          const rateData = altinkaynakData.data.exchange_rates[currency];
+        const tcmbData = await tcmbAPI.getMain();
+        if (tcmbData?.success && tcmbData?.data?.exchange_rates) {
+          const rateData = tcmbData.data.exchange_rates[currency];
           const rate = rateData?.rate || rateData?.buy || 0;
           if (rate && rate > 0) {
             return amount * rate;
           }
         }
-      } catch (altinkaynakError) {
-        console.warn('Altınkaynak API hatası, Firestore\'a fallback:', altinkaynakError);
+      } catch (tcmbError) {
+        console.warn('TCMB API hatası, Firestore\'a fallback:', tcmbError);
       }
       
       // Fallback: Firestore
