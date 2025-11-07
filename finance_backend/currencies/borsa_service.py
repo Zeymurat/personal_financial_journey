@@ -62,6 +62,21 @@ class BorsaService:
         """
         Yeni veri çekilmeli mi kontrol eder.
         
+        Mantık:
+        1. Bugün için veri yoksa:
+           - Saat >= 10:00 ise → Veri çek
+           - Saat < 10:00 ise → Veri çekme
+        
+        2. Bugün için veri varsa:
+           - Son çekim 10:00-13:30 arasındaysa:
+             * Saat >= 14:00 ise → Veri çek (13:30'u kaçırdık)
+             * Saat < 14:00 ise → Veri çekme
+           - Son çekim 13:30-17:00 arasındaysa:
+             * Saat >= 17:00 ise → Veri çek (17:00'ü kaçırdık)
+             * Saat < 17:00 ise → Veri çekme
+           - Son çekim 17:00'den sonraysa:
+             * Bugün için veri çekme (günün son verisi zaten çekilmiş)
+        
         Args:
             existing_fetch_time: Firestore'dan gelen fetch_time (örn: "2025-11-05 10:23:46")
         
@@ -71,104 +86,133 @@ class BorsaService:
         now = datetime.now()
         today = now.strftime('%Y-%m-%d')
         current_time = now.time()
+        current_minutes = current_time.hour * 60 + current_time.minute
+        
+        print(f"\n{'='*60}")
+        print(f"🔍 BORSA: Saat Mantığı Kontrolü")
+        print(f"{'='*60}")
+        print(f"📅 Bugün: {today}")
+        print(f"⏰ Şu anki saat: {current_time} ({current_minutes} dakika)")
+        print(f"📋 Fetch saatleri: 10:00 (600dk), 13:30 (810dk), 17:00 (1020dk)")
+        print(f"📋 Kontrol saatleri: 10:00, 14:00 (13:30'u kaçırdık mı?), 17:00")
+        print(f"📝 Son fetch: {existing_fetch_time or 'Yok'}")
         
         # Hafta sonu kontrolü
         if not self.is_weekday():
+            print(f"📅 Hafta sonu kontrolü: Hafta sonu, VERİ ÇEKİLMEYECEK")
+            print(f"{'='*60}\n")
             return False
         
-        # Eğer bugün için veri yoksa, saat uygunsa çek
-        if not existing_fetch_time:
-            return self.should_fetch_data()
+        # Fetch saatleri
+        FETCH_10_00 = 10 * 60  # 600 dakika
+        FETCH_13_30 = 13 * 60 + 30  # 810 dakika
+        FETCH_14_00 = 14 * 60  # 840 dakika
+        FETCH_17_00 = 17 * 60  # 1020 dakika
         
-        # Mevcut fetch_time'ı parse et
-        try:
-            # fetch_time formatı: "2025-11-05 10:23:46" veya "10:23:46"
-            if ' ' in existing_fetch_time:
-                fetch_datetime_str = existing_fetch_time.split(' ')[1]  # "10:23:46"
-            else:
-                fetch_datetime_str = existing_fetch_time  # "10:23:46"
-            
-            # Saat ve dakikayı al (saniyeyi atla)
-            time_parts = fetch_datetime_str.split(':')
-            fetch_hour = int(time_parts[0])
-            fetch_minute = int(time_parts[1]) if len(time_parts) > 1 else 0
-            fetch_time_obj = time(fetch_hour, fetch_minute)
-            
-            # Hangi fetch saatinde çekilmiş?
-            fetch_index = None
-            for i, ft in enumerate(FETCH_TIMES):
-                time_diff = abs(
-                    (fetch_time_obj.hour * 60 + fetch_time_obj.minute) - 
-                    (ft.hour * 60 + ft.minute)
-                )
-                if time_diff <= 5:  # 5 dakika tolerans
-                    fetch_index = i
-                    break
-            
-            # Eğer fetch_time belirtilen saatlerden birine uymuyorsa
-            if fetch_index is None:
-                fetch_minutes = fetch_time_obj.hour * 60 + fetch_time_obj.minute
-                current_minutes = current_time.hour * 60 + current_time.minute
-                first_fetch_minutes = FETCH_TIMES[0].hour * 60 + FETCH_TIMES[0].minute
-                
-                # Eğer son çekim ilk fetch saatinden önce yapılmışsa
-                # ve şu anki saat ilk fetch saatinden sonraysa → Yeni veri çek
-                if fetch_minutes < first_fetch_minutes:
-                    if current_minutes >= first_fetch_minutes - 5:  # 5 dakika önce başlayabilir
-                        return True
-                    else:
-                        return False
-                
-                # Eğer son çekim ilk fetch saatinden sonra ama FETCH_TIMES'ten hiçbirine uymuyorsa
-                # (örneğin 11:15, 11:59 gibi bir saatte çekilmişse)
-                # Bir sonraki fetch saatini bul ve kontrol et
-                
-                # Hangi fetch saatlerinden sonra çekilmiş?
-                next_fetch_index = None
-                for i, ft in enumerate(FETCH_TIMES):
-                    fetch_time_minutes = ft.hour * 60 + ft.minute
-                    if fetch_minutes < fetch_time_minutes:
-                        # Bu fetch saatinden önce çekilmiş, yani bir önceki fetch saati geçmiş
-                        next_fetch_index = i
-                        break
-                
-                if next_fetch_index is not None:
-                    # Bir sonraki fetch saati bulundu
-                    next_fetch_time = FETCH_TIMES[next_fetch_index]
-                    next_fetch_minutes = next_fetch_time.hour * 60 + next_fetch_time.minute
-                    
-                    # Şu anki saat bir sonraki fetch saatine gelmiş mi?
-                    if current_minutes >= next_fetch_minutes - 5:  # 5 dakika önce başlayabilir
-                        return True
-                    else:
-                        return False
+        # Mevcut fetch_time'ı parse et ve bugünün verisi olup olmadığını kontrol et
+        fetch_date = None
+        fetch_time_minutes = None
+        
+        if existing_fetch_time:
+            try:
+                # fetch_time formatı: "2025-11-05 10:23:46" veya "10:23:46"
+                if ' ' in existing_fetch_time:
+                    fetch_date_str = existing_fetch_time.split(' ')[0]  # "2025-11-05"
+                    fetch_datetime_str = existing_fetch_time.split(' ')[1]  # "10:23:46"
                 else:
-                    # Son fetch saatinden sonra çekilmiş (17:00'den sonra)
-                    # Bugün için yeni veri çekme
-                    return False
-            
-            # Bir sonraki fetch saatine gelmiş mi?
-            # Eğer son fetch 10:00'da yapıldıysa ve şimdi 13:30'a gelmişse → True
-            # Eğer son fetch 13:30'da yapıldıysa ve şimdi 17:00'a gelmişse → True
-            # Eğer son fetch 17:00'da yapıldıysa → False (bugün için son)
-            
-            if fetch_index < len(FETCH_TIMES) - 1:
-                # Bir sonraki fetch saati var
-                next_fetch_time = FETCH_TIMES[fetch_index + 1]
-                current_minutes = current_time.hour * 60 + current_time.minute
-                next_fetch_minutes = next_fetch_time.hour * 60 + next_fetch_time.minute
+                    fetch_date_str = None
+                    fetch_datetime_str = existing_fetch_time  # "10:23:46"
                 
-                # Şu anki saat bir sonraki fetch saatine gelmiş mi?
-                if current_minutes >= next_fetch_minutes - 5:  # 5 dakika önce başlayabilir
-                    return True
+                # Saat ve dakikayı parse et
+                time_parts = fetch_datetime_str.split(':')
+                fetch_hour = int(time_parts[0])
+                fetch_minute = int(time_parts[1]) if len(time_parts) > 1 else 0
+                fetch_time_minutes = fetch_hour * 60 + fetch_minute
+                
+                # Eğer tarih bilgisi varsa, bugünün verisi olup olmadığını kontrol et
+                if fetch_date_str:
+                    fetch_date = fetch_date_str
+            except Exception as e:
+                logger.warning(f"fetch_time parse hatası: {e}")
+                existing_fetch_time = None
+        
+        # Durum 1: Bugün için veri yok
+        if not existing_fetch_time or (fetch_date and fetch_date != today):
+            print(f"📊 DURUM 1: Bugün için veri YOK")
+            print(f"   - Son fetch tarihi: {fetch_date or 'Yok'}")
+            print(f"   - Bugün: {today}")
+            print(f"   - Mantık: Saat >= 10:00 ise → Veri çek")
+            print(f"   - Kontrol: {current_minutes}dk >= {FETCH_10_00}dk?")
             
-            # Son fetch saatindeyse (17:00), bugün için yeni veri çekme
+            # Saat >= 10:00 ise → Veri çek
+            if current_minutes >= FETCH_10_00:
+                print(f"   ✅ SONUÇ: Saat 10:00'u geçtik ({current_time}), VERİ ÇEKİLECEK")
+                print(f"{'='*60}\n")
+                return True
+            else:
+                print(f"   ❌ SONUÇ: Saat 10:00'a henüz gelmedik ({current_time}), VERİ ÇEKİLMEYECEK")
+                print(f"{'='*60}\n")
+                return False
+        
+        # Durum 2: Bugün için veri var
+        if fetch_time_minutes is None:
+            # Parse edilemedi, güvenli tarafta kal
+            print(f"📊 DURUM 2: Bugün için veri VAR ama parse edilemedi")
+            print(f"   ❌ SONUÇ: Parse hatası, VERİ ÇEKİLMEYECEK")
+            print(f"{'='*60}\n")
             return False
+        
+        print(f"📊 DURUM 2: Bugün için veri VAR")
+        print(f"   - Son çekim saati: {fetch_time_minutes} dakika ({fetch_time_minutes // 60}:{fetch_time_minutes % 60:02d})")
+        print(f"   - Şu anki saat: {current_minutes} dakika ({current_time})")
+        
+        # Son çekim saati hangi aralıkta?
+        if FETCH_10_00 <= fetch_time_minutes < FETCH_13_30:
+            # Son çekim 10:00-13:30 arasındaysa
+            print(f"   - Son çekim ARALIĞI: 10:00-13:30 arasında")
+            print(f"   - Mantık: Saat >= 14:00 ise → Veri çek (13:30'u kaçırdık mı?)")
+            print(f"   - Kontrol: {current_minutes}dk >= {FETCH_14_00}dk?")
             
-        except (ValueError, IndexError) as e:
-            # Parse hatası, güvenli tarafta kal ve yeni veri çek
-            logger.warning(f"fetch_time parse hatası: {e}, yeni veri çekilecek")
-            return self.should_fetch_data()
+            # Saat >= 14:00 ise → Veri çek (13:30'u kaçırdık)
+            if current_minutes >= FETCH_14_00:
+                print(f"   ✅ SONUÇ: Saat 14:00'u geçtik ({current_time}), 13:30'u kaçırdık, VERİ ÇEKİLECEK")
+                print(f"{'='*60}\n")
+                return True
+            else:
+                print(f"   ❌ SONUÇ: Saat 14:00'a henüz gelmedik ({current_time}), VERİ ÇEKİLMEYECEK")
+                print(f"{'='*60}\n")
+                return False
+        
+        elif FETCH_13_30 <= fetch_time_minutes < FETCH_17_00:
+            # Son çekim 13:30-17:00 arasındaysa
+            print(f"   - Son çekim ARALIĞI: 13:30-17:00 arasında")
+            print(f"   - Mantık: Saat >= 17:00 ise → Veri çek (17:00'ü kaçırdık mı?)")
+            print(f"   - Kontrol: {current_minutes}dk >= {FETCH_17_00}dk?")
+            
+            # Saat >= 17:00 ise → Veri çek (17:00'ü kaçırdık)
+            if current_minutes >= FETCH_17_00:
+                print(f"   ✅ SONUÇ: Saat 17:00'u geçtik ({current_time}), VERİ ÇEKİLECEK")
+                print(f"{'='*60}\n")
+                return True
+            else:
+                print(f"   ❌ SONUÇ: Saat 17:00'a henüz gelmedik ({current_time}), VERİ ÇEKİLMEYECEK")
+                print(f"{'='*60}\n")
+                return False
+        
+        elif fetch_time_minutes >= FETCH_17_00:
+            # Son çekim 17:00'den sonraysa
+            print(f"   - Son çekim ARALIĞI: 17:00'den sonra")
+            print(f"   - Mantık: Günün son verisi zaten çekilmiş")
+            print(f"   ❌ SONUÇ: Günün son verisi zaten çekilmiş, VERİ ÇEKİLMEYECEK")
+            print(f"{'='*60}\n")
+            return False
+        
+        else:
+            # Son çekim 10:00'dan önceyse (normalde olmaz ama güvenlik için)
+            print(f"   - Son çekim ARALIĞI: 10:00'dan önce (beklenmedik)")
+            print(f"   ✅ SONUÇ: Beklenmedik durum, VERİ ÇEKİLECEK")
+            print(f"{'='*60}\n")
+            return True
     
     def is_weekday(self) -> bool:
         """

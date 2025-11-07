@@ -344,31 +344,13 @@ export const tcmbAPI = {
 
 // Borsa API'leri
 export const borsaAPI = {
-  // Borsa verilerini getir (akıllı kontrol ile - tetikleme)
-  // Backend akıllı zaman kontrolü yapar: gerekirse API'den çeker, değilse Firestore'dan döndürür
+  // Borsa verilerini getir (akıllı kontrol ile)
+  // Backend akıllı zaman kontrolü yapar: gerekirse API'den çeker, değilse cache'den döndürür
+  // borsa/list endpoint'i zaten akıllı kontrol yapıyor, ayrı trigger çağrısına gerek yok
   async getBorsaData(date?: string) {
-    console.log("📈 Borsa API - GetBorsaData çağrılıyor (akıllı kontrol ile)...");
+    console.log("📈 Borsa API - GetBorsaData çağrılıyor...");
     
-    // Önce akıllı kontrolü tetikle (gerekirse API'den çeker)
-    const triggerUrl = `${API_BASE_URL}/currencies/borsa/`;
-    try {
-      const triggerResponse = await fetch(triggerUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getHeaders()
-        }
-      });
-      
-      if (triggerResponse.ok) {
-        const triggerData = await triggerResponse.json();
-        console.log("📈 Borsa akıllı kontrol tetiklendi:", triggerData.source || 'API');
-      }
-    } catch (error) {
-      console.warn("⚠️ Borsa akıllı kontrol tetiklenirken hata:", error);
-    }
-    
-    // Sonra verileri Firestore'dan oku
+    // borsa/list endpoint'i akıllı kontrol yapıyor ve veriyi döndürüyor
     const url = date 
       ? `${API_BASE_URL}/currencies/borsa/list/?date=${date}`
       : `${API_BASE_URL}/currencies/borsa/list/`;
@@ -381,8 +363,6 @@ export const borsaAPI = {
       }
     });
     
-    console.log("📈 Borsa API Response Status:", response.status);
-    
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error("❌ Borsa API Hatası:", errorData);
@@ -390,7 +370,6 @@ export const borsaAPI = {
     }
     
     const data = await response.json();
-    console.log("✅ Borsa API Başarılı - Veri çekildi:", data);
     return data;
   }
 };

@@ -376,8 +376,7 @@ const Investments: React.FC = () => {
     goldPrices,
     cryptoCurrencies,
     preciousMetals,
-    loadingRates,
-    refreshRates
+    loadingRates
   } = useFinance();
   
   const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);
@@ -479,18 +478,8 @@ const Investments: React.FC = () => {
   );
 
   // Sayfa her açıldığında döviz kurları kontrolü yap (CurrencyConverter.tsx gibi)
-  // Backend akıllı zaman kontrolü yapıyor, gereksiz API çağrısı yapmıyor
-  useEffect(() => {
-    const loadRatesOnMount = async () => {
-      console.log("💱 Investments: Sayfa açıldı, döviz kurları kontrol ediliyor (akıllı kontrol ile)...");
-      // Backend akıllı kontrol yapıyor:
-      // - Eğer bugün için veri yoksa veya bir sonraki fetch saatine gelmişse → API'den çeker
-      // - Aksi halde Firestore'dan mevcut veriyi döndürür
-      await refreshRates();
-    };
-
-    loadRatesOnMount();
-  }, []); // Sadece component mount olduğunda çalışır (sayfa her açıldığında)
+  // Döviz kurları FinanceContext tarafından yükleniyor (login olduğunda)
+  // Burada tekrar çağırmaya gerek yok, gereksiz API çağrısını önlemek için kaldırıldı
 
   // Borsa verilerini yükle - Sayfa her açıldığında akıllı kontrol yapılır
   // Backend akıllı zaman kontrolü yapıyor: gerekirse API'den çeker, değilse Firestore'dan döndürür
@@ -1072,7 +1061,7 @@ const Investments: React.FC = () => {
             <div className="flex justify-between items-center">
               <div className="flex-1">
                 <div className="flex items-center space-x-3">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Sahip</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Portföydeki Döviz Kurları</h2>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -1134,7 +1123,7 @@ const Investments: React.FC = () => {
             <div className="flex justify-between items-center">
               <div className="flex-1">
                 <div className="flex items-center space-x-3">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Takip Edilen Yatırım Fonları</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Portföydeki Yatırım Fonları</h2>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -1198,7 +1187,7 @@ const Investments: React.FC = () => {
             <div className="flex justify-between items-center">
               <div className="flex-1">
                 <div className="flex items-center space-x-3">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Güncel Borsa Verileri</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Portföydeki Hisse Senetleri</h2>
                 </div>
               </div>
               <div className="flex items-center space-x-3">

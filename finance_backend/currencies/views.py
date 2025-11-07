@@ -14,11 +14,16 @@ import json
 import os
 from pathlib import Path
 import requests
+import threading
 
 from .tcmb_service import get_tcmb_service
 from .borsa_service import get_borsa_service
 
 logger = logging.getLogger(__name__)
+
+# Borsa veri çekme için lock (aynı anda 2 istek atılmasını engellemek için)
+_borsa_fetch_lock = threading.Lock()
+_borsa_fetching = False
 
 
 # ============================================================================
@@ -54,9 +59,12 @@ def get_json_file_path(filename: str) -> str:
     return file_path
 
 
-def read_currencies_from_file() -> dict:
+def read_currencies_from_file(date: str = None) -> dict:
     """
     currencies.json dosyasından döviz kurlarını okur.
+    
+    Args:
+        date: Tarih (YYYY-MM-DD formatında). None ise bugünün tarihi kullanılır.
     
     Returns:
         {
@@ -65,50 +73,51 @@ def read_currencies_from_file() -> dict:
             'crypto_currencies': {...},
             'precious_metals': {...},
             'metadata': {...}
-        }
+        } veya None
     """
+    if date is None:
+        date = datetime.now().strftime('%Y-%m-%d')
+    
     file_path = get_json_file_path('currencies.json')
     
     if not os.path.exists(file_path):
-        print(f"⚠️ currencies.json dosyası bulunamadı: {file_path}")
-        return {
-            'exchange_rates': {},
-            'gold_prices': {},
-            'crypto_currencies': {},
-            'precious_metals': {},
-            'metadata': {}
-        }
+        return None
     
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        print(f"✅ currencies.json dosyası okundu: {file_path}")
-        return data
+        # Eski format kontrolü (direkt veri yapısı)
+        if 'exchange_rates' in data or 'metadata' in data:
+            # Eski format: direkt veri yapısı
+            # Bugünün verisi olarak kabul et
+            today = datetime.now().strftime('%Y-%m-%d')
+            if date == today:
+                return data
+            else:
+                return None
+        
+        # Yeni format: tarih bazlı
+        if isinstance(data, dict):
+            if date in data:
+                return data[date]
+            else:
+                return None
+        else:
+            return None
     except json.JSONDecodeError as e:
         print(f"❌ currencies.json parse hatası: {e}")
-        return {
-            'exchange_rates': {},
-            'gold_prices': {},
-            'crypto_currencies': {},
-            'precious_metals': {},
-            'metadata': {}
-        }
+        return None
     except Exception as e:
         print(f"❌ currencies.json okuma hatası: {e}")
-        return {
-            'exchange_rates': {},
-            'gold_prices': {},
-            'crypto_currencies': {},
-            'precious_metals': {},
-            'metadata': {}
-        }
+        return None
 
 
-def write_currencies_to_file(data: dict) -> bool:
+def write_currencies_to_file(data: dict, date: str = None) -> bool:
     """
     Döviz kurlarını currencies.json dosyasına yazar.
     funds.json ile TAM AYNI dizine yazar.
+    Borsa gibi tarih bazlı yapı kullanır.
     
     Args:
         data: {
@@ -118,10 +127,14 @@ def write_currencies_to_file(data: dict) -> bool:
             'precious_metals': {...},
             'metadata': {...}
         }
+        date: Tarih (YYYY-MM-DD formatında). None ise bugünün tarihi kullanılır.
     
     Returns:
         True if successful, False otherwise
     """
+    if date is None:
+        date = datetime.now().strftime('%Y-%m-%d')
+    
     file_path = get_json_file_path('currencies.json')
     
     # funds.json'ın dizinini kullan (zaten var olmalı)
@@ -129,11 +142,41 @@ def write_currencies_to_file(data: dict) -> bool:
     if file_dir and not os.path.exists(file_dir):
         os.makedirs(file_dir, exist_ok=True)
     
+    # Mevcut dosyayı oku (varsa)
+    existing_data = {}
+    if os.path.exists(file_path):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                existing_data = json.load(f)
+        except:
+            existing_data = {}
+    
+    # Yeni veriyi ekle/güncelle
+    if not isinstance(existing_data, dict):
+        existing_data = {}
+    
+    today = datetime.now().strftime('%Y-%m-%d')
+    
+    # Eğer bugünün verisi yazılıyorsa, eski tarihleri temizle (sadece bugünü tut)
+    if date == today:
+        # Sadece bugünün verisini ve metadata'yı tut
+        existing_data = {
+            date: data,
+            'metadata': {
+                'fetch_time': data.get('metadata', {}).get('fetch_time'),
+                'date': date,
+                'last_updated': datetime.now().isoformat()
+            }
+        }
+    else:
+        # Geçmiş tarih için ekle (ama metadata'yı güncelleme)
+        existing_data[date] = data
+    
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+            json.dump(existing_data, f, ensure_ascii=False, indent=2)
         
-        print(f"✅ currencies.json dosyasına yazıldı: {file_path} (funds.json ile aynı dizinde: {os.path.dirname(file_path)})")
+        print(f"💾 currencies.json dosyası güncellendi")
         return True
     except Exception as e:
         print(f"❌ currencies.json yazma hatası: {e}")
@@ -217,13 +260,27 @@ def write_borsa_to_file(borsa_data: dict, date: str = None) -> bool:
     if not isinstance(existing_data, dict):
         existing_data = {}
     
-    existing_data[date] = borsa_data
+    today = datetime.now().strftime('%Y-%m-%d')
+    
+    # Eğer bugünün verisi yazılıyorsa, eski tarihleri temizle (sadece bugünü tut)
+    if date == today:
+        # Sadece bugünün verisini ve metadata'yı tut
+        existing_data = {
+            date: borsa_data,
+            'metadata': {
+                'fetch_time': borsa_data.get('fetch_time'),
+                'date': date,
+                'last_updated': datetime.now().isoformat()
+            }
+        }
+    else:
+        # Geçmiş tarih için ekle (ama metadata'yı güncelleme)
+        existing_data[date] = borsa_data
     
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, ensure_ascii=False, indent=2)
         
-        print(f"✅ borsa.json dosyasına {date} tarihli veri yazıldı: {file_path} (funds.json ile aynı dizinde: {os.path.dirname(file_path)})")
         return True
     except Exception as e:
         print(f"❌ borsa.json yazma hatası: {e}")
@@ -711,72 +768,63 @@ class GetMainDataView(APIView):
         - Aksi halde Firestore'dan mevcut veriyi döndürür
         """
         try:
-            print("\n" + "="*60)
-            print("🌐 API Request: /api/currencies/getmain/")
-            print("="*60)
-            
-            print("🔧 Service başlatılıyor...")
             service = get_tcmb_service()
             today = datetime.now().strftime('%Y-%m-%d')
             current_time = datetime.now().strftime('%H:%M')
-            print(f"✅ Service hazır. Tarih: {today}, Saat: {current_time}")
+            
+            print(f"\n{'='*60}")
+            print(f"🌐 DÖVİZ: API İsteği")
+            print(f"{'='*60}")
+            print(f"📅 Bugün: {today}, ⏰ Saat: {current_time}")
             
             # Local dosyadan bugünün verisini kontrol et
             existing_fetch_time = None
             file_exists = False
             try:
-                print("📂 Local dosyadan metadata kontrol ediliyor...")
                 file_path = get_json_file_path('currencies.json')
                 file_exists = os.path.exists(file_path)
                 
                 if file_exists:
-                    file_data = read_currencies_from_file()
-                    metadata = file_data.get('metadata', {})
+                    metadata = get_currencies_metadata_from_file()
                     if metadata and metadata.get('fetch_time'):
                         existing_fetch_time = metadata.get('fetch_time')
-                        print(f"📂 Local dosyada bugünün metadata verisi var. fetch_time: {existing_fetch_time}")
+                        print(f"📂 Mevcut veri: fetch_time={existing_fetch_time}")
                     else:
-                        print("📂 Local dosyada metadata bulunamadı")
+                        print(f"📂 Mevcut veri: Metadata yok")
                 else:
-                    print(f"📂 currencies.json dosyası bulunamadı (ilk kez çalıştırılıyor): {file_path}")
+                    print(f"📂 Mevcut veri: Dosya yok (ilk kez)")
             except Exception as e:
-                print(f"⚠️ Local dosya kontrol hatası (devam ediliyor): {e}")
-                import traceback
-                print(f"⚠️ Hata detayı: {traceback.format_exc()}")
+                print(f"⚠️ Dosya kontrol hatası: {e}")
             
             # Yeni veri çekilmeli mi?
-            print(f"🔍 Akıllı zaman kontrolü yapılıyor...")
-            print(f"   - Mevcut saat: {current_time}")
-            print(f"   - Dosya var mı: {file_exists}")
-            print(f"   - Son çekilen veri: {existing_fetch_time or 'Yok'}")
-            
-            # Eğer dosya yoksa, ilk kez çalıştırılıyor demektir - her zaman API'den çek
             if not file_exists:
-                print("   ⚠️ Dosya yok, ilk kez çalıştırılıyor - API'den çekilecek")
                 should_fetch = True
+                print(f"📂 DÖVİZ: Dosya yok, yeni veri çekilecek")
             else:
                 try:
                     should_fetch = service.should_fetch_new_data(existing_fetch_time)
-                    print(f"   - Sonuç: {'✅ YENİ VERİ ÇEKİLECEK' if should_fetch else '⏰ MEVCUT VERİ KULLANILACAK'}")
                 except Exception as e:
-                    print(f"❌ should_fetch_new_data hatası: {e}")
-                    import traceback
-                    print(f"❌ Hata detayı: {traceback.format_exc()}")
-                    # Hata durumunda mevcut veriyi kullan
+                    print(f"❌ DÖVİZ: should_fetch_new_data hatası: {e}")
                     should_fetch = False
             
             if not should_fetch:
-                print(f"⏰ Yeni veri çekilmeyecek. Şu anki saat: {current_time}")
-                if existing_fetch_time:
-                    print(f"✅ Mevcut veri kullanılacak (fetch_time: {existing_fetch_time})")
-                else:
-                    print("⚠️ Bugün için veri yok, ancak saat uygun değil")
-                print("="*60 + "\n")
+                print(f"⏰ DÖVİZ: Mevcut veri kullanılacak (saat: {current_time}, son fetch: {existing_fetch_time or 'Yok'})")
+                print(f"{'='*60}\n")
                 
                 # Local dosyadan mevcut veriyi döndür
                 try:
-                    print(f"📚 Local dosyadan currencies okunuyor...")
-                    file_data = read_currencies_from_file()
+                    file_data = read_currencies_from_file(today)
+                    
+                    # Bugünün verisi yoksa, dünün verisini dene
+                    if not file_data:
+                        from datetime import timedelta
+                        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+                        print(f"📅 DÖVİZ: Bugünün verisi yok, dünün verisi deneniyor ({yesterday})")
+                        file_data = read_currencies_from_file(yesterday)
+                        if file_data:
+                            print(f"✅ DÖVİZ: Dünün verisi bulundu")
+                        else:
+                            raise Exception("Local dosyada veri yok, API'den çekilecek")
                     
                     exchange_rates = file_data.get('exchange_rates', {})
                     gold_prices = file_data.get('gold_prices', {})
@@ -784,8 +832,11 @@ class GetMainDataView(APIView):
                     precious_metals = file_data.get('precious_metals', {})
                     metadata = file_data.get('metadata', {})
                     
-                    print(f"✅ Local dosyadan okundu: {len(exchange_rates)} döviz, {len(gold_prices)} altın, {len(crypto_currencies)} kripto, {len(precious_metals)} metal")
+                    # Eğer veri yoksa veya boşsa, API'den çekmeyi dene
+                    if not exchange_rates and not gold_prices and not crypto_currencies:
+                        raise Exception("Local dosyada veri yok, API'den çekilecek")
                     
+                    # Veri varsa, döndür
                     date = metadata.get('date', today)
                     date_en = metadata.get('date_en', '')
                     
@@ -802,40 +853,89 @@ class GetMainDataView(APIView):
                     response_data = {
                         "success": True,
                         "data": formatted_data,
-                        "date": today,
+                        "date": date,
                         "source": "local_file",
                         "cached": True,
-                        "message": "Mevcut veri kullanılıyor"
+                        "message": "Mevcut veri kullanılıyor" if date == today else f"Bugünün verisi henüz yok, dünün verisi gösteriliyor ({date})",
+                        "warning": None if date == today else f"Bugünün verisi henüz yok, dünün verisi gösteriliyor ({date})"
                     }
-                    print(f"✅ GetMainDataView: Response döndürülüyor (Local File) - {len(exchange_rates)} döviz, {len(gold_prices)} altın, {len(crypto_currencies)} kripto, {len(precious_metals)} metal")
-                    print("="*60 + "\n")
+                    print(f"✅ DÖVİZ: Mevcut veri döndürülüyor ({len(exchange_rates)} döviz, {len(gold_prices)} altın, {len(crypto_currencies)} kripto, {len(precious_metals)} metal)")
+                    print(f"{'='*60}\n")
                     return Response(response_data, status=status.HTTP_200_OK)
                 except Exception as e:
                     print(f"⚠️ Local dosyadan okuma hatası: {e}")
                     import traceback
                     print(f"⚠️ Hata detayı: {traceback.format_exc()}")
                 
-                # Local dosyadan okunamadıysa, API'den çek
-                print("📞 Local dosyadan veri alınamadı, API'den çekiliyor...")
+                # Local dosyadan okunamadıysa veya should_fetch True ise, API'den çek
+                if should_fetch:
+                    print(f"📞 DÖVİZ: Local dosyadan veri alınamadı veya bugünün verisi yok, API'den çekiliyor...")
+                else:
+                    print(f"📞 DÖVİZ: Local dosyadan veri alınamadı, API'den çekiliyor...")
             
-            print(f"✅ Yeni veri çekilecek. Şu anki saat: {current_time}")
-            if existing_fetch_time:
-                print(f"   Son çekilen veri: {existing_fetch_time}")
-            print("📞 Finans API servisi çağrılıyor...")
+            if should_fetch:
+                print(f"🔄 DÖVİZ: Yeni veri çekilecek (saat: {current_time}, son fetch: {existing_fetch_time or 'Yok'})")
+                print(f"📞 DÖVİZ: Finans API servisi çağrılıyor...")
             
             # API'den veri çek
             try:
                 data = service.get_formatted_rates()
-                print(f"📊 API'den veri alındı: {data is not None}")
+                if data:
+                    print(f"✅ DÖVİZ: API'den veri alındı")
+                else:
+                    print(f"⚠️ DÖVİZ: API'den veri alınamadı (None döndü)")
             except Exception as api_error:
-                print(f"❌ API çağrısı hatası: {api_error}")
-                import traceback
-                print(f"❌ API hata detayı: {traceback.format_exc()}")
+                print(f"❌ DÖVİZ: API hatası: {api_error}")
                 data = None
             
             if data is None:
-                print("❌ Finans API servisinden veri alınamadı")
-                print("="*60 + "\n")
+                print(f"❌ DÖVİZ: Veri alınamadı, mevcut veri kontrol ediliyor...")
+                
+                # API'den veri alınamadıysa, mevcut veriyi döndür
+                try:
+                    file_data = read_currencies_from_file(today)
+                    if not file_data:
+                        from datetime import timedelta
+                        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+                        file_data = read_currencies_from_file(yesterday)
+                    
+                    if file_data:
+                        exchange_rates = file_data.get('exchange_rates', {})
+                        gold_prices = file_data.get('gold_prices', {})
+                        crypto_currencies = file_data.get('crypto_currencies', {})
+                        precious_metals = file_data.get('precious_metals', {})
+                        metadata = file_data.get('metadata', {})
+                        
+                        if exchange_rates or gold_prices or crypto_currencies or precious_metals:
+                            date = metadata.get('date', today)
+                            formatted_data = {
+                                'exchange_rates': exchange_rates,
+                                'gold_prices': gold_prices,
+                                'crypto_currencies': crypto_currencies,
+                                'precious_metals': precious_metals,
+                                'last_updated': metadata.get('last_updated', datetime.now().isoformat()),
+                                'date': date,
+                                'date_en': metadata.get('date_en', '')
+                            }
+                            
+                            print(f"✅ DÖVİZ: Mevcut veri döndürülüyor (API hatası nedeniyle)")
+                            print(f"{'='*60}\n")
+                            return Response(
+                                {
+                                    "success": True,
+                                    "data": formatted_data,
+                                    "date": date,
+                                    "source": "local_file",
+                                    "cached": True,
+                                    "warning": "Yeni veri çekilemedi, mevcut veri kullanılıyor"
+                                },
+                                status=status.HTTP_200_OK
+                            )
+                except Exception as e:
+                    print(f"⚠️ DÖVİZ: Mevcut veri okuma hatası: {e}")
+                
+                print(f"❌ DÖVİZ: Veri alınamadı")
+                print(f"{'='*60}\n")
                 return Response(
                     {
                         "success": False,
@@ -846,7 +946,6 @@ class GetMainDataView(APIView):
                 )
             
             # Local dosyaya kaydet
-            print(f"💾 Local dosyaya kayıt başlıyor...")
             try:
                 # Metadata'yı hazırla
                 metadata = {
@@ -872,40 +971,40 @@ class GetMainDataView(APIView):
                 crypto_count = len(data.get('crypto_currencies', {}))
                 metal_count = len(data.get('precious_metals', {}))
                 
-                success = write_currencies_to_file(file_data)
+                success = write_currencies_to_file(file_data, today)
                 
                 if success:
-                    print(f"✅ Local dosyaya kayıt başarılı!")
-                    print(f"   - Toplam: {currency_count} döviz, {gold_count} altın, {crypto_count} kripto, {metal_count} metal")
-                    print(f"   - Tarih: {today}")
-                    print(f"   - Çekilme saati: {data.get('fetch_time')}")
-                    print("="*60 + "\n")
+                    print(f"✅ DÖVİZ: Veri çekildi ve dosyaya kaydedildi")
+                    print(f"   📊 {currency_count} döviz, {gold_count} altın, {crypto_count} kripto, {metal_count} metal")
+                    print(f"   📅 Tarih: {today}, ⏰ Saat: {data.get('fetch_time')}")
+                    print(f"   💾 Dosya: currencies.json")
+                    print(f"{'='*60}\n")
                 else:
-                    print(f"⚠️ Local dosyaya kayıt başarısız!")
+                    print(f"⚠️ DÖVİZ: Local dosyaya kayıt başarısız!")
             except Exception as file_error:
-                print(f"❌ Local dosyaya kaydetme hatası: {file_error}")
-                import traceback
-                print(f"❌ Hata detayı: {traceback.format_exc()}")
+                print(f"❌ DÖVİZ: Dosyaya kaydetme hatası: {file_error}")
                 logger.error(f"Local dosyaya kaydetme hatası: {file_error}", exc_info=True)
             
-            print(f"✅ Veri başarıyla alındı!")
-            print(f"   - Döviz kurları: {len(data.get('exchange_rates', {}))} adet")
-            print(f"   - Altın: {len(data.get('gold_prices', {}))} adet")
-            print(f"   - Kripto: {len(data.get('crypto_currencies', {}))} adet")
-            print(f"   - Metaller: {len(data.get('precious_metals', {}))} adet")
-            print(f"   - Tarih: {data.get('date', 'N/A')}")
-            print("="*60 + "\n")
-            
+            # Response döndür
             response_data = {
                 "success": True,
-                "data": data,
-                "source": "Finans API",
-                "saved_to_local_file": True,
-                "date": today,
-                "fetch_time": data.get('fetch_time')
+                "data": {
+                    'exchange_rates': data.get('exchange_rates', {}),
+                    'gold_prices': data.get('gold_prices', {}),
+                    'crypto_currencies': data.get('crypto_currencies', {}),
+                    'precious_metals': data.get('precious_metals', {}),
+                    'last_updated': data.get('timestamp', datetime.now().isoformat()),
+                    'date': data.get('date', today),
+                    'date_en': data.get('date_en', '')
+                },
+                "date": data.get('date', today),
+                "source": "api",
+                "cached": False
             }
-            print(f"✅ GetMainDataView: Response döndürülüyor (API) - {len(data.get('exchange_rates', {}))} döviz, {len(data.get('gold_prices', {}))} altın, {len(data.get('crypto_currencies', {}))} kripto, {len(data.get('precious_metals', {}))} metal")
-            print("="*60 + "\n")
+            print(f"✅ DÖVİZ: Response döndürülüyor (API)")
+            print(f"   📊 {currency_count} döviz, {gold_count} altın, {crypto_count} kripto, {metal_count} metal")
+            print(f"   📅 Tarih: {today}, ⏰ Saat: {data.get('fetch_time')}")
+            print(f"{'='*60}\n")
             return Response(response_data, status=status.HTTP_200_OK)
             
         except Exception as e:
@@ -1045,18 +1144,16 @@ class BorsaDataView(APIView):
                 print(f"⚠️ Local dosya kontrol hatası (devam ediliyor): {e}")
             
             # Yeni veri çekilmeli mi?
-            print(f"🔍 Akıllı zaman kontrolü yapılıyor...")
-            print(f"   - Mevcut saat: {current_time}")
-            print(f"   - Dosya var mı: {file_exists}")
-            print(f"   - Son çekilen veri: {existing_fetch_time or 'Yok'}")
-            
-            # Eğer dosya yoksa, ilk kez çalıştırılıyor demektir - her zaman API'den çek
             if not file_exists:
-                print("   ⚠️ Dosya yok, ilk kez çalıştırılıyor - API'den çekilecek")
                 should_fetch = True
             else:
                 should_fetch = service.should_fetch_new_data(existing_fetch_time)
-                print(f"   - Sonuç: {'✅ YENİ VERİ ÇEKİLECEK' if should_fetch else '⏰ MEVCUT VERİ KULLANILACAK'}")
+            
+            # Sadeleştirilmiş log
+            if should_fetch:
+                print(f"✅ Yeni veri çekilecek (saat: {current_time}, son fetch: {existing_fetch_time or 'Yok'})")
+            else:
+                print(f"⏰ Mevcut veri kullanılacak (saat: {current_time}, son fetch: {existing_fetch_time or 'Yok'})")
             
             if not should_fetch:
                 print(f"⏰ Yeni veri çekilmeyecek. Şu anki saat: {current_time}")
@@ -1269,44 +1366,24 @@ class BorsaDataListView(APIView):
                         if metadata and metadata.get('fetch_time'):
                             existing_fetch_time = metadata.get('fetch_time')
                     else:
-                        print(f"📂 borsa.json dosyası bulunamadı (ilk kez çalıştırılıyor): {file_path}")
+                        pass
                 except Exception as e:
                     logger.warning(f"Local dosya kontrol hatası: {e}")
                 
                 # Yeni veri çekilmeli mi?
                 # Eğer dosya yoksa, ilk kez çalıştırılıyor demektir - her zaman API'den çek
                 if not file_exists:
-                    print(f"🔄 BorsaDataListView: Dosya yok, ilk kez çalıştırılıyor - API'den çekilecek")
                     should_fetch = True
                 else:
                     should_fetch = service.should_fetch_new_data(existing_fetch_time)
                 
                 if should_fetch:
-                    # Yeni veri çekilmeli, BorsaDataView mantığını kullan
-                    print(f"🔄 BorsaDataListView: Yeni veri çekilecek (fetch_time: {existing_fetch_time})")
+                    # Aynı anda 2 istek atılmasını engelle (lock mekanizması)
+                    global _borsa_fetching
                     
-                    # Hafta içi kontrolü
-                    if not service.is_weekday():
-                        # Hafta sonu, mevcut veriyi döndür
-                        if existing_fetch_time:
-                            borsa_data = read_borsa_from_file(today)
-                            if borsa_data:
-                                return Response(
-                                    {
-                                        "success": True,
-                                        "data": borsa_data,
-                                        "date": today,
-                                        "source": "local_file",
-                                        "cached": True
-                                    },
-                                    status=status.HTTP_200_OK
-                                )
-                    
-                    # API'den veri çek
-                    borsa_data = service.get_borsa_data()
-                    if borsa_data is None:
-                        # API hatası, mevcut veriyi döndür
-                        if existing_fetch_time:
+                    with _borsa_fetch_lock:
+                        # Eğer başka bir thread zaten veri çekiyorsa, bekle veya mevcut veriyi döndür
+                        if _borsa_fetching:
                             borsa_data = read_borsa_from_file(today)
                             if borsa_data:
                                 return Response(
@@ -1316,43 +1393,86 @@ class BorsaDataListView(APIView):
                                         "date": today,
                                         "source": "local_file",
                                         "cached": True,
-                                        "warning": "Yeni veri çekilemedi, mevcut veri kullanılıyor"
+                                        "warning": "Veri çekiliyor, mevcut veri gösteriliyor"
                                     },
                                     status=status.HTTP_200_OK
                                 )
+                        
+                        _borsa_fetching = True
+                    
+                    try:
+                        # Hafta içi kontrolü
+                        if not service.is_weekday():
+                            # Hafta sonu, mevcut veriyi döndür
+                            if existing_fetch_time:
+                                borsa_data = read_borsa_from_file(today)
+                                if borsa_data:
+                                    return Response(
+                                        {
+                                            "success": True,
+                                            "data": borsa_data,
+                                            "date": today,
+                                            "source": "local_file",
+                                            "cached": True
+                                        },
+                                        status=status.HTTP_200_OK
+                                    )
+                        
+                        # API'den veri çek
+                        borsa_data = service.get_borsa_data()
+                        
+                        if borsa_data is None:
+                            # API hatası, mevcut veriyi döndür
+                            if existing_fetch_time:
+                                borsa_data = read_borsa_from_file(today)
+                                if borsa_data:
+                                    return Response(
+                                        {
+                                            "success": True,
+                                            "data": borsa_data,
+                                            "date": today,
+                                            "source": "local_file",
+                                            "cached": True,
+                                            "warning": "Yeni veri çekilemedi, mevcut veri kullanılıyor"
+                                        },
+                                        status=status.HTTP_200_OK
+                                    )
+                            return Response(
+                                {
+                                    "success": False,
+                                    "error": "Veri alınamadı"
+                                },
+                                status=status.HTTP_503_SERVICE_UNAVAILABLE
+                            )
+                        
+                        # Local dosyaya kaydet
+                        try:
+                            stock_data = {
+                                'date': today,
+                                'fetch_time': borsa_data.get('fetch_time'),
+                                'timestamp': borsa_data.get('timestamp'),
+                                'source': borsa_data.get('source'),
+                                'total_count': borsa_data.get('total_count', 0),
+                                'last_updated': datetime.now().isoformat(),
+                                'stocks': borsa_data.get('stocks', [])
+                            }
+                            write_borsa_to_file(stock_data, today)
+                        except Exception as e:
+                            logger.error(f"Local dosyaya kaydetme hatası: {e}")
+                        
                         return Response(
                             {
-                                "success": False,
-                                "error": "Veri alınamadı"
+                                "success": True,
+                                "data": borsa_data,
+                                "date": today,
+                                "source": "api",
+                                "cached": False
                             },
-                            status=status.HTTP_503_SERVICE_UNAVAILABLE
+                            status=status.HTTP_200_OK
                         )
-                    
-                    # Local dosyaya kaydet
-                    try:
-                        stock_data = {
-                            'date': today,
-                            'fetch_time': borsa_data.get('fetch_time'),
-                            'timestamp': borsa_data.get('timestamp'),
-                            'source': borsa_data.get('source'),
-                            'total_count': borsa_data.get('total_count', 0),
-                            'last_updated': datetime.now().isoformat(),
-                            'stocks': borsa_data.get('stocks', [])
-                        }
-                        write_borsa_to_file(stock_data, today)
-                    except Exception as e:
-                        logger.error(f"Local dosyaya kaydetme hatası: {e}")
-                    
-                    return Response(
-                        {
-                            "success": True,
-                            "data": borsa_data,
-                            "date": today,
-                            "source": "api",
-                            "cached": False
-                        },
-                        status=status.HTTP_200_OK
-                    )
+                    finally:
+                        with _borsa_fetch_lock:
+                            _borsa_fetching = False
             
             # Bugün için değilse veya yeni veri çekilmeyecekse, local dosyadan oku
             borsa_data = read_borsa_from_file(target_date)
@@ -1365,15 +1485,12 @@ class BorsaDataListView(APIView):
                     "source": "local_file",
                     "cached": True
                 }
-                print(f"✅ BorsaDataListView: Response döndürülüyor (Local File) - {len(borsa_data.get('stocks', []))} hisse")
-                print("="*60 + "\n")
                 return Response(response_data, status=status.HTTP_200_OK)
             
             # Bugünün verisi yoksa, dünün verisini dene (dövizlerdeki gibi)
             if target_date == today:
                 from datetime import timedelta
                 yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-                print(f"⚠️ Bugünün verisi bulunamadı, dünün verisi deneniyor: {yesterday}")
                 borsa_data = read_borsa_from_file(yesterday)
                 
                 if borsa_data:
@@ -1385,8 +1502,6 @@ class BorsaDataListView(APIView):
                         "cached": True,
                         "warning": f"Bugünün verisi henüz yok, dünün verisi gösteriliyor ({yesterday})"
                     }
-                    print(f"✅ BorsaDataListView: Dünün verisi döndürülüyor - {len(borsa_data.get('stocks', []))} hisse")
-                    print("="*60 + "\n")
                     return Response(response_data, status=status.HTTP_200_OK)
             
             # Local dosyada bulunamadı
@@ -1424,10 +1539,6 @@ class FundsListView(APIView):
         Tüm funds'ları döndürür (global havuz).
         """
         try:
-            print("\n" + "="*60)
-            print("💰 API Request: /api/currencies/funds/")
-            print("="*60)
-            
             import json
             import os
             
@@ -1443,9 +1554,6 @@ class FundsListView(APIView):
                 funds_json_path = os.path.join(base_dir, 'funds.json')
             
             if not os.path.exists(funds_json_path):
-                print(f"❌ funds.json dosyası bulunamadı. Aranan yollar:")
-                print(f"   1. {os.path.join(current_dir, 'funds.json')}")
-                print(f"   2. {funds_json_path}")
                 return Response(
                     {
                         "success": False,
@@ -1453,8 +1561,6 @@ class FundsListView(APIView):
                     },
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
-            
-            print(f"📂 Funds JSON dosyası okunuyor: {funds_json_path}")
             
             # JSON dosyasını oku
             try:
@@ -1487,11 +1593,7 @@ class FundsListView(APIView):
                 # Key'e göre sırala
                 funds_list.sort(key=lambda x: x.get('key', ''))
                 
-                print(f"✅ Funds verileri alındı: {len(funds_list)} adet (JSON dosyasından)")
-                print("="*60 + "\n")
-                
             except json.JSONDecodeError as e:
-                print(f"❌ JSON parse hatası: {e}")
                 return Response(
                     {
                         "success": False,
@@ -1501,7 +1603,6 @@ class FundsListView(APIView):
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
             except Exception as e:
-                print(f"❌ Funds okuma hatası: {e}")
                 raise  # Hataları yukarı fırlat
             
             response_data = {
@@ -1512,12 +1613,9 @@ class FundsListView(APIView):
                 },
                 "source": "json_file"
             }
-            print(f"✅ FundsListView: Response döndürülüyor - {len(funds_list)} fon")
-            print("="*60 + "\n")
             return Response(response_data, status=status.HTTP_200_OK)
             
         except Exception as e:
-            print(f"❌ FundsListView hatası: {e}")
             logger.error(f"FundsListView hatası: {e}")
             return Response(
                 {
