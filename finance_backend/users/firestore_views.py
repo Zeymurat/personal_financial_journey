@@ -70,13 +70,13 @@ class FirestoreTransactionView(BaseFirestoreView):
             finally:
                 loop.close()
             
-            return Response(transactions)
+            return Response({'success': True, 'data': transactions})
             
         except exceptions.PermissionDenied as e:
-            return Response({'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
             logger.error(f"İşlem getirilirken beklenmedik hata: {e}")
-            return Response({'error': 'Sunucu hatası: İşlemler getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'success': False, 'error': 'Sunucu hatası: İşlemler getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def post(self, request):
         """Yeni işlem oluşturur."""
@@ -331,13 +331,13 @@ class FirestoreInvestmentView(BaseFirestoreView):
             finally:
                 loop.close()
             
-            return Response(investments)
+            return Response({'success': True, 'data': investments})
             
         except exceptions.PermissionDenied as e:
-            return Response({'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
             logger.error(f"Yatırımlar getirilirken beklenmedik hata: {e}")
-            return Response({'error': 'Sunucu hatası: Yatırımlar getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'success': False, 'error': 'Sunucu hatası: Yatırımlar getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def post(self, request):
         """Yeni bir yatırım portföy öğesi oluşturur."""
@@ -377,15 +377,84 @@ class FirestoreInvestmentView(BaseFirestoreView):
                 loop.close()
             
             return Response(
-                {'id': investment_id, 'message': 'Yatırım başarıyla oluşturuldu'}, 
+                {'success': True, 'id': investment_id, 'message': 'Yatırım başarıyla oluşturuldu'}, 
                 status=status.HTTP_201_CREATED
             )
             
         except exceptions.PermissionDenied as e:
-            return Response({'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
             logger.error(f"Yeni yatırım oluşturulurken beklenmedik hata: {e}")
-            return Response({'error': 'Sunucu hatası: Yatırım oluşturulamadı.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'success': False, 'error': 'Sunucu hatası: Yatırım oluşturulamadı.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# --- 2.1. Yatırım Detay View'i (/api/auth/investments/<id>/) ---
+
+class FirestoreInvestmentDetailView(BaseFirestoreView):
+    
+    def put(self, request, investment_id):
+        """Yatırım günceller."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            investment_data = request.data
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                success = loop.run_until_complete(
+                    firestore_service.update_investment(firebase_uid, investment_id, investment_data)
+                )
+            finally:
+                loop.close()
+            
+            if success:
+                return Response(
+                    {'success': True, 'message': 'Yatırım başarıyla güncellendi'}, 
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {'success': False, 'error': 'Yatırım bulunamadı'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Yatırım güncellenirken beklenmedik hata: {e}")
+            return Response({'success': False, 'error': 'Sunucu hatası: Yatırım güncellenemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def delete(self, request, investment_id):
+        """Yatırım siler."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                success = loop.run_until_complete(
+                    firestore_service.delete_investment(firebase_uid, investment_id)
+                )
+            finally:
+                loop.close()
+            
+            if success:
+                return Response(
+                    {'success': True, 'message': 'Yatırım başarıyla silindi'}, 
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {'success': False, 'error': 'Yatırım bulunamadı'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Yatırım silinirken beklenmedik hata: {e}")
+            return Response({'success': False, 'error': 'Sunucu hatası: Yatırım silinemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # --- 3. Yatırım İşlemleri View'i (/api/auth/investments/<id>/transactions/) ---
 
@@ -406,13 +475,13 @@ class FirestoreInvestmentTransactionView(BaseFirestoreView):
             finally:
                 loop.close()
             
-            return Response(transactions)
+            return Response({'success': True, 'data': transactions})
             
         except exceptions.PermissionDenied as e:
-            return Response({'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
             logger.error(f"Yatırım işlemleri getirilirken beklenmedik hata: {e}")
-            return Response({'error': 'Sunucu hatası: İşlemler getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'success': False, 'error': 'Sunucu hatası: İşlemler getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def post(self, request, investment_id):
         """Belirli bir yatırıma yeni bir işlem (alım/satım) ekler."""
@@ -440,12 +509,486 @@ class FirestoreInvestmentTransactionView(BaseFirestoreView):
                 loop.close()
             
             return Response(
-                {'id': transaction_id, 'message': 'Yatırım işlemi başarıyla eklendi'}, 
+                {'success': True, 'id': transaction_id, 'message': 'Yatırım işlemi başarıyla eklendi'}, 
                 status=status.HTTP_201_CREATED
             )
             
         except exceptions.PermissionDenied as e:
-            return Response({'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+            logger.error(f"Yatırım işlemi eklenirken erişim hatası: {e}", exc_info=True)
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
-            logger.error(f"Yatırım işlemi eklenirken beklenmedik hata: {e}")
-            return Response({'error': 'Sunucu hatası: İşlem eklenemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f"Yatırım işlemi eklenirken beklenmedik hata: {e}", exc_info=True)
+            error_msg = str(e)
+            # Firestore permission hatalarını daha açıklayıcı yap
+            if 'permission' in error_msg.lower() or 'insufficient' in error_msg.lower():
+                error_msg = f"Firestore izin hatası: {error_msg}. Lütfen Firebase Admin SDK yapılandırmasını kontrol edin."
+            return Response({'success': False, 'error': f'Sunucu hatası: {error_msg}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# --- 3. Yatırım İşlemi Detay View'i (/api/auth/investments/<investment_id>/transactions/<transaction_id>/) ---
+
+class FirestoreInvestmentTransactionDetailView(BaseFirestoreView):
+    
+    def put(self, request, investment_id, transaction_id):
+        """Belirli bir yatırım işlemini günceller."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            transaction_data = request.data
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(
+                    firestore_service.update_investment_transaction(firebase_uid, investment_id, transaction_id, transaction_data)
+                )
+            finally:
+                loop.close()
+            
+            return Response(
+                {'success': True, 'message': 'Yatırım işlemi başarıyla güncellendi'}, 
+                status=status.HTTP_200_OK
+            )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Yatırım işlemi güncellenirken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: İşlem güncellenemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def delete(self, request, investment_id, transaction_id):
+        """Belirli bir yatırım işlemini siler."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(
+                    firestore_service.delete_investment_transaction(firebase_uid, investment_id, transaction_id)
+                )
+            finally:
+                loop.close()
+            
+            return Response(
+                {'success': True, 'message': 'Yatırım işlemi başarıyla silindi'}, 
+                status=status.HTTP_200_OK
+            )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Yatırım işlemi silinirken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: İşlem silinemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# --- 7. Settings View'i (/api/auth/settings/) ---
+
+class FirestoreSettingsView(BaseFirestoreView):
+    """Kullanıcı ayarlarını yöneten view"""
+    
+    def get(self, request):
+        """Kullanıcının ayarlarını getirir."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                settings = loop.run_until_complete(
+                    firestore_service.get_user_settings(firebase_uid)
+                )
+            finally:
+                loop.close()
+            
+            # Eğer settings yoksa varsayılan değerleri döndür
+            if not settings:
+                default_settings = {
+                    'darkMode': False,
+                    'budgetAlerts': True,
+                    'language': 'tr',
+                    'currency': 'TRY'
+                }
+                return Response({'success': True, 'data': default_settings})
+            
+            # Firestore'dan gelen veriyi temizle (id ve timestamp'leri kaldır)
+            settings_data = {k: v for k, v in settings.items() if k not in ['id', 'createdAt', 'updatedAt']}
+            
+            return Response({'success': True, 'data': settings_data})
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Ayarlar getirilirken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: Ayarlar getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def put(self, request):
+        """Kullanıcının ayarlarını günceller veya oluşturur."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            settings_data = request.data
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(
+                    firestore_service.create_or_update_user_settings(firebase_uid, settings_data)
+                )
+            finally:
+                loop.close()
+            
+            return Response(
+                {'success': True, 'message': 'Ayarlar başarıyla kaydedildi'}, 
+                status=status.HTTP_200_OK
+            )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Ayarlar kaydedilirken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: Ayarlar kaydedilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# --- 8. Notifications View'i (/api/auth/notifications/) ---
+
+class FirestoreNotificationView(BaseFirestoreView):
+    """Bildirimleri yöneten view"""
+    
+    def get(self, request):
+        """Kullanıcının bildirimlerini getirir (son 30 gün)."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                notifications = loop.run_until_complete(
+                    firestore_service.get_user_notifications(firebase_uid)
+                )
+            finally:
+                loop.close()
+            
+            return Response({'success': True, 'data': notifications})
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Bildirimler getirilirken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: Bildirimler getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def post(self, request):
+        """Yeni bildirim oluşturur."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            notification_data = request.data
+            required_fields = ['category', 'title', 'message']
+            
+            for field in required_fields:
+                if not notification_data.get(field):
+                    return Response(
+                        {'success': False, 'error': f'{field} alanı gerekli'}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            # Kategori kontrolü
+            valid_categories = ['target', 'investment', 'transaction', 'reminder']
+            if notification_data.get('category') not in valid_categories:
+                return Response(
+                    {'success': False, 'error': f'Geçersiz kategori. Geçerli kategoriler: {", ".join(valid_categories)}'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                notification_id = loop.run_until_complete(
+                    firestore_service.create_notification(firebase_uid, notification_data)
+                )
+            finally:
+                loop.close()
+            
+            return Response(
+                {'success': True, 'id': notification_id, 'message': 'Bildirim başarıyla oluşturuldu'}, 
+                status=status.HTTP_201_CREATED
+            )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Bildirim oluşturulurken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: Bildirim oluşturulamadı.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class FirestoreNotificationDetailView(BaseFirestoreView):
+    """Tek bir bildirimi yöneten view"""
+    
+    def put(self, request, notification_id):
+        """Bildirimi okundu olarak işaretle."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                success = loop.run_until_complete(
+                    firestore_service.mark_notification_as_read(firebase_uid, notification_id)
+                )
+            finally:
+                loop.close()
+            
+            if success:
+                return Response(
+                    {'success': True, 'message': 'Bildirim okundu olarak işaretlendi'}, 
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {'success': False, 'error': 'Bildirim bulunamadı'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Bildirim işaretlenirken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: Bildirim işaretlenemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def delete(self, request, notification_id):
+        """Bildirimi siler."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                success = loop.run_until_complete(
+                    firestore_service.delete_notification(firebase_uid, notification_id)
+                )
+            finally:
+                loop.close()
+            
+            if success:
+                return Response(
+                    {'success': True, 'message': 'Bildirim başarıyla silindi'}, 
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {'success': False, 'error': 'Bildirim bulunamadı'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Bildirim silinirken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: Bildirim silinemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class FirestoreNotificationReadAllView(BaseFirestoreView):
+    """Tüm bildirimleri okundu olarak işaretleyen view"""
+    
+    def put(self, request):
+        """Tüm bildirimleri okundu olarak işaretle."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                success = loop.run_until_complete(
+                    firestore_service.mark_all_notifications_as_read(firebase_uid)
+                )
+            finally:
+                loop.close()
+            
+            return Response(
+                {'success': True, 'message': 'Tüm bildirimler okundu olarak işaretlendi'}, 
+                status=status.HTTP_200_OK
+            )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Bildirimler işaretlenirken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: Bildirimler işaretlenemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class FirestoreNotificationDeleteReadView(BaseFirestoreView):
+    """Okunmuş bildirimleri silen view"""
+    
+    def delete(self, request):
+        """Tüm okunmuş bildirimleri sil."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                success = loop.run_until_complete(
+                    firestore_service.delete_all_read_notifications(firebase_uid)
+                )
+            finally:
+                loop.close()
+            
+            return Response(
+                {'success': True, 'message': 'Okunmuş bildirimler başarıyla silindi'}, 
+                status=status.HTTP_200_OK
+            )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Okunmuş bildirimler silinirken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: Bildirimler silinemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# --- 9. Events View'i (/api/auth/events/) ---
+
+class FirestoreEventView(BaseFirestoreView):
+    """Etkinlikleri yöneten view"""
+    
+    def get(self, request):
+        """Kullanıcının etkinliklerini getirir."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            # Filtreler (opsiyonel)
+            filters = {}
+            start_date = request.query_params.get('startDate')
+            end_date = request.query_params.get('endDate')
+            
+            if start_date:
+                filters['startDate'] = start_date
+            if end_date:
+                filters['endDate'] = end_date
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                events = loop.run_until_complete(
+                    firestore_service.get_user_events(firebase_uid, filters if filters else None)
+                )
+            finally:
+                loop.close()
+            
+            return Response({'success': True, 'data': events})
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Etkinlikler getirilirken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: Etkinlikler getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def post(self, request):
+        """Yeni etkinlik oluşturur."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            event_data = request.data
+            required_fields = ['title', 'date']
+            
+            for field in required_fields:
+                if not event_data.get(field):
+                    return Response(
+                        {'success': False, 'error': f'{field} alanı gerekli'}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                event_id = loop.run_until_complete(
+                    firestore_service.create_event(firebase_uid, event_data)
+                )
+            finally:
+                loop.close()
+            
+            return Response(
+                {'success': True, 'id': event_id, 'message': 'Etkinlik başarıyla oluşturuldu'}, 
+                status=status.HTTP_201_CREATED
+            )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Etkinlik oluşturulurken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: Etkinlik oluşturulamadı.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# --- 9.1. Event Detay View'i (/api/auth/events/<id>/) ---
+
+class FirestoreEventDetailView(BaseFirestoreView):
+    """Etkinlik detayını yöneten view"""
+    
+    def put(self, request, event_id):
+        """Etkinlik günceller."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            event_data = request.data
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                success = loop.run_until_complete(
+                    firestore_service.update_event(firebase_uid, event_id, event_data)
+                )
+            finally:
+                loop.close()
+            
+            if success:
+                return Response(
+                    {'success': True, 'message': 'Etkinlik başarıyla güncellendi'}, 
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {'success': False, 'error': 'Etkinlik bulunamadı'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Etkinlik güncellenirken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: Etkinlik güncellenemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def delete(self, request, event_id):
+        """Etkinlik siler."""
+        try:
+            firebase_uid = self.validate_user_access(request)
+            
+            # Async firestore servisini sync wrapper ile çağır
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                success = loop.run_until_complete(
+                    firestore_service.delete_event(firebase_uid, event_id)
+                )
+            finally:
+                loop.close()
+            
+            if success:
+                return Response(
+                    {'success': True, 'message': 'Etkinlik başarıyla silindi'}, 
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {'success': False, 'error': 'Etkinlik bulunamadı'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': f'Erişim hatası: {str(e)}'}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Etkinlik silinirken beklenmedik hata: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Sunucu hatası: Etkinlik silinemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

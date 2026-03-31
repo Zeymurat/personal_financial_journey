@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Home, 
   ArrowUpDown, 
@@ -9,9 +10,13 @@ import {
   Wallet,
   LogOut,
   User,
-  Eye
+  Eye,
+  Bell,
+  Calendar,
+  Calculator
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotifications } from '../contexts/NotificationContext';
 
 interface SidebarProps {
   activeTab: string;
@@ -19,16 +24,37 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
+  const { t } = useTranslation('sidebar');
   const { currentUser: user, logout } = useAuth();
+  const { unreadCount } = useNotifications();
+
+  // Custom event listener for navigation
+  React.useEffect(() => {
+    const handleNavigateToTab = (event: CustomEvent) => {
+      const tab = event.detail;
+      if (tab && typeof tab === 'string') {
+        setActiveTab(tab);
+      }
+    };
+
+    window.addEventListener('navigateToTab', handleNavigateToTab as EventListener);
+    
+    return () => {
+      window.removeEventListener('navigateToTab', handleNavigateToTab as EventListener);
+    };
+  }, [setActiveTab]);
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'transactions', label: 'İşlemler', icon: ArrowUpDown },
-    { id: 'investments', label: 'Yatırımlar', icon: TrendingUp },
-    { id: 'track', label: 'Takip ve Karşılaştırma', icon: Eye },
-    { id: 'reports', label: 'Raporlar', icon: BarChart3 },
-    { id: 'converter', label: 'Döviz Çevirici', icon: Repeat },
-    { id: 'settings', label: 'Ayarlar', icon: Settings }
+    { id: 'dashboard', labelKey: 'nav.dashboard' as const, icon: Home },
+    { id: 'transactions', labelKey: 'nav.transactions' as const, icon: ArrowUpDown },
+    { id: 'investments', labelKey: 'nav.investments' as const, icon: TrendingUp },
+    { id: 'track', labelKey: 'nav.track' as const, icon: Eye },
+    { id: 'reports', labelKey: 'nav.reports' as const, icon: BarChart3 },
+    { id: 'converter', labelKey: 'nav.converter' as const, icon: Repeat },
+    { id: 'calculator', labelKey: 'nav.calculator' as const, icon: Calculator },
+    { id: 'notifications', labelKey: 'nav.notifications' as const, icon: Bell },
+    { id: 'agenda', labelKey: 'nav.agenda' as const, icon: Calendar },
+    { id: 'settings', labelKey: 'nav.settings' as const, icon: Settings }
   ];
 
   return (
@@ -39,8 +65,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
             <Wallet className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">FinansApp</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Kişisel Finans</p>
+            <h1 className="text-lg font-bold text-gray-900 dark:text-white">{t('brand.title')}</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('brand.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -59,8 +85,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.label}</span>
+                  <div className="relative">
+                    <Icon className="w-5 h-5" />
+                    {item.id === 'notifications' && unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center shadow-lg border-2 border-white dark:border-gray-900">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-medium">{t(item.labelKey)}</span>
                 </button>
               </li>
             );
@@ -84,7 +117,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-              {user?.name || 'Kullanıcı'}
+              {user?.name || t('userFallback')}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
               {user?.email}
@@ -97,7 +130,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
           className="w-full flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 font-medium"
         >
           <LogOut className="w-5 h-5" />
-          <span>Çıkış Yap</span>
+          <span>{t('logout')}</span>
         </button>
       </div>
     </div>

@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "title": "Currency converter",
+    "subtitle": "Convert using live rates",
+    "disclaimer": "Figures may differ slightly; check reports."
+  },
+  "form": {
+    "amountToConvert": "Amount to convert",
+    "convertedAmount": "Converted amount",
+    "rateLine": "1 {{from}} = {{rate}} {{to}}",
+    "amountPlaceholder": "0.00"
+  },
+  "quick": {
+    "title": "Quick conversions",
+    "add": "Add",
+    "manageTitle": "Manage conversions",
+    "empty": "No quick conversions yet. Click Add to create one."
+  },
+  "modalQuick": {
+    "title": "Manage quick conversions",
+    "subtitle": "Add new conversions or edit existing ones.",
+    "from": "From",
+    "to": "To",
+    "amount": "Amount",
+    "addButton": "Add conversion",
+    "listTitle": "Current conversions",
+    "addSectionTitle": "Add new conversion",
+    "fromCurrencyLabel": "Source currency",
+    "toCurrencyLabel": "Target currency",
+    "listEmpty": "No conversions yet.",
+    "removeTitle": "Remove conversion",
+    "close": "Close"
+  },
+  "modalCurrency": {
+    "title": "Choose forex, gold, crypto & metals",
+    "subtitle": "Select the rates and instruments you want to see.",
+    "selectedCount": "{{count}} selected",
+    "categoryFilter": "Category filter",
+    "activeFilters": "{{count}} active",
+    "all": "All",
+    "categoryCurrency": "💱 Forex",
+    "categoryGold": "🥇 Gold",
+    "categoryCrypto": "₿ Crypto",
+    "categoryMetal": "💎 Precious metal",
+    "searchPlaceholder": "Search by code or name (e.g. USD, Euro, Bitcoin)",
+    "noResults": "No results for \"{{query}}\"",
+    "sectionForex": "💱 Forex rates",
+    "sectionGold": "🥇 Gold prices",
+    "sectionCrypto": "₿ Cryptocurrencies",
+    "sectionMetal": "💎 Precious metals",
+    "buy": "Buy:",
+    "sell": "Sell:",
+    "price": "Price:",
+    "footerSelected": "{{count}} selected",
+    "footerMinOne": "Select at least one item",
+    "close": "Close"
+  },
+  "toast": {
+    "invalidConvert": "Enter a valid conversion.",
+    "sameCurrency": "Source and target cannot be the same.",
+    "duplicate": "This conversion already exists.",
+    "addSuccess": "Conversion added.",
+    "addError": "Could not add conversion.",
+    "removeSuccess": "Conversion removed.",
+    "removeError": "Could not remove conversion."
+  },
+  "cards": {
+    "removeQuickConvert": "Remove from list",
+    "dragToReorder": "Drag to reorder",
+    "removeCurrencyCard": "Remove from list",
+    "buy": "Buy:",
+    "sell": "Sell:",
+    "change": "Change:"
+  },
+  "tryName": "Turkish Lira"
+}

@@ -1,0 +1,102 @@
+{
+  "header": {
+    "title": "Suivre et comparer",
+    "subtitle": "Suivez les actifs qui vous intéressent et comparez-les",
+    "disclaimer": "Des écarts sont possibles ; vérifiez les rapports."
+  },
+  "typeLabels": {
+    "currency": "Forex",
+    "gold": "Or",
+    "crypto": "Crypto",
+    "metal": "Métal",
+    "fund": "Fonds",
+    "stock": "Action"
+  },
+  "currencySection": {
+    "sectionTitle": "Forex, crypto, or et métaux suivis",
+    "add": "Ajouter",
+    "selectTitle": "Choisir les cours",
+    "loading": "Chargement des cours...",
+    "empty": "Aucun cours suivi. Cliquez sur « Ajouter ».",
+    "emptyCta": "Choisir les cours"
+  },
+  "funds": {
+    "sectionTitle": "Fonds d’investissement suivis",
+    "selectTitle": "Choisir des fonds",
+    "add": "Ajouter",
+    "empty": "Aucun fonds suivi. Cliquez sur « Ajouter ».",
+    "emptyCta": "Choisir des fonds"
+  },
+  "borsa": {
+    "sectionTitle": "Titres suivis",
+    "selectTitle": "Choisir des actions",
+    "loading": "Chargement du marché...",
+    "add": "Ajouter",
+    "empty": "Aucune action suivie. Cliquez sur « Ajouter ».",
+    "emptyCta": "Choisir des actions"
+  },
+  "comparison": {
+    "tableTitle": "Tableau de comparaison",
+    "tableSubtitle": "Tous vos actifs suivis au même endroit",
+    "searchPlaceholder": "Rechercher...",
+    "addAsset": "Ajouter un actif",
+    "filterAll": "Tous les types",
+    "currency": "Forex",
+    "gold": "Or",
+    "crypto": "Crypto",
+    "metal": "Métal",
+    "fund": "Fonds",
+    "stock": "Action",
+    "colName": "Nom",
+    "colCode": "Code",
+    "colType": "Type",
+    "colPrice": "Cours",
+    "colChange": "Variation (%)",
+    "colBuy": "Achat",
+    "colSell": "Vente",
+    "colTrend": "Tendance",
+    "colActions": "Actions",
+    "emptySearch": "Aucun résultat.",
+    "emptyTracked": "Aucun actif suivi.",
+    "follow": "Suivre",
+    "addToWatchlistTitle": "Ajouter à la liste de suivi",
+    "removeFromTableTitle": "Retirer du tableau",
+    "priceCompareTitle": "Comparaison des cours",
+    "priceCompareSubtitle": "Cours actuels (₺)",
+    "noPriceData": "Aucune donnée de cours.",
+    "changeCompareTitle": "Comparaison des variations",
+    "changeCompareSubtitle": "Variation journalière (%)"
+  },
+  "addModal": {
+    "title": "Ajouter un actif au tableau",
+    "subtitle": "Ajout temporaire (liste de suivi pour conserver)",
+    "searchPlaceholder": "Rechercher...",
+    "filterAll": "Tous les types",
+    "currency": "Forex",
+    "gold": "Or",
+    "crypto": "Crypto",
+    "metal": "Métal",
+    "fund": "Fonds",
+    "stock": "Action",
+    "sectionMixed": "Forex / crypto / or / métaux",
+    "sectionStocks": "Actions",
+    "sectionFunds": "Fonds",
+    "addHover": "Ajouter →",
+    "addedCount": "{{count}} actif(s) ajouté(s)",
+    "close": "Fermer"
+  },
+  "cards": {
+    "removeFromList": "Retirer de la liste",
+    "removeFund": "Retirer de la liste",
+    "fundDetail": "Détails du fonds",
+    "removeCard": "Retirer de la liste",
+    "high": "Haut :",
+    "low": "Bas :",
+    "change": "Variation :",
+    "buy": "Achat :",
+    "sell": "Vente :",
+    "lastPrice": "Dernier cours :",
+    "volume": "Volume :",
+    "detail": "Détails"
+  }
+}

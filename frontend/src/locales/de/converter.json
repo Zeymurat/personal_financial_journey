@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "title": "Währungsrechner",
+    "subtitle": "Mit aktuellen Kursen umrechnen",
+    "disclaimer": "Kleine Abweichungen möglich; prüfen Sie die Berichte."
+  },
+  "form": {
+    "amountToConvert": "Betrag",
+    "convertedAmount": "Ergebnis",
+    "rateLine": "1 {{from}} = {{rate}} {{to}}",
+    "amountPlaceholder": "0,00"
+  },
+  "quick": {
+    "title": "Schnellumrechnungen",
+    "add": "Hinzufügen",
+    "manageTitle": "Umrechnungen verwalten",
+    "empty": "Noch keine Schnellumrechnungen. Klicken Sie auf Hinzufügen."
+  },
+  "modalQuick": {
+    "title": "Schnellumrechnungen verwalten",
+    "subtitle": "Neue Umrechnungen hinzufügen oder bestehende bearbeiten.",
+    "from": "Von",
+    "to": "Nach",
+    "amount": "Betrag",
+    "addButton": "Umrechnung hinzufügen",
+    "listTitle": "Aktuelle Umrechnungen",
+    "addSectionTitle": "Neue Umrechnung",
+    "fromCurrencyLabel": "Quellwährung",
+    "toCurrencyLabel": "Zielwährung",
+    "listEmpty": "Noch keine Umrechnungen.",
+    "removeTitle": "Umrechnung entfernen",
+    "close": "Schließen"
+  },
+  "modalCurrency": {
+    "title": "Devisen, Gold, Krypto & Edelmetalle",
+    "subtitle": "Wählen Sie die Kurse und Instrumente, die Sie sehen möchten.",
+    "selectedCount": "{{count}} ausgewählt",
+    "categoryFilter": "Kategoriefilter",
+    "activeFilters": "{{count}} aktiv",
+    "all": "Alle",
+    "categoryCurrency": "💱 Devisen",
+    "categoryGold": "🥇 Gold",
+    "categoryCrypto": "₿ Krypto",
+    "categoryMetal": "💎 Edelmetalle",
+    "searchPlaceholder": "Nach Code oder Name suchen (z. B. USD, Euro, Bitcoin)",
+    "noResults": "Keine Treffer für „{{query}}“",
+    "sectionForex": "💱 Devisenkurse",
+    "sectionGold": "🥇 Goldpreise",
+    "sectionCrypto": "₿ Kryptowährungen",
+    "sectionMetal": "💎 Edelmetalle",
+    "buy": "Kauf:",
+    "sell": "Verkauf:",
+    "price": "Preis:",
+    "footerSelected": "{{count}} ausgewählt",
+    "footerMinOne": "Mindestens ein Element auswählen",
+    "close": "Schließen"
+  },
+  "toast": {
+    "invalidConvert": "Geben Sie eine gültige Umrechnung ein.",
+    "sameCurrency": "Quelle und Ziel dürfen nicht identisch sein.",
+    "duplicate": "Diese Umrechnung existiert bereits.",
+    "addSuccess": "Umrechnung hinzugefügt.",
+    "addError": "Umrechnung konnte nicht hinzugefügt werden.",
+    "removeSuccess": "Umrechnung entfernt.",
+    "removeError": "Umrechnung konnte nicht entfernt werden."
+  },
+  "cards": {
+    "removeQuickConvert": "Aus Liste entfernen",
+    "dragToReorder": "Zum Sortieren ziehen",
+    "removeCurrencyCard": "Aus Liste entfernen",
+    "buy": "Kauf:",
+    "sell": "Verkauf:",
+    "change": "Veränderung:"
+  },
+  "tryName": "Türkische Lira"
+}

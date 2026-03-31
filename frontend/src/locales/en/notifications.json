@@ -1,0 +1,48 @@
+{
+  "toast": {
+    "loadError": "Could not load notifications",
+    "genericError": "Something went wrong",
+    "markReadSuccess": "Marked as read",
+    "markAllSuccess": "All notifications marked as read",
+    "deleteSuccess": "Notification deleted",
+    "deleteReadSuccess": "Read notifications deleted"
+  },
+  "category": {
+    "target": "Goals",
+    "investment": "Investments",
+    "transaction": "Transactions",
+    "reminder": "Reminders",
+    "other": "Other"
+  },
+  "filters": {
+    "all": "All",
+    "categoryLabel": "Category:",
+    "unreadOnly": "Unread only"
+  },
+  "header": {
+    "title": "Notifications",
+    "unreadCount": "{{count}} unread",
+    "allRead": "All caught up"
+  },
+  "actions": {
+    "markAllRead": "Mark all as read",
+    "deleteRead": "Delete read",
+    "markReadTooltip": "Mark as read",
+    "deleteTooltip": "Delete"
+  },
+  "badge": {
+    "new": "New"
+  },
+  "empty": {
+    "title": "No notifications",
+    "noUnread": "No unread notifications",
+    "noInCategory": "No notifications in this category",
+    "none": "No notifications yet"
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}} h ago",
+    "daysAgo": "{{count}} d ago"
+  }
+}

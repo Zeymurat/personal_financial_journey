@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "title": "Percentage calculator",
+    "subtitle": "Various percentage calculations"
+  },
+  "common": {
+    "number": "Number",
+    "percentage": "Percent",
+    "result": "Result",
+    "resultPlaceholder": "Result appears here",
+    "firstNumber": "First number",
+    "secondNumber": "Second number",
+    "initialValue": "Initial value",
+    "finalValue": "Final value",
+    "value": "Value"
+  },
+  "s1": {
+    "title": "Percent of a number",
+    "ofNumber": "of",
+    "percentLabel": "Percent"
+  },
+  "s2": {
+    "title": "What percent is A of B?",
+    "firstSuffix": "is",
+    "secondSuffix": "of",
+    "resultPercent": "Result (%)"
+  },
+  "s3": {
+    "title": "Percent change",
+    "suffix1": "from",
+    "suffix2": "change to",
+    "resultLabel": "Result (% change)"
+  },
+  "s4": {
+    "title": "Increase or decrease by a percent",
+    "afterNumber": "→",
+    "increase": "increase",
+    "decrease": "decrease"
+  },
+  "s5": {
+    "title": "Find the number where A% equals B",
+    "percentSuffix": "",
+    "valueHint": "equals this value"
+  }
+}

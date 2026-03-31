@@ -1,0 +1,20 @@
+{
+  "actions": {
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "cancel": "Annuler",
+    "delete": "Supprimer"
+  },
+  "languages": {
+    "tr": "Türkçe",
+    "en": "English",
+    "de": "Deutsch",
+    "fr": "Français",
+    "es": "Español"
+  },
+  "toast": {
+    "settingsSaved": "Paramètres enregistrés !",
+    "settingsSaveError": "Impossible d'enregistrer les paramètres.",
+    "settingsAutoSaveError": "Erreur lors de l'enregistrement automatique."
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Wallet, Check } from 'lucide-react';
 
 interface RegisterProps {
@@ -8,6 +9,7 @@ interface RegisterProps {
 }
 
 const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loading }) => {
+  const { t } = useTranslation('auth');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,33 +26,33 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
     const newErrors: {[key: string]: string} = {};
     
     if (!formData.name.trim()) {
-      newErrors.name = 'Ad soyad gerekli';
+      newErrors.name = t('register.errors.nameRequired');
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Ad soyad en az 2 karakter olmalı';
+      newErrors.name = t('register.errors.nameMin');
     }
     
     if (!formData.email) {
-      newErrors.email = 'E-posta adresi gerekli';
+      newErrors.email = t('register.errors.emailRequired');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Geçerli bir e-posta adresi girin';
+      newErrors.email = t('register.errors.emailInvalid');
     }
     
     if (!formData.password) {
-      newErrors.password = 'Şifre gerekli';
+      newErrors.password = t('register.errors.passwordRequired');
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Şifre en az 6 karakter olmalı';
+      newErrors.password = t('register.errors.passwordMin');
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = 'Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermeli';
+      newErrors.password = t('register.errors.passwordPattern');
     }
     
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Şifre tekrarı gerekli';
+      newErrors.confirmPassword = t('register.errors.confirmRequired');
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Şifreler eşleşmiyor';
+      newErrors.confirmPassword = t('register.errors.confirmMismatch');
     }
     
     if (!acceptTerms) {
-      newErrors.terms = 'Kullanım koşullarını kabul etmelisiniz';
+      newErrors.terms = t('register.errors.termsRequired');
     }
     
     setErrors(newErrors);
@@ -62,7 +64,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
     setFormError('');
     
     if (!acceptTerms) {
-      setFormError('Lütfen kullanım koşullarını kabul edin.');
+      setFormError(t('register.formAcceptTerms'));
       return;
     }
     
@@ -70,7 +72,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
       try {
         await onRegister(formData.name, formData.email, formData.password);
       } catch (error: any) {
-        setFormError(error.message || 'Kayıt sırasında bir hata oluştu');
+        setFormError(error.message || t('register.toastRegisterError'));
       }
     }
   };
@@ -104,9 +106,9 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
 
   const getStrengthText = () => {
     const strength = getPasswordStrength();
-    if (strength <= 2) return 'Zayıf';
-    if (strength <= 3) return 'Orta';
-    return 'Güçlü';
+    if (strength <= 2) return t('register.passwordStrength.weak');
+    if (strength <= 3) return t('register.passwordStrength.medium');
+    return t('register.passwordStrength.strong');
   };
 
   return (
@@ -121,18 +123,16 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                 <Wallet className="w-12 h-12 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-black">FinansApp</h1>
-                <p className="text-xl text-purple-200 font-medium">Finansal Özgürlük</p>
+                <h1 className="text-4xl font-black">{t('login.brandTitle')}</h1>
+                <p className="text-xl text-purple-200 font-medium">{t('register.brandSubtitle')}</p>
               </div>
             </div>
           </div>
 
           <div className="space-y-8 max-w-md">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-black mb-4">Finansal Yolculuğunuza Başlayın</h2>
-              <p className="text-lg text-purple-200 leading-relaxed">
-                Ücretsiz hesap oluşturun ve finansal hedeflerinize adım adım ilerleyin.
-              </p>
+              <h2 className="text-3xl font-black mb-4">{t('register.heroTitle')}</h2>
+              <p className="text-lg text-purple-200 leading-relaxed">{t('register.heroBody')}</p>
             </div>
 
             <div className="space-y-4">
@@ -140,13 +140,13 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                 <div className="p-2 bg-green-500/20 rounded-full">
                   <Check className="w-5 h-5 text-green-400" />
                 </div>
-                <span className="font-semibold">Sınırsız işlem takibi</span>
+                <span className="font-semibold">{t('register.bullet1')}</span>
               </div>
               <div className="flex items-center space-x-3 text-purple-200">
                 <div className="p-2 bg-green-500/20 rounded-full">
                   <Check className="w-5 h-5 text-green-400" />
                 </div>
-                <span className="font-semibold">Detaylı yatırım analizi</span>
+                <span className="font-semibold">{t('register.bullet2')}</span>
               </div>
               <div className="flex items-center space-x-3 text-purple-200">
                 <div className="p-2 bg-green-500/20 rounded-full">
@@ -158,7 +158,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                 <div className="p-2 bg-green-500/20 rounded-full">
                   <Check className="w-5 h-5 text-green-400" />
                 </div>
-                <span className="font-semibold">Döviz ve kripto takibi</span>
+                <span className="font-semibold">{t('register.bullet4')}</span>
               </div>
             </div>
           </div>
@@ -174,10 +174,10 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                 <div className="p-3 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl">
                   <Wallet className="w-8 h-8 text-white" />
                 </div>
-                <h1 className="text-2xl font-black text-slate-900 dark:text-white">FinansApp</h1>
+                <h1 className="text-2xl font-black text-slate-900 dark:text-white">{t('login.brandTitle')}</h1>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Hesap Oluştur</h2>
-              <p className="text-gray-300 mb-4">Ücretsiz hesabınızı oluşturun</p>
+              <h2 className="text-2xl font-bold text-white mb-2">{t('register.title')}</h2>
+              <p className="text-gray-300 mb-4">{t('register.subtitle')}</p>
               {formError && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
                   <span className="block sm:inline">{formError}</span>
@@ -188,7 +188,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Ad Soyad
+                  {t('register.fullName')}
                 </label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -199,7 +199,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                     className={`w-full pl-12 pr-4 py-4 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${
                       errors.name ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'
                     }`}
-                    placeholder="Adınız Soyadınız"
+                    placeholder={t('register.namePlaceholder')}
                   />
                 </div>
                 {errors.name && <p className="text-red-500 text-sm mt-2 font-medium">{errors.name}</p>}
@@ -207,7 +207,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  E-posta Adresi
+                  {t('login.email')}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -218,7 +218,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                     className={`w-full pl-12 pr-4 py-4 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${
                       errors.email ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'
                     }`}
-                    placeholder="ornek@email.com"
+                    placeholder={t('login.emailPlaceholder')}
                   />
                 </div>
                 {errors.email && <p className="text-red-500 text-sm mt-2 font-medium">{errors.email}</p>}
@@ -226,7 +226,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Şifre
+                  {t('login.password')}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -267,7 +267,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Şifre Tekrarı
+                  {t('register.confirmPassword')}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -304,9 +304,8 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                     }}
                     className="mt-1 rounded border-slate-300 text-purple-600 focus:ring-purple-500" 
                   />
-                  <span className="text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">Kullanım Koşulları</span> ve{' '}
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">Gizlilik Politikası</span>'nı okudum ve kabul ediyorum.
+                    <span className="text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+                    {t('register.termsCheckboxLabel')}
                   </span>
                 </label>
                 {errors.terms && <p className="text-red-500 text-sm mt-2 font-medium">{errors.terms}</p>}
@@ -321,7 +320,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                   <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <>
-                    <span>Hesap Oluştur</span>
+                    <span>{t('register.submit')}</span>
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}
@@ -330,12 +329,12 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
 
             <div className="mt-8 text-center">
               <p className="text-slate-600 dark:text-slate-400 font-medium">
-                Zaten hesabınız var mı?{' '}
+                {t('register.hasAccount')}{' '}
                 <button
                   onClick={onSwitchToLogin}
                   className="text-purple-600 hover:text-purple-700 font-bold hover:underline"
                 >
-                  Giriş yapın
+                  {t('register.signIn')}
                 </button>
               </p>
             </div>

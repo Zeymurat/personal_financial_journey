@@ -1,0 +1,95 @@
+{
+  "header": {
+    "title": "Tableau de bord",
+    "subtitle": "Vue d'ensemble de vos finances",
+    "disclaimer": "Les chiffres peuvent varier ; consultez les rapports.",
+    "lastUpdate": "Dernière mise à jour : {{date}}",
+    "totalNetWorth": "Patrimoine net total",
+    "totalAssets": "Actifs totaux"
+  },
+  "stats": {
+    "monthlyIncome": "Revenu mensuel",
+    "monthlyExpense": "Dépenses mensuelles",
+    "monthlyNet": "Revenu net mensuel",
+    "totalStatus": "Solde global",
+    "investmentPortfolio": "Portefeuille d'investissement",
+    "vsLastMonth": "vs mois dernier",
+    "thisMonth": "ce mois-ci"
+  },
+  "performance": {
+    "monthlyTarget": "Objectif mensuel",
+    "editTarget": "Modifier",
+    "editTargetTitle": "Modifier l'objectif",
+    "netIncomeThisMonth": "Revenu net (ce mois)",
+    "remainingToTarget": "Reste à atteindre",
+    "targetReached": "✓ Objectif atteint !",
+    "progress": "Progression",
+    "savingsRate": "Taux d'épargne",
+    "incomeThisMonth": "Revenu (ce mois)",
+    "netThisMonth": "Net (ce mois)",
+    "vsLastMonthShort": "vs mois dernier",
+    "investmentRoi": "ROI investissement",
+    "totalValue": "Valeur totale",
+    "profitLoss": "P/P",
+    "performance": "Performance",
+    "roiExcellent": "Excellent",
+    "roiGood": "Bon",
+    "roiLow": "Faible",
+    "savingsGoal": "Objectif d'épargne",
+    "currentSavings": "Épargne actuelle",
+    "setSavingsGoalTitle": "Définir un objectif d'épargne total",
+    "setSavingsGoalBody": "Suivez votre objectif d'épargne à long terme.",
+    "setGoalButton": "Définir l'objectif"
+  },
+  "investmentTypes": {
+    "other": "Autre",
+    "fund": "Fonds",
+    "stock": "Action",
+    "crypto": "Crypto",
+    "gold": "Or",
+    "currency": "Devises",
+    "preciousMetal": "Métal précieux"
+  },
+  "recent": {
+    "title": "Dernières opérations",
+    "subtitle": "5 dernières opérations",
+    "seeAll": "Tout voir",
+    "loading": "Chargement...",
+    "empty": "Aucune opération",
+    "noDescription": "Sans description",
+    "noCategory": "Sans catégorie"
+  },
+  "investmentOverview": {
+    "title": "Portefeuille",
+    "subtitle": "Meilleures performances",
+    "details": "Détails",
+    "loading": "Chargement...",
+    "empty": "Aucun investissement",
+    "units": "unités",
+    "noPrice": "Prix indisponible"
+  },
+  "quickActions": {
+    "title": "Actions rapides",
+    "addIncome": "Ajouter un revenu",
+    "addExpense": "Ajouter une dépense",
+    "addInvestment": "Ajouter un investissement",
+    "viewReports": "Voir les rapports"
+  },
+  "targetModal": {
+    "titleMonthly": "Modifier l'objectif mensuel",
+    "titleSavings": "Modifier l'objectif d'épargne",
+    "descMonthly": "Définissez votre objectif d'épargne mensuel",
+    "descSavings": "Définissez votre objectif d'épargne total",
+    "amountLabel": "Montant cible (₺)",
+    "placeholder": "ex. 15000"
+  },
+  "toast": {
+    "investmentError": "Impossible d'ajouter l'investissement : {{message}}",
+    "investmentCreateFailed": "Impossible de créer l'investissement",
+    "unknownError": "Erreur inconnue",
+    "invalidAmount": "Saisissez un montant valide",
+    "monthlyTargetSaved": "Objectif mensuel mis à jour !",
+    "savingsTargetSaved": "Objectif d'épargne mis à jour !",
+    "targetSaveError": "Impossible d'enregistrer l'objectif"
+  }
+}

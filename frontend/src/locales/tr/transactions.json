@@ -1,0 +1,141 @@
+{
+  "labels": {
+    "income": "Gelir",
+    "expense": "Gider"
+  },
+  "header": {
+    "title": "İşlemler",
+    "subtitle": "Gelir ve giderlerinizi yönetin",
+    "disclaimer": "Hesaplamalarda sapmalar olabilir, lütfen raporları kontrol edin.",
+    "newTransaction": "Yeni İşlem"
+  },
+  "summary": {
+    "totalIncome": "Toplam Gelir",
+    "totalExpense": "Toplam Gider",
+    "monthlyStatus": "Aylık Durum",
+    "transactionCount": "İşlem Sayısı",
+    "thisMonth": "Bu ay",
+    "netStatus": "Net Durum",
+    "vsPreviousMonth": "Önceki ay'a göre"
+  },
+  "quickActions": {
+    "title": "Hızlı İşlemler",
+    "subtitle": "Sık kullandığınız işlemleri tek tıkla ekleyin",
+    "loading": "Yükleniyor...",
+    "scrollLeft": "Sola kaydır",
+    "scrollRight": "Sağa kaydır",
+    "confirmDelete": "Bu hızlı işlemi silmek istediğinize emin misiniz?",
+    "newAdd": "Yeni Ekle",
+    "dragTitle": "Sürükleyerek sırala",
+    "editTitle": "Düzenle",
+    "deleteTitle": "Sil",
+    "setup": {
+      "titleEdit": "Hızlı İşlem Düzenle",
+      "titleCreate": "Hızlı İşlem Oluştur",
+      "subtitle": "Sık kullandığınız işlemi kaydedin",
+      "nameLabel": "Hızlı İşlem Adı",
+      "namePlaceholder": "Örn: Kira Ödemesi",
+      "descriptionLabel": "Açıklama (Tabloda işlem sütununda görünecektir.)",
+      "descriptionPlaceholder": "İşlem açıklaması",
+      "transactionType": "İşlem Türü",
+      "amount": "Miktar",
+      "currency": "Döviz",
+      "category": "Kategori",
+      "selectCategory": "Kategori Seçin",
+      "fillAllFields": "Lütfen tüm alanları doldurun.",
+      "update": "Güncelle"
+    }
+  },
+  "toast": {
+    "deleteSuccess": "İşlem başarıyla silindi.",
+    "deleteError": "İşlem silinirken bir hata oluştu. Lütfen tekrar deneyin.",
+    "loadError": "İşlemler yüklenirken hata oluştu.",
+    "addSuccess": "İşlem başarıyla eklendi.",
+    "addError": "İşlem eklenirken bir hata oluştu. Lütfen tekrar deneyin.",
+    "updateSuccess": "İşlem başarıyla güncellendi.",
+    "updateError": "İşlem güncellenirken bir hata oluştu. Lütfen tekrar deneyin.",
+    "quickSaveSuccess": "Hızlı işlem başarıyla kaydedildi.",
+    "quickSaveError": "Hızlı işlem kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.",
+    "quickDeleteSuccess": "Hızlı işlem başarıyla silindi.",
+    "quickDeleteError": "Hızlı işlem silinirken bir hata oluştu. Lütfen tekrar deneyin."
+  },
+  "list": {
+    "title": "Tüm İşlemler",
+    "subtitleLoading": "Yükleniyor...",
+    "showingCount": "{{count}} işlem gösteriliyor",
+    "searchPlaceholder": "İşlem ara...",
+    "filterAll": "Tüm İşlemler",
+    "dateAll": "Tüm Tarihler",
+    "today": "Bugün",
+    "week": "Son 7 Gün",
+    "month": "Bu Ay",
+    "last30days": "Son 30 Gün",
+    "customRange": "Özel Tarih Aralığı",
+    "allCategories": "Tüm Kategoriler",
+    "colTransaction": "İşlem",
+    "colCategory": "Kategori",
+    "colDate": "Tarih",
+    "colAmount": "Tutar",
+    "colActions": "İşlemler",
+    "loading": "İşlemler yükleniyor...",
+    "emptyTitle": "Henüz işlem bulunmuyor",
+    "emptyHint": "İlk işleminizi ekleyerek başlayın",
+    "firstAdd": "İlk İşlemi Ekle"
+  },
+  "pagination": {
+    "totalRecords": "Toplam {{count}} kayıt",
+    "perPage": "{{count}} / sayfa",
+    "pageOf": "Sayfa {{current}} / {{total}}"
+  },
+  "form": {
+    "transactionType": "İşlem Türü",
+    "amount": "Miktar",
+    "currency": "Döviz",
+    "category": "Kategori",
+    "selectCategory": "Kategori Seçin",
+    "description": "Açıklama",
+    "descriptionPlaceholder": "İşlem açıklaması",
+    "date": "Tarih",
+    "addTitle": "Yeni İşlem Ekle",
+    "addSubtitle": "Gelir veya gider işlemi ekleyin",
+    "addButton": "Ekle",
+    "editTitle": "İşlem Düzenle",
+    "editSubtitle": "İşlem bilgilerini güncelleyin",
+    "updateButton": "Güncelle"
+  },
+  "detail": {
+    "title": "İşlem Detayları",
+    "subtitle": "Detaylı işlem bilgileri",
+    "incomeLabel": "Gelir İşlemi",
+    "expenseLabel": "Gider İşlemi",
+    "amount": "Tutar",
+    "category": "Kategori",
+    "date": "Tarih",
+    "currency": "Para Birimi",
+    "edit": "Düzenle",
+    "delete": "Sil"
+  },
+  "deleteModal": {
+    "title": "İşlemi Sil",
+    "subtitle": "Bu işlem kalıcı olarak silinecek",
+    "warning": "⚠️ Bu işlem geri alınamaz. Emin misiniz?"
+  },
+  "investmentSuggestion": {
+    "title": "Yatırım Hatırlatması",
+    "areaLabel": "Yatırımlar",
+    "body": "Yapmış olduğunuz işlemi {{area}} alanında eklemeniz tavsiye edilir. Bu sayede yatırımlarınızı daha detaylı takip edebilir ve portföy performansınızı analiz edebilirsiniz.",
+    "goToInvestments": "Yatırımlar Sayfasına Git",
+    "close": "Kapat"
+  },
+  "currencyLong": {
+    "TRY": "Türk Lirası",
+    "USD": "Amerikan Doları",
+    "EUR": "Euro",
+    "GBP": "İngiliz Sterlini",
+    "JPY": "Japon Yeni",
+    "CHF": "İsviçre Frangı",
+    "AUD": "Avustralya Doları",
+    "CAD": "Kanada Doları",
+    "CNY": "Çin Yuanı"
+  }
+}

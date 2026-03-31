@@ -1,4 +1,4 @@
-import { Transaction, Investment, InvestmentTransaction, QuickTransaction } from '../types';
+import { Transaction, Investment, InvestmentTransaction, QuickTransaction, UserSettings, Notification, Event } from '../types';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -7,20 +7,16 @@ const API_BASE_URL = 'http://localhost:8000/api';
 
 // JWT token'ı localStorage'dan al
 const getAuthToken = (): string | null => {
-  const token = localStorage.getItem('access_token');
-  console.log("🔍 getAuthToken:", token ? "Token var" : "Token yok");
-  return token;
+  return localStorage.getItem('access_token');
 };
 
 // API headers'ı hazırla
 const getHeaders = (): HeadersInit => {
   const token = getAuthToken();
-  const headers = {
+  return {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` }),
   };
-  console.log("🔧 Headers:", headers);
-  return headers;
 };
 
 // API isteği yap
@@ -31,14 +27,8 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
     ...options
   };
   
-  console.log("🚀 API Request URL:", url);
-  console.log("🔧 Config:", config);
-  
   try {
     const response = await fetch(url, config);
-    
-    console.log("📨 Response status:", response.status);
-    console.log("📨 Response headers:", Object.fromEntries(response.headers.entries()));
     
     if (!response.ok) {
       // 401/403 durumunda kullanıcıyı login ekranına yönlendirmek için oturumu temizle
@@ -47,23 +37,18 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
           localStorage.removeItem('access_token');
           localStorage.removeItem('refreshToken');
           await signOut(auth);
-          console.warn('🔒 Unauthorized/Forbidden. User signed out and tokens cleared.');
         } catch (e) {
-          console.error('Error during forced sign out:', e);
+          // Silent fail
         }
       }
 
       const errorData = await response.json().catch(() => ({}));
-      console.error("❌ API Error:", errorData);
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json();
-    console.log("✅ Success response:", data);
-    return data;
+    return await response.json();
     
   } catch (error) {
-    console.error('❌ API request failed:', error);
     throw error;
   }
 };
@@ -77,7 +62,6 @@ export const transactionAPI = {
     if (filters?.category) queryParams.append('category', filters.category);
     
     const endpoint = `/auth/transactions/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    console.log("📝 Transaction getAll endpoint:", endpoint);
     return await apiRequest(endpoint);
   },
 
@@ -180,6 +164,21 @@ export const investmentTransactionAPI = {
       method: 'POST',
       body: JSON.stringify(transaction)
     });
+  },
+
+  // Yatırım işlemini güncelle
+  async update(investmentId: string, transactionId: string, updates: Partial<InvestmentTransaction>) {
+    return await apiRequest(`/auth/investments/${investmentId}/transactions/${transactionId}/`, {
+      method: 'PUT',
+      body: JSON.stringify(updates)
+    });
+  },
+
+  // Yatırım işlemini sil
+  async delete(investmentId: string, transactionId: string) {
+    return await apiRequest(`/auth/investments/${investmentId}/transactions/${transactionId}/`, {
+      method: 'DELETE'
+    });
   }
 };
 
@@ -196,10 +195,6 @@ export const authAPI = {
     if (response.access) {
       localStorage.setItem('access_token', response.access);
       localStorage.setItem('refreshToken', response.refresh);
-      console.log("🔑 Tokens saved to localStorage");
-      console.log("🔑 Access token:", response.access.substring(0, 50) + "...");
-    } else {
-      console.log("❌ No access token in response:", response);
     }
     
     return response;
@@ -217,7 +212,6 @@ export const authAPI = {
     
     if (response.access) {
       localStorage.setItem('access_token', response.access);
-      console.log("🔄 Token refreshed");
     }
     
     return response;
@@ -233,14 +227,13 @@ export const authAPI = {
           body: JSON.stringify({ refresh_token: refreshToken })
         });
       } catch (error) {
-        console.error('Logout error:', error);
+        // Silent fail
       }
     }
     
     // Local storage'ı temizle
     localStorage.removeItem('access_token');
     localStorage.removeItem('refreshToken');
-    console.log("🚪 Logged out, tokens cleared");
   }
 };
 
@@ -259,10 +252,6 @@ export const checkTokenStatus = () => {
   const token = localStorage.getItem('access_token');
   const refreshToken = localStorage.getItem('refreshToken');
   
-  console.log("🔍 Token Status Check:");
-  console.log("- Auth Token:", token ? "✅ Var" : "❌ Yok");
-  console.log("- Refresh Token:", refreshToken ? "✅ Var" : "❌ Yok");
-  
   return {
     hasAuthToken: !!token,
     hasRefreshToken: !!refreshToken,
@@ -275,7 +264,6 @@ export const checkTokenStatus = () => {
 export const tcmbAPI = {
     // Tüm verileri getir (döviz kurları)
   async getMain() {
-    console.log("💰 Finans API - GetMain çağrılıyor...");
     const response = await fetch(`${API_BASE_URL}/currencies/getmain/`, {
       method: 'GET',
       headers: {
@@ -283,25 +271,16 @@ export const tcmbAPI = {
       }
     });
     
-    console.log("💰 Finans API Response Status:", response.status);
-    
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("❌ Finans API Hatası:", errorData);
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json();
-    console.log("✅ Finans API Başarılı - Veri çekildi:", data);
-    console.log("📊 Çekilen Döviz Kurları:", data.data?.exchange_rates);
-    console.log("📅 Finans API Tarihi:", data.data?.date);
-    
-    return data;
+    return await response.json();
   },
 
   // Sadece döviz kurları
   async getExchangeRates() {
-    console.log("💱 Finans API - Exchange Rates çağrılıyor...");
     const response = await fetch(`${API_BASE_URL}/currencies/exchange-rates/`, {
       method: 'GET',
       headers: {
@@ -311,18 +290,14 @@ export const tcmbAPI = {
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("❌ Finans API Exchange Rates Hatası:", errorData);
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json();
-    console.log("✅ Finans API Exchange Rates:", data);
-    return data;
+    return await response.json();
   },
 
-  // Sadece altın fiyatları (Finans API'de altın var ama farklı formatta)
+  // Sadece altın fiyatları
   async getGoldPrices() {
-    console.log("🥇 Finans API - Gold Prices");
     const response = await fetch(`${API_BASE_URL}/currencies/gold-prices/`, {
       method: 'GET',
       headers: {
@@ -332,25 +307,17 @@ export const tcmbAPI = {
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("❌ Finans API Gold Prices Hatası:", errorData);
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json();
-    console.log("✅ Finans API Gold Prices:", data);
-    return data;
+    return await response.json();
   }
 };
 
 // Borsa API'leri
 export const borsaAPI = {
   // Borsa verilerini getir (akıllı kontrol ile)
-  // Backend akıllı zaman kontrolü yapar: gerekirse API'den çeker, değilse cache'den döndürür
-  // borsa/list endpoint'i zaten akıllı kontrol yapıyor, ayrı trigger çağrısına gerek yok
   async getBorsaData(date?: string) {
-    console.log("📈 Borsa API - GetBorsaData çağrılıyor...");
-    
-    // borsa/list endpoint'i akıllı kontrol yapıyor ve veriyi döndürüyor
     const url = date 
       ? `${API_BASE_URL}/currencies/borsa/list/?date=${date}`
       : `${API_BASE_URL}/currencies/borsa/list/`;
@@ -365,12 +332,26 @@ export const borsaAPI = {
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("❌ Borsa API Hatası:", errorData);
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json();
-    return data;
+    return await response.json();
+  }
+};
+
+// Settings API'leri
+export const settingsAPI = {
+  // Kullanıcı ayarlarını getir
+  async get() {
+    return await apiRequest('/auth/settings/');
+  },
+
+  // Kullanıcı ayarlarını güncelle
+  async update(settings: Partial<UserSettings>) {
+    return await apiRequest('/auth/settings/', {
+      method: 'PUT',
+      body: JSON.stringify(settings)
+    });
   }
 };
 
@@ -378,7 +359,6 @@ export const borsaAPI = {
 export const fundsAPI = {
   // Funds verilerini getir (global havuz)
   async getFunds() {
-    console.log("💰 Funds API - GetFunds çağrılıyor...");
     const response = await fetch(`${API_BASE_URL}/currencies/funds/`, {
       method: 'GET',
       headers: {
@@ -387,23 +367,18 @@ export const fundsAPI = {
       }
     });
     
-    console.log("💰 Funds API Response Status:", response.status);
-    
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("❌ Funds API Hatası:", errorData);
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log("✅ Funds API:", data);
+    console.log('💰 Funds verileri yüklendi');
     return data;
   },
 
   // Quota bilgisini getir (cache'den okur, istek saymaz)
   async getFundQuota() {
-    console.log('💰 Fund Quota API - GetFundQuota çağrılıyor...');
-    
     const url = `${API_BASE_URL}/currencies/fund-quota/`;
     const response = await fetch(url, {
       method: 'GET',
@@ -418,14 +393,11 @@ export const fundsAPI = {
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json();
-    return data;
+    return await response.json();
   },
 
   // Fon detay bilgilerini getir (RapidAPI - akıllı cache ile)
   async getFundDetail(fundCode: string, date?: string) {
-    console.log(`💰 Fund Detail API - GetFundDetail çağrılıyor: ${fundCode}${date ? ` (${date})` : ''}`);
-    
     const queryParams = new URLSearchParams();
     queryParams.append('fund_code', fundCode);
     if (date) {
@@ -441,28 +413,16 @@ export const fundsAPI = {
       }
     });
     
-    console.log("💰 Fund Detail API Response Status:", response.status);
-    
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("❌ Fund Detail API Hatası:", errorData);
       throw new Error(errorData.error || errorData.message || `HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json();
-    console.log("✅ Fund Detail API:", {
-      success: data.success,
-      source: data.source,
-      cached: data.cached,
-      quota: data.quota
-    });
-    return data;
+    return await response.json();
   },
 
   // Fon fiyat kontrolü (cache'den okur, API'ye istek atmaz)
   async checkFundPrice(fundCode: string, date?: string) {
-    console.log(`💰 Fund Price Check API - CheckFundPrice çağrılıyor: ${fundCode}${date ? ` (${date})` : ''}`);
-    
     const queryParams = new URLSearchParams();
     queryParams.append('fund_code', fundCode);
     if (date) {
@@ -483,7 +443,81 @@ export const fundsAPI = {
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json();
-    return data;
+    return await response.json();
+  }
+};
+
+// Notifications API'leri
+export const notificationsAPI = {
+  // Tüm bildirimleri getir (son 30 gün)
+  async getAll() {
+    return await apiRequest('/auth/notifications/');
+  },
+
+  // NOT: create metodu yok - Bildirimler sistem tarafından otomatik oluşturulur
+  // Kullanıcı sadece okuyup silebilir
+
+  // Bildirimi okundu olarak işaretle
+  async markAsRead(id: string) {
+    return await apiRequest(`/auth/notifications/${id}/read/`, {
+      method: 'PUT'
+    });
+  },
+
+  // Tüm bildirimleri okundu olarak işaretle
+  async markAllAsRead() {
+    return await apiRequest('/auth/notifications/read-all/', {
+      method: 'PUT'
+    });
+  },
+
+  // Bildirimi sil
+  async delete(id: string) {
+    return await apiRequest(`/auth/notifications/${id}/`, {
+      method: 'DELETE'
+    });
+  },
+
+  // Tüm okunmamış bildirimleri sil
+  async deleteAllRead() {
+    return await apiRequest('/auth/notifications/delete-read/', {
+      method: 'DELETE'
+    });
+  }
+};
+
+// Events API'leri
+export const eventsAPI = {
+  // Tüm etkinlikleri getir
+  async getAll(filters?: { startDate?: string; endDate?: string }) {
+    const queryParams = new URLSearchParams();
+    if (filters?.startDate) queryParams.append('startDate', filters.startDate);
+    if (filters?.endDate) queryParams.append('endDate', filters.endDate);
+    
+    const endpoint = `/auth/events/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    return await apiRequest(endpoint);
+  },
+
+  // Yeni etkinlik oluştur
+  async create(event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) {
+    return await apiRequest('/auth/events/', {
+      method: 'POST',
+      body: JSON.stringify(event)
+    });
+  },
+
+  // Etkinlik güncelle
+  async update(id: string, event: Partial<Event>) {
+    return await apiRequest(`/auth/events/${id}/`, {
+      method: 'PUT',
+      body: JSON.stringify(event)
+    });
+  },
+
+  // Etkinlik sil
+  async delete(id: string) {
+    return await apiRequest(`/auth/events/${id}/`, {
+      method: 'DELETE'
+    });
   }
 };

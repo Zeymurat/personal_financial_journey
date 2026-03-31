@@ -1,0 +1,95 @@
+{
+  "header": {
+    "title": "Dashboard",
+    "subtitle": "Umfassende Übersicht Ihrer Finanzen",
+    "disclaimer": "Abweichungen möglich – bitte Berichte prüfen.",
+    "lastUpdate": "Zuletzt aktualisiert: {{date}}",
+    "totalNetWorth": "Gesamtnettovermögen",
+    "totalAssets": "Gesamtvermögen"
+  },
+  "stats": {
+    "monthlyIncome": "Monatseinkommen",
+    "monthlyExpense": "Monatsausgaben",
+    "monthlyNet": "Monatlicher Überschuss",
+    "totalStatus": "Gesamtsaldo",
+    "investmentPortfolio": "Anlageportfolio",
+    "vsLastMonth": "zum Vormonat",
+    "thisMonth": "diesen Monat"
+  },
+  "performance": {
+    "monthlyTarget": "Monatsziel",
+    "editTarget": "Bearbeiten",
+    "editTargetTitle": "Ziel bearbeiten",
+    "netIncomeThisMonth": "Nettoeinkommen (dieser Monat)",
+    "remainingToTarget": "Bis zum Ziel",
+    "targetReached": "✓ Ziel erreicht!",
+    "progress": "Fortschritt",
+    "savingsRate": "Sparquote",
+    "incomeThisMonth": "Einkommen (dieser Monat)",
+    "netThisMonth": "Netto (dieser Monat)",
+    "vsLastMonthShort": "zum Vormonat",
+    "investmentRoi": "Anlage-ROI",
+    "totalValue": "Gesamtwert",
+    "profitLoss": "G/V",
+    "performance": "Performance",
+    "roiExcellent": "Ausgezeichnet",
+    "roiGood": "Gut",
+    "roiLow": "Niedrig",
+    "savingsGoal": "Sparkiel",
+    "currentSavings": "Aktuelle Ersparnisse",
+    "setSavingsGoalTitle": "Gesamt-Sparkiel festlegen",
+    "setSavingsGoalBody": "Verfolgen Sie Ihr langfristiges Sparziel.",
+    "setGoalButton": "Ziel setzen"
+  },
+  "investmentTypes": {
+    "other": "Sonstiges",
+    "fund": "Fonds",
+    "stock": "Aktie",
+    "crypto": "Krypto",
+    "gold": "Gold",
+    "currency": "Devisen",
+    "preciousMetal": "Edelmetall"
+  },
+  "recent": {
+    "title": "Letzte Transaktionen",
+    "subtitle": "Letzte 5 Transaktionen",
+    "seeAll": "Alle anzeigen",
+    "loading": "Wird geladen...",
+    "empty": "Noch keine Transaktionen",
+    "noDescription": "Keine Beschreibung",
+    "noCategory": "Keine Kategorie"
+  },
+  "investmentOverview": {
+    "title": "Anlageportfolio",
+    "subtitle": "Beste Performance",
+    "details": "Details",
+    "loading": "Wird geladen...",
+    "empty": "Noch keine Anlagen",
+    "units": "Stk.",
+    "noPrice": "Kein Preis"
+  },
+  "quickActions": {
+    "title": "Schnellaktionen",
+    "addIncome": "Einnahme",
+    "addExpense": "Ausgabe",
+    "addInvestment": "Anlage hinzufügen",
+    "viewReports": "Berichte"
+  },
+  "targetModal": {
+    "titleMonthly": "Monatsziel bearbeiten",
+    "titleSavings": "Sparkiel bearbeiten",
+    "descMonthly": "Monatliches Sparziel festlegen",
+    "descSavings": "Gesamt-Sparkiel festlegen",
+    "amountLabel": "Zielbetrag (₺)",
+    "placeholder": "z. B. 15000"
+  },
+  "toast": {
+    "investmentError": "Anlage konnte nicht hinzugefügt werden: {{message}}",
+    "investmentCreateFailed": "Anlage konnte nicht erstellt werden",
+    "unknownError": "Unbekannter Fehler",
+    "invalidAmount": "Bitte gültigen Betrag eingeben",
+    "monthlyTargetSaved": "Monatsziel aktualisiert!",
+    "savingsTargetSaved": "Sparkiel aktualisiert!",
+    "targetSaveError": "Ziel konnte nicht gespeichert werden"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "calendar": {
+    "months": ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"],
+    "weekdaysShort": ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"],
+    "weekdaysLong": ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"]
+  },
+  "ui": {
+    "backToToday": "Bugüne Dön",
+    "loading": "Yükleniyor...",
+    "noEvents": "Etkinlik Yok",
+    "deleteEventTitle": "Etkinliği sil",
+    "editEventTitle": "Etkinliği düzenle"
+  },
+  "recurrence": {
+    "daily": "Günlük",
+    "weekly": "Haftalık",
+    "monthly": "Aylık",
+    "yearly": "Yıllık"
+  },
+  "toast": {
+    "loadError": "Etkinlikler yüklenirken bir hata oluştu.",
+    "titleRequired": "Lütfen etkinlik başlığı girin.",
+    "updateSuccess": "Etkinlik başarıyla güncellendi!",
+    "createSuccess": "Etkinlik başarıyla oluşturuldu!",
+    "saveError": "Etkinlik kaydedilirken bir hata oluştu.",
+    "seriesCapped": "Seri maksimum kayıt sınırına takıldı. ",
+    "seriesCreated": "Etkinlik serisi oluşturuldu. Toplam {{total}} etkinlik oluşturuldu.",
+    "deletedMany": "{{count}} etkinlik başarıyla silindi!",
+    "deleteManyError": "Etkinlikler silinirken bir hata oluştu.",
+    "deleteOneSuccess": "Etkinlik başarıyla silindi!",
+    "deleteOneError": "Etkinlik silinirken bir hata oluştu."
+  },
+  "modal": {
+    "editTitle": "Etkinliği Düzenle",
+    "newTitle": "Yeni Etkinlik",
+    "titleLabel": "Başlık *",
+    "titlePlaceholder": "Etkinlik başlığı",
+    "descriptionLabel": "Açıklama",
+    "descriptionPlaceholder": "Etkinlik açıklaması",
+    "dateLabel": "Tarih",
+    "timeLabel": "Saat (isteğe bağlı)",
+    "recurringCheckbox": "Düzenli (Tekrarlı) Etkinlik",
+    "recurrenceTypeLabel": "Tekrarlama Tipi",
+    "optDaily": "Her Gün",
+    "optWeekly": "Her Hafta (Aynı Gün)",
+    "optMonthly": "Her Ayın {{day}}. Günü",
+    "optYearly": "Her Yıl (Aynı Tarih)",
+    "creatingProgress": "Oluşturuluyor: {{created}}/{{total}}",
+    "deleteFromEditTitle": "Etkinliği sil",
+    "saving": "Oluşturuluyor...",
+    "update": "Güncelle",
+    "save": "Kaydet"
+  },
+  "deleteDialog": {
+    "title": "Etkinliği Sil",
+    "bodySingle": "Bu etkinliği silmek istediğinize emin misiniz?",
+    "bodyRecurring": "Bu tekrarlı etkinliğin {{count}} tekrarını içeren seriyi silmek istediğinizde ilerleme göreceksiniz.",
+    "deletingProgress": "Siliniyor: {{deleted}}/{{total}}",
+    "deleteSeries": "Tüm seriyi sil",
+    "deleteThisOnly": "Sadece bu tekrar"
+  }
+}

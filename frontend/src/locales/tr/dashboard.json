@@ -1,0 +1,95 @@
+{
+  "header": {
+    "title": "Dashboard",
+    "subtitle": "Finansal durumunuzun kapsamlı özeti",
+    "disclaimer": "Hesaplamalarda sapmalar olabilir, lütfen raporları kontrol edin.",
+    "lastUpdate": "Son güncelleme: {{date}}",
+    "totalNetWorth": "Toplam Net Değer",
+    "totalAssets": "Toplam varlık"
+  },
+  "stats": {
+    "monthlyIncome": "Aylık Gelir",
+    "monthlyExpense": "Aylık Gider",
+    "monthlyNet": "Aylık Net Gelir",
+    "totalStatus": "Toplam Durum",
+    "investmentPortfolio": "Yatırım Portföyü",
+    "vsLastMonth": "önceki ay'a göre",
+    "thisMonth": "bu ay"
+  },
+  "performance": {
+    "monthlyTarget": "Aylık Hedef",
+    "editTarget": "Düzenle",
+    "editTargetTitle": "Hedefi düzenle",
+    "netIncomeThisMonth": "Bu Ay Net Gelir",
+    "remainingToTarget": "Hedefe Kalan",
+    "targetReached": "✓ Hedefe Ulaşıldı!",
+    "progress": "İlerleme",
+    "savingsRate": "Tasarruf Oranı",
+    "incomeThisMonth": "Bu Ay Gelir",
+    "netThisMonth": "Bu Ay Net",
+    "vsLastMonthShort": "Geçen Aya Göre",
+    "investmentRoi": "Yatırım ROI",
+    "totalValue": "Toplam Değer",
+    "profitLoss": "Kar/Zarar",
+    "performance": "Performans",
+    "roiExcellent": "Mükemmel",
+    "roiGood": "İyi",
+    "roiLow": "Düşük",
+    "savingsGoal": "Birikim Hedefi",
+    "currentSavings": "Mevcut Birikim",
+    "setSavingsGoalTitle": "Toplam Birikim Hedefi Belirleyin",
+    "setSavingsGoalBody": "Uzun vadeli birikim hedefinizi belirleyerek ilerlemenizi takip edin.",
+    "setGoalButton": "Hedef Belirle"
+  },
+  "investmentTypes": {
+    "other": "Diğer",
+    "fund": "Fon",
+    "stock": "Hisse",
+    "crypto": "Kripto",
+    "gold": "Altın",
+    "currency": "Döviz",
+    "preciousMetal": "Değerli Metal"
+  },
+  "recent": {
+    "title": "Son İşlemler",
+    "subtitle": "Son 5 finansal işlem",
+    "seeAll": "Tümünü Gör",
+    "loading": "Yükleniyor...",
+    "empty": "Henüz işlem yok",
+    "noDescription": "Açıklama yok",
+    "noCategory": "Kategori yok"
+  },
+  "investmentOverview": {
+    "title": "Yatırım Portföyü",
+    "subtitle": "En iyi performans",
+    "details": "Detaylar",
+    "loading": "Yükleniyor...",
+    "empty": "Henüz yatırım yok",
+    "units": "adet",
+    "noPrice": "Fiyat bulunamadı"
+  },
+  "quickActions": {
+    "title": "Hızlı İşlemler",
+    "addIncome": "Gelir Ekle",
+    "addExpense": "Gider Ekle",
+    "addInvestment": "Yatırım Ekle",
+    "viewReports": "Rapor Görüntüle"
+  },
+  "targetModal": {
+    "titleMonthly": "Aylık Hedef Düzenle",
+    "titleSavings": "Birikim Hedefi Düzenle",
+    "descMonthly": "Aylık birikim hedefinizi belirleyin",
+    "descSavings": "Toplam birikim hedefinizi belirleyin",
+    "amountLabel": "Hedef Tutar (₺)",
+    "placeholder": "Örn: 15000"
+  },
+  "toast": {
+    "investmentError": "Yatırım eklenirken bir hata oluştu: {{message}}",
+    "investmentCreateFailed": "Investment oluşturulamadı",
+    "unknownError": "Bilinmeyen bir hata oluştu",
+    "invalidAmount": "Lütfen geçerli bir tutar girin",
+    "monthlyTargetSaved": "Aylık hedef güncellendi!",
+    "savingsTargetSaved": "Birikim hedefi güncellendi!",
+    "targetSaveError": "Hedef kaydedilirken bir hata oluştu"
+  }
+}

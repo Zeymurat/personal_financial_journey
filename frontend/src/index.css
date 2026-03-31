@@ -2,45 +2,240 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Quick Actions Scrollbar Styling */
+/* Quick Actions Scrollbar Styling - Modern & Minimal */
 .quick-actions-scroll {
   scrollbar-width: thin !important;
-  scrollbar-color: #cbd5e1 #f1f5f9 !important;
+  scrollbar-color: rgba(139, 92, 246, 0.3) transparent !important; /* Purple with transparency */
 }
 
+/* Varsayılan olarak scrollbar gizli, hover'da görünür */
 .quick-actions-scroll::-webkit-scrollbar {
-  height: 8px !important;
+  height: 6px !important;
+  width: 6px !important;
   display: block !important;
+  opacity: 0;
+  transition: opacity 0.3s ease !important;
+}
+
+.quick-actions-scroll:hover::-webkit-scrollbar {
+  opacity: 1 !important;
 }
 
 .quick-actions-scroll::-webkit-scrollbar-track {
-  background: #f1f5f9 !important;
-  border-radius: 4px !important;
+  background: transparent !important;
+  border-radius: 10px !important;
 }
 
 .quick-actions-scroll::-webkit-scrollbar-thumb {
-  background: #cbd5e1 !important;
-  border-radius: 4px !important;
-  min-width: 20px;
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.4), rgba(236, 72, 153, 0.4)) !important;
+  border-radius: 10px !important;
+  min-height: 40px;
+  min-width: 40px;
+  transition: background 0.3s ease !important;
 }
 
 .quick-actions-scroll::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8 !important;
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.6), rgba(236, 72, 153, 0.6)) !important;
 }
 
 /* Dark mode */
 .dark .quick-actions-scroll {
-  scrollbar-color: #475569 #1e293b !important;
+  scrollbar-color: rgba(167, 139, 250, 0.3) transparent !important;
 }
 
 .dark .quick-actions-scroll::-webkit-scrollbar-track {
-  background: #1e293b !important;
+  background: transparent !important;
 }
 
 .dark .quick-actions-scroll::-webkit-scrollbar-thumb {
-  background: #475569 !important;
+  background: linear-gradient(180deg, rgba(167, 139, 250, 0.4), rgba(251, 113, 133, 0.4)) !important;
 }
 
 .dark .quick-actions-scroll::-webkit-scrollbar-thumb:hover {
-  background: #64748b !important;
+  background: linear-gradient(180deg, rgba(167, 139, 250, 0.6), rgba(251, 113, 133, 0.6)) !important;
+}
+
+/* Toast Notifications - Modern & Beautiful */
+.toast-container {
+  top: 20px !important;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast-container > div {
+  /* Toast görsel olarak görünsün ama tıklamaları engellemesin. */
+  pointer-events: none;
+}
+
+/* React-hot-toast içindeki tüm alt elemanlar da tıklamayı engellemesin. */
+.toast-container * {
+  pointer-events: none !important;
+}
+
+.toast-notification {
+  font-family: inherit !important;
+  background: white !important;
+  color: #1f2937 !important;
+  border-radius: 16px !important;
+  padding: 18px 24px 18px 56px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  backdrop-filter: blur(10px) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  min-width: 320px !important;
+  max-width: 500px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  animation: toastSlideIn 0.3s ease-out !important;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Success Toast */
+.toast-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3), 0 4px 12px rgba(16, 185, 129, 0.2) !important;
+}
+
+.toast-success svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)) !important;
+  flex-shrink: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* İkon için ekstra sol boşluk - react-hot-toast yapısı */
+.toast-success [data-icon],
+.toast-success > div:first-child {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Error Toast */
+.toast-error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 10px 40px rgba(239, 68, 68, 0.3), 0 4px 12px rgba(239, 68, 68, 0.2) !important;
+}
+
+.toast-error svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)) !important;
+  flex-shrink: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* İkon için ekstra sol boşluk - react-hot-toast yapısı */
+.toast-error [data-icon],
+.toast-error > div:first-child {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Toast içeriği için padding kontrolü */
+.toast-notification > div {
+  padding: 0 !important;
+}
+
+/* İkon wrapper'ı için özel stil */
+.toast-notification [data-icon],
+.toast-notification > div:first-child {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.toast-notification span {
+  line-height: 1.5 !important;
+  padding: 0 !important;
+}
+
+/* Dark Mode Toast Styles */
+.dark .toast-notification {
+  background: #1f2937 !important;
+  color: #f9fafb !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark .toast-success {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 10px 40px rgba(5, 150, 105, 0.4), 0 4px 12px rgba(5, 150, 105, 0.3) !important;
+}
+
+.dark .toast-error {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 10px 40px rgba(220, 38, 38, 0.4), 0 4px 12px rgba(220, 38, 38, 0.3) !important;
+}
+
+/* Toast Close Button */
+.toast-notification button[aria-label] {
+  color: inherit !important;
+  opacity: 0.7 !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.toast-notification button[aria-label]:hover {
+  opacity: 1 !important;
+}
+
+.dark .toast-notification button[aria-label] {
+  opacity: 0.8 !important;
+}
+
+.dark .toast-notification button[aria-label]:hover {
+  opacity: 1 !important;
+}
+
+/* Shimmer Effect - Blue to Purple Gradient */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    to right,
+    #c7d2fe 0%,
+    #a5b4fc 15%,
+    #818cf8 30%,
+    #a5b4fc 45%,
+    #c7d2fe 60%,
+    #c7d2fe 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.dark .shimmer {
+  background: linear-gradient(
+    to right,
+    #312e81 0%,
+    #4338ca 15%,
+    #6366f1 30%,
+    #4338ca 45%,
+    #312e81 60%,
+    #312e81 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
 }

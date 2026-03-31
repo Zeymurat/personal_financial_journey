@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "title": "Döviz Çevirici",
+    "subtitle": "Güncel kurlarla döviz çevirisi yapın",
+    "disclaimer": "Hesaplamalarda sapmalar olabilir, lütfen raporları kontrol edin."
+  },
+  "form": {
+    "amountToConvert": "Çevrilecek Miktar",
+    "convertedAmount": "Çevrilmiş Miktar",
+    "rateLine": "1 {{from}} = {{rate}} {{to}}",
+    "amountPlaceholder": "0,00"
+  },
+  "quick": {
+    "title": "Hızlı Çevirimler",
+    "add": "Ekle",
+    "manageTitle": "Çevirimleri yönet",
+    "empty": "Henüz hızlı çevirim eklenmemiş. \"Ekle\" butonuna tıklayarak çevirim ekleyebilirsiniz."
+  },
+  "modalQuick": {
+    "title": "Hızlı Çevirimleri Yönet",
+    "subtitle": "Yeni çevirim ekleyin veya mevcut çevirimleri düzenleyin.",
+    "from": "Kaynak",
+    "to": "Hedef",
+    "amount": "Miktar",
+    "addButton": "Çevirim Ekle",
+    "listTitle": "Mevcut çevirimler",
+    "addSectionTitle": "Yeni Çevirim Ekle",
+    "fromCurrencyLabel": "Kaynak Para Birimi",
+    "toCurrencyLabel": "Hedef Para Birimi",
+    "listEmpty": "Henüz çevirim eklenmemiş.",
+    "removeTitle": "Çevirimi sil",
+    "close": "Kapat"
+  },
+  "modalCurrency": {
+    "title": "Döviz, Altın, Kripto ve Değerli Metaller Seç",
+    "subtitle": "Görmek istediğiniz döviz kurlarını, altın fiyatlarını, kripto paraları ve değerli metalleri seçin.",
+    "selectedCount": "{{count}} öğe seçili",
+    "categoryFilter": "Kategori Filtresi",
+    "activeFilters": "{{count}} aktif",
+    "all": "Hepsi",
+    "categoryCurrency": "💱 Döviz",
+    "categoryGold": "🥇 Altın",
+    "categoryCrypto": "₿ Kripto",
+    "categoryMetal": "💎 Değerli Metal",
+    "searchPlaceholder": "Döviz kodu veya adı ile ara (örn: USD, Euro, Bitcoin)",
+    "noResults": "\"{{query}}\" için sonuç bulunamadı",
+    "sectionForex": "💱 Döviz Kurları",
+    "sectionGold": "🥇 Altın Fiyatları",
+    "sectionCrypto": "₿ Kripto Paralar",
+    "sectionMetal": "💎 Değerli Metaller",
+    "buy": "Alış:",
+    "sell": "Satış:",
+    "price": "Fiyat:",
+    "footerSelected": "{{count}} öğe seçili",
+    "footerMinOne": "En az bir öğe seçmelisiniz",
+    "close": "Kapat"
+  },
+  "toast": {
+    "invalidConvert": "Lütfen geçerli bir çevirim girin.",
+    "sameCurrency": "Kaynak ve hedef para birimi aynı olamaz.",
+    "duplicate": "Bu çevirim zaten mevcut.",
+    "addSuccess": "Çevirim başarıyla eklendi.",
+    "addError": "Çevirim eklenirken bir hata oluştu.",
+    "removeSuccess": "Çevirim başarıyla çıkarıldı.",
+    "removeError": "Çevirim çıkarılırken bir hata oluştu."
+  },
+  "cards": {
+    "removeQuickConvert": "Çevirimi listeden çıkar",
+    "dragToReorder": "Sürükleyerek sırala",
+    "removeCurrencyCard": "Kartı listeden çıkar",
+    "buy": "Alış:",
+    "sell": "Satış:",
+    "change": "Değişim:"
+  },
+  "tryName": "Türk Lirası"
+}

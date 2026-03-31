@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "title": "Einstellungen",
+    "subtitle": "App-Einstellungen verwalten"
+  },
+  "appearance": {
+    "title": "Erscheinungsbild",
+    "description": "Design und Anzeige",
+    "darkMode": "Dunkelmodus",
+    "darkModeHint": "Dunkles Farbschema aktivieren"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "description": "In-App-Benachrichtigungen für Transaktionen, Ziele und Investments",
+    "budgetAlerts": "Budgetwarnungen",
+    "budgetAlertsHint": "Wenn aus, erstellt der Server keine neuen Transaktions-, Ziel- oder Investment-Benachrichtigungen"
+  },
+  "language": {
+    "title": "Sprache & Region",
+    "description": "Sprache",
+    "label": "Sprache"
+  },
+  "security": {
+    "title": "Sicherheit",
+    "description": "Kontosicherheit",
+    "changePassword": "Passwort ändern",
+    "twoFactor": "Zwei-Faktor-Authentifizierung",
+    "passwordChange": {
+      "title": "Passwort ändern",
+      "description": "Geben Sie Ihr aktuelles und neues Passwort ein.",
+      "current": "Aktuelles Passwort",
+      "new": "Neues Passwort",
+      "confirm": "Neues Passwort bestätigen",
+      "submit": "Passwort aktualisieren",
+      "success": "Passwort wurde aktualisiert.",
+      "errorGeneric": "Passwort konnte nicht aktualisiert werden.",
+      "errorWrongPassword": "Aktuelles Passwort ist falsch.",
+      "errorWeak": "Passwort muss mindestens 6 Zeichen haben.",
+      "errorRecentLogin": "Bitte abmelden, erneut anmelden und es nochmal versuchen.",
+      "errorTooMany": "Zu viele Versuche. Bitte später erneut versuchen.",
+      "errorMismatch": "Neue Passwörter stimmen nicht überein.",
+      "errorNoEmail": "Keine E-Mail-Adresse vorhanden.",
+      "errorNoPasswordProvider": "Dieses Konto nutzt keine E-Mail/Passwort-Anmeldung.",
+      "oauthHint": "Sie haben sich mit Google oder einem anderen Anbieter angemeldet. Es gibt kein App-Passwort zum Ändern."
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "description": "Persönliche Daten",
+    "fullName": "Vollständiger Name",
+    "email": "E-Mail-Adresse"
+  },
+  "data": {
+    "title": "Daten & Datenschutz",
+    "description": "Daten verwalten",
+    "export": "Daten exportieren",
+    "backup": "Konto sichern",
+    "deleteAccount": "Konto löschen"
+  }
+}

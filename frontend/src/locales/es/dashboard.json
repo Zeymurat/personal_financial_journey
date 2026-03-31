@@ -1,0 +1,95 @@
+{
+  "header": {
+    "title": "Panel",
+    "subtitle": "Resumen completo de tus finanzas",
+    "disclaimer": "Los cifras pueden variar; revisa los informes.",
+    "lastUpdate": "Última actualización: {{date}}",
+    "totalNetWorth": "Patrimonio neto total",
+    "totalAssets": "Activos totales"
+  },
+  "stats": {
+    "monthlyIncome": "Ingreso mensual",
+    "monthlyExpense": "Gasto mensual",
+    "monthlyNet": "Ingreso neto mensual",
+    "totalStatus": "Saldo total",
+    "investmentPortfolio": "Cartera de inversiones",
+    "vsLastMonth": "vs mes anterior",
+    "thisMonth": "este mes"
+  },
+  "performance": {
+    "monthlyTarget": "Objetivo mensual",
+    "editTarget": "Editar",
+    "editTargetTitle": "Editar objetivo",
+    "netIncomeThisMonth": "Ingreso neto (este mes)",
+    "remainingToTarget": "Restante para el objetivo",
+    "targetReached": "✓ ¡Objetivo alcanzado!",
+    "progress": "Progreso",
+    "savingsRate": "Tasa de ahorro",
+    "incomeThisMonth": "Ingreso (este mes)",
+    "netThisMonth": "Neto (este mes)",
+    "vsLastMonthShort": "vs mes anterior",
+    "investmentRoi": "ROI de inversión",
+    "totalValue": "Valor total",
+    "profitLoss": "G/P",
+    "performance": "Rendimiento",
+    "roiExcellent": "Excelente",
+    "roiGood": "Bueno",
+    "roiLow": "Bajo",
+    "savingsGoal": "Objetivo de ahorro",
+    "currentSavings": "Ahorro actual",
+    "setSavingsGoalTitle": "Define un objetivo de ahorro total",
+    "setSavingsGoalBody": "Sigue tu objetivo de ahorro a largo plazo.",
+    "setGoalButton": "Definir objetivo"
+  },
+  "investmentTypes": {
+    "other": "Otro",
+    "fund": "Fondo",
+    "stock": "Acción",
+    "crypto": "Cripto",
+    "gold": "Oro",
+    "currency": "Divisas",
+    "preciousMetal": "Metal precioso"
+  },
+  "recent": {
+    "title": "Últimas transacciones",
+    "subtitle": "Últimas 5 transacciones",
+    "seeAll": "Ver todo",
+    "loading": "Cargando...",
+    "empty": "Sin transacciones",
+    "noDescription": "Sin descripción",
+    "noCategory": "Sin categoría"
+  },
+  "investmentOverview": {
+    "title": "Cartera de inversiones",
+    "subtitle": "Mejor rendimiento",
+    "details": "Detalles",
+    "loading": "Cargando...",
+    "empty": "Sin inversiones",
+    "units": "uds.",
+    "noPrice": "Sin precio"
+  },
+  "quickActions": {
+    "title": "Acciones rápidas",
+    "addIncome": "Añadir ingreso",
+    "addExpense": "Añadir gasto",
+    "addInvestment": "Añadir inversión",
+    "viewReports": "Ver informes"
+  },
+  "targetModal": {
+    "titleMonthly": "Editar objetivo mensual",
+    "titleSavings": "Editar objetivo de ahorro",
+    "descMonthly": "Define tu objetivo de ahorro mensual",
+    "descSavings": "Define tu objetivo de ahorro total",
+    "amountLabel": "Importe objetivo (₺)",
+    "placeholder": "ej. 15000"
+  },
+  "toast": {
+    "investmentError": "No se pudo añadir la inversión: {{message}}",
+    "investmentCreateFailed": "No se pudo crear la inversión",
+    "unknownError": "Error desconocido",
+    "invalidAmount": "Introduce un importe válido",
+    "monthlyTargetSaved": "¡Objetivo mensual actualizado!",
+    "savingsTargetSaved": "¡Objetivo de ahorro actualizado!",
+    "targetSaveError": "No se pudo guardar el objetivo"
+  }
+}

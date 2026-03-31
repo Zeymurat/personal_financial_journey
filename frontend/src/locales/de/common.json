@@ -1,0 +1,20 @@
+{
+  "actions": {
+    "save": "Speichern",
+    "saving": "Wird gespeichert...",
+    "cancel": "Abbrechen",
+    "delete": "Löschen"
+  },
+  "languages": {
+    "tr": "Türkçe",
+    "en": "English",
+    "de": "Deutsch",
+    "fr": "Français",
+    "es": "Español"
+  },
+  "toast": {
+    "settingsSaved": "Einstellungen gespeichert!",
+    "settingsSaveError": "Einstellungen konnten nicht gespeichert werden.",
+    "settingsAutoSaveError": "Fehler beim automatischen Speichern."
+  }
+}

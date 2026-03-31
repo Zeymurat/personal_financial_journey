@@ -1,0 +1,20 @@
+{
+  "actions": {
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "languages": {
+    "tr": "Türkçe",
+    "en": "English",
+    "de": "Deutsch",
+    "fr": "Français",
+    "es": "Español"
+  },
+  "toast": {
+    "settingsSaved": "Settings saved successfully!",
+    "settingsSaveError": "Could not save settings. Please try again.",
+    "settingsAutoSaveError": "An error occurred while auto-saving settings."
+  }
+}

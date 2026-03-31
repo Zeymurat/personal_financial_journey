@@ -1,0 +1,102 @@
+{
+  "header": {
+    "title": "Takip ve Karşılaştırma",
+    "subtitle": "İlgilendiğiniz varlıkları takip edin ve karşılaştırın",
+    "disclaimer": "Hesaplamalarda sapmalar olabilir, lütfen raporları kontrol edin."
+  },
+    "typeLabels": {
+    "currency": "Döviz",
+    "gold": "Altın",
+    "crypto": "Kripto",
+    "metal": "Metal",
+    "fund": "Fon",
+    "stock": "Hisse"
+  },
+  "currencySection": {
+    "sectionTitle": "Takip Edilen Döviz/Kripto/Altın/Metal Varlıklar",
+    "add": "Ekle",
+    "selectTitle": "Döviz kurları seç",
+    "loading": "Kurlar yükleniyor...",
+    "empty": "Henüz takip edilen döviz kuru yok. Lütfen \"Ekle\" butonuna tıklayarak takip etmek istediğiniz döviz kurlarını seçin.",
+    "emptyCta": "Döviz Kurları Seç"
+  },
+  "funds": {
+    "sectionTitle": "Takip Edilen Yatırım Fonları",
+    "selectTitle": "Yatırım fonları seç",
+    "add": "Ekle",
+    "empty": "Henüz takip edilen yatırım fonu yok. Lütfen \"Ekle\" butonuna tıklayarak takip etmek istediğiniz yatırım fonlarını seçin.",
+    "emptyCta": "Yatırım Fonları Seç"
+  },
+  "borsa": {
+    "sectionTitle": "Takip Edilen Borsa Verileri",
+    "selectTitle": "Hisse senetleri seç",
+    "loading": "Borsa verileri yükleniyor...",
+    "add": "Ekle",
+    "empty": "Henüz takip edilen hisse senedi yok. Lütfen \"Ekle\" butonuna tıklayarak takip etmek istediğiniz hisse senetlerini seçin.",
+    "emptyCta": "Hisse Senetleri Seç"
+  },
+  "comparison": {
+    "tableTitle": "Karşılaştırma Tablosu",
+    "tableSubtitle": "Tüm takip edilen varlıkları bir arada görüntüleyin ve karşılaştırın",
+    "searchPlaceholder": "Varlık ara...",
+    "addAsset": "Varlık Ekle",
+    "filterAll": "Tüm Tipler",
+    "currency": "Döviz",
+    "gold": "Altın",
+    "crypto": "Kripto",
+    "metal": "Metal",
+    "fund": "Fon",
+    "stock": "Hisse",
+    "colName": "Varlık Adı",
+    "colCode": "Kod",
+    "colType": "Tip",
+    "colPrice": "Mevcut Fiyat",
+    "colChange": "Değişim (%)",
+    "colBuy": "Alış",
+    "colSell": "Satış",
+    "colTrend": "Trend",
+    "colActions": "İşlemler",
+    "emptySearch": "Arama kriterlerinize uygun varlık bulunamadı.",
+    "emptyTracked": "Henüz takip edilen varlık yok.",
+    "follow": "Takip Et",
+    "addToWatchlistTitle": "Kalıcı olması için takip listesine ekle",
+    "removeFromTableTitle": "Tablodan kaldır",
+    "priceCompareTitle": "Fiyat Karşılaştırması",
+    "priceCompareSubtitle": "Mevcut fiyatlar (₺)",
+    "noPriceData": "Fiyat bilgisi olan varlık bulunamadı.",
+    "changeCompareTitle": "Değişim Karşılaştırması",
+    "changeCompareSubtitle": "Günlük değişim yüzdeleri (%)"
+  },
+  "addModal": {
+    "title": "Tabloya Varlık Ekle",
+    "subtitle": "Karşılaştırma tablosuna geçici olarak varlık ekleyin (kalıcı olması için takip listesine ekleyin)",
+    "searchPlaceholder": "Varlık ara...",
+    "filterAll": "Tüm Tipler",
+    "currency": "Döviz",
+    "gold": "Altın",
+    "crypto": "Kripto",
+    "metal": "Metal",
+    "fund": "Fon",
+    "stock": "Hisse",
+    "sectionMixed": "Döviz / Kripto / Altın / Metal",
+    "sectionStocks": "Hisse Senetleri",
+    "sectionFunds": "Yatırım Fonları",
+    "addHover": "Ekle →",
+    "addedCount": "{{count}} varlık tabloya eklendi",
+    "close": "Kapat"
+  },
+  "cards": {
+    "removeFromList": "Kartı listeden çıkar",
+    "removeFund": "Fonu listeden çıkar",
+    "fundDetail": "Fon detay bilgilerini görüntüle",
+    "removeCard": "Kartı listeden çıkar",
+    "high": "Yüksek:",
+    "low": "Düşük:",
+    "change": "Değişim:",
+    "buy": "Alış:",
+    "sell": "Satış:",
+    "lastPrice": "Son Fiyat:",
+    "volume": "Hacim:",
+    "detail": "Detay"
+  }
+}

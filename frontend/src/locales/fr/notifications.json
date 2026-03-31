@@ -1,0 +1,48 @@
+{
+  "toast": {
+    "loadError": "Impossible de charger les notifications",
+    "genericError": "Une erreur s'est produite",
+    "markReadSuccess": "Marqué comme lu",
+    "markAllSuccess": "Toutes les notifications sont marquées comme lues",
+    "deleteSuccess": "Notification supprimée",
+    "deleteReadSuccess": "Notifications lues supprimées"
+  },
+  "category": {
+    "target": "Objectifs",
+    "investment": "Investissements",
+    "transaction": "Transactions",
+    "reminder": "Rappels",
+    "other": "Autre"
+  },
+  "filters": {
+    "all": "Tout",
+    "categoryLabel": "Catégorie :",
+    "unreadOnly": "Non lues uniquement"
+  },
+  "header": {
+    "title": "Notifications",
+    "unreadCount": "{{count}} non lues",
+    "allRead": "Tout est lu"
+  },
+  "actions": {
+    "markAllRead": "Tout marquer comme lu",
+    "deleteRead": "Supprimer les lues",
+    "markReadTooltip": "Marquer comme lu",
+    "deleteTooltip": "Supprimer"
+  },
+  "badge": {
+    "new": "Nouveau"
+  },
+  "empty": {
+    "title": "Aucune notification",
+    "noUnread": "Aucune notification non lue",
+    "noInCategory": "Aucune notification dans cette catégorie",
+    "none": "Pas encore de notifications"
+  },
+  "time": {
+    "justNow": "À l'instant",
+    "minutesAgo": "Il y a {{count}} min",
+    "hoursAgo": "Il y a {{count}} h",
+    "daysAgo": "Il y a {{count}} j"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "fundSelection": {
+    "title": "Yatırım Fonları Seç",
+    "subtitle": "Görmek istediğiniz yatırım fonlarını seçin.",
+    "selectedBanner": "{{count}} fon seçili",
+    "searchPlaceholder": "Fon adı veya key ile ara (örn: AKBNK, Garanti)",
+    "noResults": "\"{{query}}\" için sonuç bulunamadı",
+    "footerSelected": "{{count}} fon seçili",
+    "footerMinOne": "En az bir fon seçmelisiniz",
+    "close": "Kapat"
+  },
+  "stockSelection": {
+    "title": "Hisse Senetleri Seç",
+    "subtitle": "Görmek istediğiniz hisse senetlerini seçin.",
+    "selectedBanner": "{{count}} hisse seçili",
+    "searchPlaceholder": "Hisse kodu veya adı ile ara (örn: AKBNK, Garanti)",
+    "noResults": "\"{{query}}\" için sonuç bulunamadı",
+    "footerSelected": "{{count}} hisse seçili",
+    "footerMinOne": "En az bir hisse seçmelisiniz",
+    "close": "Kapat",
+    "lastPrice": "Son Fiyat:",
+    "high": "Yüksek:",
+    "low": "Düşük:"
+  }
+}

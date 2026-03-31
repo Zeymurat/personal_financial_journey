@@ -1,0 +1,20 @@
+{
+  "actions": {
+    "save": "Kaydet",
+    "saving": "Kaydediliyor...",
+    "cancel": "İptal",
+    "delete": "Sil"
+  },
+  "languages": {
+    "tr": "Türkçe",
+    "en": "English",
+    "de": "Deutsch",
+    "fr": "Français",
+    "es": "Español"
+  },
+  "toast": {
+    "settingsSaved": "Ayarlar başarıyla kaydedildi!",
+    "settingsSaveError": "Ayarlar kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.",
+    "settingsAutoSaveError": "Ayarlar otomatik kaydedilirken bir hata oluştu."
+  }
+}

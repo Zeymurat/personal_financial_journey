@@ -1,0 +1,47 @@
+{
+  "loading": "Raporlar yükleniyor...",
+  "header": {
+    "title": "Raporlar",
+    "subtitle": "Finansal performansınızı analiz edin",
+    "disclaimer": "Hesaplamalarda sapmalar olabilir, lütfen raporları kontrol edin."
+  },
+  "summary": {
+    "title": "Bu Ay Özeti - {{month}}",
+    "trendLabel": "Genel Trend:",
+    "trendPositive": "Pozitif",
+    "trendNegative": "Negatif",
+    "income": "Gelir",
+    "expense": "Gider",
+    "netIncome": "Net Gelir",
+    "vsPrevMonth": "(önceki ay)",
+    "assetBuyCost": "Varlık Alım Maliyeti",
+    "assetSellGain": "Varlıkların Satış Kazancı",
+    "investmentGain": "Yatırım Kazancı",
+    "gain": "Kazanç",
+    "loss": "Kayıp"
+  },
+  "trends": {
+    "incomeVsExpense": "Gelir vs Gider Trendi",
+    "net": "Net:",
+    "incomeShort": "Gelir",
+    "expenseShort": "Gider",
+    "investmentPerformance": "Yatırım Performansı",
+    "month": "Ay",
+    "buyCost": "Alım Maliyeti",
+    "sellProceeds": "Satış Getirisi",
+    "return": "Getiri",
+    "value": "Değer",
+    "noInvestmentData": "Yatırım verisi bulunamadı"
+  },
+  "detailed": {
+    "title": "Aylık Detaylı Rapor",
+    "subtitle": "Tasarruf Oranı: (Net Gelir / Gelir) × 100 - Gelirinin ne kadarını tasarruf ettiğini gösterir",
+    "month": "Ay",
+    "income": "Gelir",
+    "expense": "Gider",
+    "netIncome": "Net Gelir",
+    "investmentGain": "Yatırım Kazancı",
+    "savingsRate": "Tasarruf Oranı",
+    "noData": "Veri bulunamadı"
+  }
+}

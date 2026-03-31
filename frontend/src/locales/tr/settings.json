@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "title": "Ayarlar",
+    "subtitle": "Uygulama tercihlerinizi yönetin"
+  },
+  "appearance": {
+    "title": "Görünüm",
+    "description": "Tema ve görünüm ayarları",
+    "darkMode": "Koyu Tema",
+    "darkModeHint": "Koyu renk temasını etkinleştir"
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "description": "Uygulama içi otomatik bildirimler: işlem, hedef ve yatırım uyarıları",
+    "budgetAlerts": "Bütçe Uyarıları",
+    "budgetAlertsHint": "Kapatıldığında sunucu yeni işlem, hedef ve yatırım bildirimi oluşturmaz"
+  },
+  "language": {
+    "title": "Dil ve Bölge",
+    "description": "Dil tercihi",
+    "label": "Dil"
+  },
+  "security": {
+    "title": "Güvenlik",
+    "description": "Hesap güvenliği ayarları",
+    "changePassword": "Şifre Değiştir",
+    "twoFactor": "İki Faktörlü Kimlik Doğrulama",
+    "passwordChange": {
+      "title": "Şifre değiştir",
+      "description": "Güvenlik için önce mevcut şifrenizi, ardından yeni şifrenizi girin.",
+      "current": "Mevcut şifre",
+      "new": "Yeni şifre",
+      "confirm": "Yeni şifre (tekrar)",
+      "submit": "Şifreyi güncelle",
+      "success": "Şifreniz güncellendi.",
+      "errorGeneric": "Şifre güncellenemedi. Lütfen tekrar deneyin.",
+      "errorWrongPassword": "Mevcut şifre yanlış.",
+      "errorWeak": "Şifre en az 6 karakter olmalıdır.",
+      "errorRecentLogin": "Bu işlem için güvenlik nedeniyle çıkış yapıp tekrar giriş yapın.",
+      "errorTooMany": "Çok fazla deneme. Lütfen bir süre sonra tekrar deneyin.",
+      "errorMismatch": "Yeni şifreler eşleşmiyor.",
+      "errorNoEmail": "E-posta adresi bulunamadı.",
+      "errorNoPasswordProvider": "Bu hesap için e-posta/şifre ile giriş tanımlı değil.",
+      "oauthHint": "Google veya başka bir sosyal hesap ile giriş yaptığınız için uygulama şifresi yoktur; şifre değiştirme bu hesap için kullanılamaz."
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "description": "Kişisel bilgilerinizi yönetin",
+    "fullName": "Ad Soyad",
+    "email": "E-posta Adresi"
+  },
+  "data": {
+    "title": "Veri ve Gizlilik",
+    "description": "Verilerinizi yönetin",
+    "export": "Verilerimi Dışa Aktar",
+    "backup": "Hesabı Yedekle",
+    "deleteAccount": "Hesabı Sil"
+  }
+}

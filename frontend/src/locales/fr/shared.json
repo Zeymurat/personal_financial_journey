@@ -1,0 +1,25 @@
+{
+  "fundSelection": {
+    "title": "Choisir des fonds",
+    "subtitle": "Sélectionnez les fonds à afficher.",
+    "selectedBanner": "{{count}} fond(s) sélectionné(s)",
+    "searchPlaceholder": "Rechercher par nom ou code",
+    "noResults": "Aucun résultat pour « {{query}} »",
+    "footerSelected": "{{count}} sélectionné(s)",
+    "footerMinOne": "Sélectionnez au moins un fonds",
+    "close": "Fermer"
+  },
+  "stockSelection": {
+    "title": "Choisir des actions",
+    "subtitle": "Sélectionnez les actions à afficher.",
+    "selectedBanner": "{{count}} action(s) sélectionnée(s)",
+    "searchPlaceholder": "Rechercher par code ou nom",
+    "noResults": "Aucun résultat pour « {{query}} »",
+    "footerSelected": "{{count}} sélectionné(s)",
+    "footerMinOne": "Sélectionnez au moins une action",
+    "close": "Fermer",
+    "lastPrice": "Dernier cours :",
+    "high": "Haut :",
+    "low": "Bas :"
+  }
+}

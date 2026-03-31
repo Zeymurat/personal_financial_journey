@@ -1,0 +1,102 @@
+{
+  "header": {
+    "title": "Verfolgen & vergleichen",
+    "subtitle": "Verfolgen Sie Werte und vergleichen Sie sie",
+    "disclaimer": "Kleine Abweichungen möglich; prüfen Sie die Berichte."
+  },
+  "typeLabels": {
+    "currency": "Devisen",
+    "gold": "Gold",
+    "crypto": "Krypto",
+    "metal": "Metall",
+    "fund": "Fonds",
+    "stock": "Aktie"
+  },
+  "currencySection": {
+    "sectionTitle": "Verfolgte Devisen, Krypto, Gold & Metalle",
+    "add": "Hinzufügen",
+    "selectTitle": "Kurse wählen",
+    "loading": "Kurse werden geladen...",
+    "empty": "Noch keine Kurse. Klicken Sie auf „Hinzufügen“.",
+    "emptyCta": "Kurse auswählen"
+  },
+  "funds": {
+    "sectionTitle": "Verfolgte Investmentfonds",
+    "selectTitle": "Fonds wählen",
+    "add": "Hinzufügen",
+    "empty": "Noch keine Fonds. Klicken Sie auf „Hinzufügen“.",
+    "emptyCta": "Fonds auswählen"
+  },
+  "borsa": {
+    "sectionTitle": "Verfolgte Börsenwerte",
+    "selectTitle": "Aktien wählen",
+    "loading": "Marktdaten werden geladen...",
+    "add": "Hinzufügen",
+    "empty": "Noch keine Aktien. Klicken Sie auf „Hinzufügen“.",
+    "emptyCta": "Aktien auswählen"
+  },
+  "comparison": {
+    "tableTitle": "Vergleichstabelle",
+    "tableSubtitle": "Alle verfolgten Werte an einem Ort",
+    "searchPlaceholder": "Werte suchen...",
+    "addAsset": "Wert hinzufügen",
+    "filterAll": "Alle Typen",
+    "currency": "Devisen",
+    "gold": "Gold",
+    "crypto": "Krypto",
+    "metal": "Metall",
+    "fund": "Fonds",
+    "stock": "Aktie",
+    "colName": "Name",
+    "colCode": "Code",
+    "colType": "Typ",
+    "colPrice": "Kurs",
+    "colChange": "Veränderung (%)",
+    "colBuy": "Kauf",
+    "colSell": "Verkauf",
+    "colTrend": "Trend",
+    "colActions": "Aktionen",
+    "emptySearch": "Keine Treffer.",
+    "emptyTracked": "Noch keine verfolgten Werte.",
+    "follow": "Folgen",
+    "addToWatchlistTitle": "Zur Merkliste hinzufügen",
+    "removeFromTableTitle": "Aus Tabelle entfernen",
+    "priceCompareTitle": "Kursvergleich",
+    "priceCompareSubtitle": "Aktuelle Kurse (₺)",
+    "noPriceData": "Keine Kursdaten.",
+    "changeCompareTitle": "Veränderungsvergleich",
+    "changeCompareSubtitle": "Tägliche Veränderung (%)"
+  },
+  "addModal": {
+    "title": "Wert zur Tabelle hinzufügen",
+    "subtitle": "Vorübergehend zur Tabelle (für dauerhaft: Merkliste)",
+    "searchPlaceholder": "Werte suchen...",
+    "filterAll": "Alle Typen",
+    "currency": "Devisen",
+    "gold": "Gold",
+    "crypto": "Krypto",
+    "metal": "Metall",
+    "fund": "Fonds",
+    "stock": "Aktie",
+    "sectionMixed": "Devisen / Krypto / Gold / Metalle",
+    "sectionStocks": "Aktien",
+    "sectionFunds": "Investmentfonds",
+    "addHover": "Hinzufügen →",
+    "addedCount": "{{count}} Wert(e) in der Tabelle",
+    "close": "Schließen"
+  },
+  "cards": {
+    "removeFromList": "Aus Liste entfernen",
+    "removeFund": "Aus Liste entfernen",
+    "fundDetail": "Fondsdetails",
+    "removeCard": "Aus Liste entfernen",
+    "high": "Hoch:",
+    "low": "Tief:",
+    "change": "Veränderung:",
+    "buy": "Kauf:",
+    "sell": "Verkauf:",
+    "lastPrice": "Letzter Kurs:",
+    "volume": "Volumen:",
+    "detail": "Details"
+  }
+}

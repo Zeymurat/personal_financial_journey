@@ -78,3 +78,43 @@ export interface AuthState {
   user: User | null;
   loading: boolean;
 }
+
+export interface UserSettings {
+  darkMode?: boolean;
+  /** Otomatik işlem / hedef / yatırım bildirimleri (backend: _check_*_notifications) */
+  budgetAlerts?: boolean;
+  language?: string;
+  currency?: string;
+  targets?: {
+    monthly?: number;
+    savings?: number;
+    accumulation?: number;
+  };
+}
+
+export interface Notification {
+  id: string;
+  category: 'target' | 'investment' | 'transaction' | 'reminder';
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: string | Date | { toDate: () => Date };
+  metadata?: {
+    [key: string]: any;
+  };
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  description?: string;
+  date: string; // YYYY-MM-DD format
+  time?: string; // HH:mm format (optional)
+  isRecurring?: boolean; // Tekrarlı etkinlik mi?
+  recurrenceType?: 'daily' | 'weekly' | 'monthly' | 'yearly'; // Tekrarlama tipi
+  recurrenceDay?: number; // Ayın kaçıncı günü (1-31) veya haftanın kaçıncı günü (0-6, 0=Pazar)
+  recurrenceWeekday?: number; // Haftanın hangi günü (0-6, 0=Pazar) - weekly için
+  originalDate?: string; // İlk oluşturulan tarih (recurring events için)
+  createdAt?: string | Date | { toDate: () => Date };
+  updatedAt?: string | Date | { toDate: () => Date };
+}

@@ -1,0 +1,102 @@
+{
+  "header": {
+    "title": "Track & compare",
+    "subtitle": "Follow assets you care about and compare them",
+    "disclaimer": "Figures may differ slightly; check reports."
+  },
+  "typeLabels": {
+    "currency": "Forex",
+    "gold": "Gold",
+    "crypto": "Crypto",
+    "metal": "Metal",
+    "fund": "Fund",
+    "stock": "Stock"
+  },
+  "currencySection": {
+    "sectionTitle": "Followed forex, crypto, gold & metals",
+    "add": "Add",
+    "selectTitle": "Select rates",
+    "loading": "Loading rates...",
+    "empty": "No rates followed yet. Click \"Add\" to choose instruments.",
+    "emptyCta": "Select rates"
+  },
+  "funds": {
+    "sectionTitle": "Followed mutual funds",
+    "selectTitle": "Select funds",
+    "add": "Add",
+    "empty": "No funds followed yet. Click \"Add\" to choose funds.",
+    "emptyCta": "Select funds"
+  },
+  "borsa": {
+    "sectionTitle": "Followed equities",
+    "selectTitle": "Select stocks",
+    "loading": "Loading market data...",
+    "add": "Add",
+    "empty": "No stocks followed yet. Click \"Add\" to choose tickers.",
+    "emptyCta": "Select stocks"
+  },
+  "comparison": {
+    "tableTitle": "Comparison table",
+    "tableSubtitle": "View and compare everything you follow in one place",
+    "searchPlaceholder": "Search assets...",
+    "addAsset": "Add asset",
+    "filterAll": "All types",
+    "currency": "Forex",
+    "gold": "Gold",
+    "crypto": "Crypto",
+    "metal": "Metal",
+    "fund": "Fund",
+    "stock": "Stock",
+    "colName": "Name",
+    "colCode": "Code",
+    "colType": "Type",
+    "colPrice": "Price",
+    "colChange": "Change (%)",
+    "colBuy": "Bid",
+    "colSell": "Ask",
+    "colTrend": "Trend",
+    "colActions": "Actions",
+    "emptySearch": "No assets match your filters.",
+    "emptyTracked": "No followed assets yet.",
+    "follow": "Follow",
+    "addToWatchlistTitle": "Add to watchlist to keep",
+    "removeFromTableTitle": "Remove from table",
+    "priceCompareTitle": "Price comparison",
+    "priceCompareSubtitle": "Current prices (₺)",
+    "noPriceData": "No assets with price data.",
+    "changeCompareTitle": "Change comparison",
+    "changeCompareSubtitle": "Daily change (%)"
+  },
+  "addModal": {
+    "title": "Add asset to table",
+    "subtitle": "Temporarily add assets to the table (add to watchlist to keep them)",
+    "searchPlaceholder": "Search assets...",
+    "filterAll": "All types",
+    "currency": "Forex",
+    "gold": "Gold",
+    "crypto": "Crypto",
+    "metal": "Metal",
+    "fund": "Fund",
+    "stock": "Stock",
+    "sectionMixed": "Forex / crypto / gold / metals",
+    "sectionStocks": "Stocks",
+    "sectionFunds": "Mutual funds",
+    "addHover": "Add →",
+    "addedCount": "{{count}} asset(s) added to table",
+    "close": "Close"
+  },
+  "cards": {
+    "removeFromList": "Remove from list",
+    "removeFund": "Remove from list",
+    "fundDetail": "View fund details",
+    "removeCard": "Remove from list",
+    "high": "High:",
+    "low": "Low:",
+    "change": "Change:",
+    "buy": "Bid:",
+    "sell": "Ask:",
+    "lastPrice": "Last price:",
+    "volume": "Volume:",
+    "detail": "Details"
+  }
+}

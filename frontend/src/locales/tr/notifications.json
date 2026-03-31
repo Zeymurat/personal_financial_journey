@@ -1,0 +1,48 @@
+{
+  "toast": {
+    "loadError": "Bildirimler yüklenirken bir hata oluştu",
+    "genericError": "Bir hata oluştu",
+    "markReadSuccess": "Bildirim okundu olarak işaretlendi",
+    "markAllSuccess": "Tüm bildirimler okundu olarak işaretlendi",
+    "deleteSuccess": "Bildirim silindi",
+    "deleteReadSuccess": "Okunmuş bildirimler silindi"
+  },
+  "category": {
+    "target": "Hedef",
+    "investment": "Yatırım",
+    "transaction": "İşlemler",
+    "reminder": "Hatırlatma",
+    "other": "Diğer"
+  },
+  "filters": {
+    "all": "Tümü",
+    "categoryLabel": "Kategori:",
+    "unreadOnly": "Sadece Okunmamışlar"
+  },
+  "header": {
+    "title": "Bildirimler",
+    "unreadCount": "{{count}} okunmamış bildirim",
+    "allRead": "Tüm bildirimler okundu"
+  },
+  "actions": {
+    "markAllRead": "Tümünü Okundu İşaretle",
+    "deleteRead": "Okunmuşları Sil",
+    "markReadTooltip": "Okundu olarak işaretle",
+    "deleteTooltip": "Sil"
+  },
+  "badge": {
+    "new": "Yeni"
+  },
+  "empty": {
+    "title": "Bildirim bulunamadı",
+    "noUnread": "Okunmamış bildirim bulunmuyor",
+    "noInCategory": "Bu kategoride bildirim bulunmuyor",
+    "none": "Henüz bildirim yok"
+  },
+  "time": {
+    "justNow": "Az önce",
+    "minutesAgo": "{{count}} dakika önce",
+    "hoursAgo": "{{count}} saat önce",
+    "daysAgo": "{{count}} gün önce"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "title": "Ajustes",
+    "subtitle": "Gestiona las preferencias de la app"
+  },
+  "appearance": {
+    "title": "Apariencia",
+    "description": "Tema y visualización",
+    "darkMode": "Modo oscuro",
+    "darkModeHint": "Activar tema oscuro"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "description": "Alertas en la app para transacciones, metas e inversiones",
+    "budgetAlerts": "Alertas de presupuesto",
+    "budgetAlertsHint": "Si está desactivado, el servidor no crea nuevas notificaciones"
+  },
+  "language": {
+    "title": "Idioma y región",
+    "description": "Idioma",
+    "label": "Idioma"
+  },
+  "security": {
+    "title": "Seguridad",
+    "description": "Seguridad de la cuenta",
+    "changePassword": "Cambiar contraseña",
+    "twoFactor": "Autenticación en dos pasos",
+    "passwordChange": {
+      "title": "Cambiar contraseña",
+      "description": "Introduce tu contraseña actual y la nueva.",
+      "current": "Contraseña actual",
+      "new": "Nueva contraseña",
+      "confirm": "Confirmar nueva contraseña",
+      "submit": "Actualizar contraseña",
+      "success": "Contraseña actualizada.",
+      "errorGeneric": "No se pudo actualizar la contraseña.",
+      "errorWrongPassword": "La contraseña actual no es correcta.",
+      "errorWeak": "La contraseña debe tener al menos 6 caracteres.",
+      "errorRecentLogin": "Cierra sesión, vuelve a entrar e inténtalo de nuevo.",
+      "errorTooMany": "Demasiados intentos. Inténtalo más tarde.",
+      "errorMismatch": "Las contraseñas nuevas no coinciden.",
+      "errorNoEmail": "No hay correo electrónico.",
+      "errorNoPasswordProvider": "Esta cuenta no usa inicio de sesión con correo y contraseña.",
+      "oauthHint": "Iniciaste sesión con Google u otro proveedor. No hay contraseña de la app que cambiar."
+    }
+  },
+  "profile": {
+    "title": "Perfil",
+    "description": "Datos personales",
+    "fullName": "Nombre completo",
+    "email": "Correo electrónico"
+  },
+  "data": {
+    "title": "Datos y privacidad",
+    "description": "Gestiona tus datos",
+    "export": "Exportar mis datos",
+    "backup": "Respaldar cuenta",
+    "deleteAccount": "Eliminar cuenta"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "actions": {
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "cancel": "Cancelar",
+    "delete": "Eliminar"
+  },
+  "languages": {
+    "tr": "Türkçe",
+    "en": "English",
+    "de": "Deutsch",
+    "fr": "Français",
+    "es": "Español"
+  },
+  "toast": {
+    "settingsSaved": "¡Ajustes guardados!",
+    "settingsSaveError": "No se pudieron guardar los ajustes.",
+    "settingsAutoSaveError": "Error al guardar automáticamente."
+  }
+}

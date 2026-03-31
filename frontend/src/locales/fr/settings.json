@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "title": "Paramètres",
+    "subtitle": "Gérez vos préférences"
+  },
+  "appearance": {
+    "title": "Apparence",
+    "description": "Thème et affichage",
+    "darkMode": "Mode sombre",
+    "darkModeHint": "Activer le thème sombre"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Alertes in-app pour transactions, objectifs et investissements",
+    "budgetAlerts": "Alertes budgétaires",
+    "budgetAlertsHint": "Si désactivé, le serveur ne crée pas de nouvelles notifications"
+  },
+  "language": {
+    "title": "Langue et région",
+    "description": "Langue",
+    "label": "Langue"
+  },
+  "security": {
+    "title": "Sécurité",
+    "description": "Sécurité du compte",
+    "changePassword": "Changer le mot de passe",
+    "twoFactor": "Authentification à deux facteurs",
+    "passwordChange": {
+      "title": "Changer le mot de passe",
+      "description": "Saisissez votre mot de passe actuel puis le nouveau.",
+      "current": "Mot de passe actuel",
+      "new": "Nouveau mot de passe",
+      "confirm": "Confirmer le nouveau mot de passe",
+      "submit": "Mettre à jour",
+      "success": "Mot de passe mis à jour.",
+      "errorGeneric": "Impossible de mettre à jour le mot de passe.",
+      "errorWrongPassword": "Mot de passe actuel incorrect.",
+      "errorWeak": "Le mot de passe doit contenir au moins 6 caractères.",
+      "errorRecentLogin": "Déconnectez-vous, reconnectez-vous et réessayez.",
+      "errorTooMany": "Trop de tentatives. Réessayez plus tard.",
+      "errorMismatch": "Les nouveaux mots de passe ne correspondent pas.",
+      "errorNoEmail": "Aucune adresse e-mail.",
+      "errorNoPasswordProvider": "Ce compte n’utilise pas e-mail/mot de passe.",
+      "oauthHint": "Vous vous êtes connecté avec Google ou un autre fournisseur. Aucun mot de passe d’application à modifier."
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "description": "Informations personnelles",
+    "fullName": "Nom complet",
+    "email": "Adresse e-mail"
+  },
+  "data": {
+    "title": "Données et confidentialité",
+    "description": "Gérer vos données",
+    "export": "Exporter mes données",
+    "backup": "Sauvegarder le compte",
+    "deleteAccount": "Supprimer le compte"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "calendar": {
+    "months": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
+    "weekdaysShort": ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"],
+    "weekdaysLong": ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"]
+  },
+  "ui": {
+    "backToToday": "Volver a hoy",
+    "loading": "Cargando...",
+    "noEvents": "Sin eventos",
+    "deleteEventTitle": "Eliminar evento",
+    "editEventTitle": "Editar evento"
+  },
+  "recurrence": {
+    "daily": "Diario",
+    "weekly": "Semanal",
+    "monthly": "Mensual",
+    "yearly": "Anual"
+  },
+  "toast": {
+    "loadError": "No se pudieron cargar los eventos.",
+    "titleRequired": "Introduce un título.",
+    "updateSuccess": "Evento actualizado.",
+    "createSuccess": "Evento creado.",
+    "saveError": "No se pudo guardar el evento.",
+    "seriesCapped": "La serie alcanzó el límite máximo. ",
+    "seriesCreated": "Serie creada. {{total}} eventos en total.",
+    "deletedMany": "¡{{count}} eventos eliminados!",
+    "deleteManyError": "No se pudieron eliminar los eventos.",
+    "deleteOneSuccess": "Evento eliminado.",
+    "deleteOneError": "No se pudo eliminar el evento."
+  },
+  "modal": {
+    "editTitle": "Editar evento",
+    "newTitle": "Nuevo evento",
+    "titleLabel": "Título *",
+    "titlePlaceholder": "Título del evento",
+    "descriptionLabel": "Descripción",
+    "descriptionPlaceholder": "Descripción",
+    "dateLabel": "Fecha",
+    "timeLabel": "Hora (opcional)",
+    "recurringCheckbox": "Evento recurrente",
+    "recurrenceTypeLabel": "Recurrencia",
+    "optDaily": "Cada día",
+    "optWeekly": "Cada semana (mismo día)",
+    "optMonthly": "Cada mes el día {{day}}",
+    "optYearly": "Cada año (misma fecha)",
+    "creatingProgress": "Creando: {{created}}/{{total}}",
+    "deleteFromEditTitle": "Eliminar evento",
+    "saving": "Creando...",
+    "update": "Actualizar",
+    "save": "Guardar"
+  },
+  "deleteDialog": {
+    "title": "Eliminar evento",
+    "bodySingle": "¿Eliminar este evento?",
+    "bodyRecurring": "Al eliminar esta serie ({{count}} repeticiones) verás el progreso.",
+    "deletingProgress": "Eliminando: {{deleted}}/{{total}}",
+    "deleteSeries": "Eliminar toda la serie",
+    "deleteThisOnly": "Solo esta repetición"
+  }
+}

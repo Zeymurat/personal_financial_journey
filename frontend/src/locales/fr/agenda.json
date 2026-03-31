@@ -1,0 +1,62 @@
+{
+  "calendar": {
+    "months": ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+    "weekdaysShort": ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"],
+    "weekdaysLong": ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"]
+  },
+  "ui": {
+    "backToToday": "Aujourd'hui",
+    "loading": "Chargement...",
+    "noEvents": "Aucun événement",
+    "deleteEventTitle": "Supprimer l'événement",
+    "editEventTitle": "Modifier l'événement"
+  },
+  "recurrence": {
+    "daily": "Quotidien",
+    "weekly": "Hebdomadaire",
+    "monthly": "Mensuel",
+    "yearly": "Annuel"
+  },
+  "toast": {
+    "loadError": "Impossible de charger les événements.",
+    "titleRequired": "Veuillez saisir un titre.",
+    "updateSuccess": "Événement mis à jour !",
+    "createSuccess": "Événement créé !",
+    "saveError": "Impossible d'enregistrer l'événement.",
+    "seriesCapped": "La série a atteint la limite d'enregistrements. ",
+    "seriesCreated": "Série créée. {{total}} événements au total.",
+    "deletedMany": "{{count}} événements supprimés !",
+    "deleteManyError": "Impossible de supprimer les événements.",
+    "deleteOneSuccess": "Événement supprimé !",
+    "deleteOneError": "Impossible de supprimer l'événement."
+  },
+  "modal": {
+    "editTitle": "Modifier l'événement",
+    "newTitle": "Nouvel événement",
+    "titleLabel": "Titre *",
+    "titlePlaceholder": "Titre de l'événement",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Description",
+    "dateLabel": "Date",
+    "timeLabel": "Heure (facultatif)",
+    "recurringCheckbox": "Événement récurrent",
+    "recurrenceTypeLabel": "Récurrence",
+    "optDaily": "Chaque jour",
+    "optWeekly": "Chaque semaine (même jour)",
+    "optMonthly": "Chaque mois le {{day}}",
+    "optYearly": "Chaque année (même date)",
+    "creatingProgress": "Création : {{created}}/{{total}}",
+    "deleteFromEditTitle": "Supprimer l'événement",
+    "saving": "Création...",
+    "update": "Mettre à jour",
+    "save": "Enregistrer"
+  },
+  "deleteDialog": {
+    "title": "Supprimer l'événement",
+    "bodySingle": "Supprimer cet événement ?",
+    "bodyRecurring": "La suppression de cette série ({{count}} occurrences) affichera une progression.",
+    "deletingProgress": "Suppression : {{deleted}}/{{total}}",
+    "deleteSeries": "Toute la série",
+    "deleteThisOnly": "Cette occurrence seulement"
+  }
+}

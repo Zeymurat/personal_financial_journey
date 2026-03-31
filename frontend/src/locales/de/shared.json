@@ -1,0 +1,25 @@
+{
+  "fundSelection": {
+    "title": "Investmentfonds wählen",
+    "subtitle": "Wählen Sie die Fonds, die Sie sehen möchten.",
+    "selectedBanner": "{{count}} Fonds ausgewählt",
+    "searchPlaceholder": "Nach Name oder Key suchen",
+    "noResults": "Keine Treffer für „{{query}}“",
+    "footerSelected": "{{count}} ausgewählt",
+    "footerMinOne": "Mindestens einen Fonds wählen",
+    "close": "Schließen"
+  },
+  "stockSelection": {
+    "title": "Aktien wählen",
+    "subtitle": "Wählen Sie die Aktien, die Sie sehen möchten.",
+    "selectedBanner": "{{count}} Aktien ausgewählt",
+    "searchPlaceholder": "Nach Kürzel oder Name suchen",
+    "noResults": "Keine Treffer für „{{query}}“",
+    "footerSelected": "{{count}} ausgewählt",
+    "footerMinOne": "Mindestens eine Aktie wählen",
+    "close": "Schließen",
+    "lastPrice": "Letzter Kurs:",
+    "high": "Hoch:",
+    "low": "Tief:"
+  }
+}

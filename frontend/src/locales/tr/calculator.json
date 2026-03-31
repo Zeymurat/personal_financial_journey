@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "title": "Yüzde Hesaplama",
+    "subtitle": "Farklı yüzde hesaplamaları yapın"
+  },
+  "common": {
+    "number": "Sayı",
+    "percentage": "Yüzde",
+    "result": "Sonuç",
+    "resultPlaceholder": "Sonuç burada görünecek",
+    "firstNumber": "İlk Sayı",
+    "secondNumber": "İkinci Sayı",
+    "initialValue": "Başlangıç Değeri",
+    "finalValue": "Bitiş Değeri",
+    "value": "Değer"
+  },
+  "s1": {
+    "title": "Bir sayının yüzdesini hesapla",
+    "ofNumber": "sayısının",
+    "percentLabel": "Yüzde"
+  },
+  "s2": {
+    "title": "Bir sayının, diğer sayının yüzde kaçı olduğunu hesapla",
+    "firstSuffix": "sayısı,",
+    "secondSuffix": "sayısının",
+    "resultPercent": "Sonuç (Yüzde)"
+  },
+  "s3": {
+    "title": "Değişimi yüzde olarak hesapla",
+    "suffix1": "sayısı,",
+    "suffix2": "olduğunda değişim",
+    "resultLabel": "Sonuç (Yüzde Değişim)"
+  },
+  "s4": {
+    "title": "Sayıyı belirli bir yüzde olarak artırmak ya da azaltmak",
+    "afterNumber": "sayısı,",
+    "increase": "artarsa",
+    "decrease": "azalırsa"
+  },
+  "s5": {
+    "title": "Yüzde A'sı B olan sayıyı bulmak",
+    "percentSuffix": "sı",
+    "valueHint": "sayısına eşit olan sayı"
+  }
+}

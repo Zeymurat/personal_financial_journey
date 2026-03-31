@@ -1,0 +1,95 @@
+{
+  "header": {
+    "title": "Dashboard",
+    "subtitle": "A complete overview of your finances",
+    "disclaimer": "Figures may differ slightly; please check reports.",
+    "lastUpdate": "Last updated: {{date}}",
+    "totalNetWorth": "Total net worth",
+    "totalAssets": "Total assets"
+  },
+  "stats": {
+    "monthlyIncome": "Monthly income",
+    "monthlyExpense": "Monthly expense",
+    "monthlyNet": "Monthly net income",
+    "totalStatus": "Overall balance",
+    "investmentPortfolio": "Investment portfolio",
+    "vsLastMonth": "vs last month",
+    "thisMonth": "this month"
+  },
+  "performance": {
+    "monthlyTarget": "Monthly target",
+    "editTarget": "Edit",
+    "editTargetTitle": "Edit target",
+    "netIncomeThisMonth": "Net income (this month)",
+    "remainingToTarget": "Remaining to target",
+    "targetReached": "✓ Target reached!",
+    "progress": "Progress",
+    "savingsRate": "Savings rate",
+    "incomeThisMonth": "Income (this month)",
+    "netThisMonth": "Net (this month)",
+    "vsLastMonthShort": "vs last month",
+    "investmentRoi": "Investment ROI",
+    "totalValue": "Total value",
+    "profitLoss": "P/L",
+    "performance": "Performance",
+    "roiExcellent": "Excellent",
+    "roiGood": "Good",
+    "roiLow": "Low",
+    "savingsGoal": "Savings goal",
+    "currentSavings": "Current savings",
+    "setSavingsGoalTitle": "Set a total savings goal",
+    "setSavingsGoalBody": "Track progress toward your long-term savings goal.",
+    "setGoalButton": "Set goal"
+  },
+  "investmentTypes": {
+    "other": "Other",
+    "fund": "Fund",
+    "stock": "Stock",
+    "crypto": "Crypto",
+    "gold": "Gold",
+    "currency": "FX",
+    "preciousMetal": "Precious metal"
+  },
+  "recent": {
+    "title": "Recent transactions",
+    "subtitle": "Last 5 transactions",
+    "seeAll": "See all",
+    "loading": "Loading...",
+    "empty": "No transactions yet",
+    "noDescription": "No description",
+    "noCategory": "No category"
+  },
+  "investmentOverview": {
+    "title": "Investment portfolio",
+    "subtitle": "Top performers",
+    "details": "Details",
+    "loading": "Loading...",
+    "empty": "No investments yet",
+    "units": "units",
+    "noPrice": "No price"
+  },
+  "quickActions": {
+    "title": "Quick actions",
+    "addIncome": "Add income",
+    "addExpense": "Add expense",
+    "addInvestment": "Add investment",
+    "viewReports": "View reports"
+  },
+  "targetModal": {
+    "titleMonthly": "Edit monthly target",
+    "titleSavings": "Edit savings goal",
+    "descMonthly": "Set your monthly savings target",
+    "descSavings": "Set your total savings goal",
+    "amountLabel": "Target amount (₺)",
+    "placeholder": "e.g. 15000"
+  },
+  "toast": {
+    "investmentError": "Could not add investment: {{message}}",
+    "investmentCreateFailed": "Could not create investment",
+    "unknownError": "Unknown error",
+    "invalidAmount": "Please enter a valid amount",
+    "monthlyTargetSaved": "Monthly target updated!",
+    "savingsTargetSaved": "Savings goal updated!",
+    "targetSaveError": "Could not save target"
+  }
+}

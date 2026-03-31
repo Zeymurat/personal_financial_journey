@@ -88,19 +88,8 @@ class BorsaService:
         current_time = now.time()
         current_minutes = current_time.hour * 60 + current_time.minute
         
-        print(f"\n{'='*60}")
-        print(f"🔍 BORSA: Saat Mantığı Kontrolü")
-        print(f"{'='*60}")
-        print(f"📅 Bugün: {today}")
-        print(f"⏰ Şu anki saat: {current_time} ({current_minutes} dakika)")
-        print(f"📋 Fetch saatleri: 10:00 (600dk), 13:30 (810dk), 17:00 (1020dk)")
-        print(f"📋 Kontrol saatleri: 10:00, 14:00 (13:30'u kaçırdık mı?), 17:00")
-        print(f"📝 Son fetch: {existing_fetch_time or 'Yok'}")
-        
         # Hafta sonu kontrolü
         if not self.is_weekday():
-            print(f"📅 Hafta sonu kontrolü: Hafta sonu, VERİ ÇEKİLMEYECEK")
-            print(f"{'='*60}\n")
             return False
         
         # Fetch saatleri
@@ -132,86 +121,33 @@ class BorsaService:
                 # Eğer tarih bilgisi varsa, bugünün verisi olup olmadığını kontrol et
                 if fetch_date_str:
                     fetch_date = fetch_date_str
-            except Exception as e:
-                logger.warning(f"fetch_time parse hatası: {e}")
+            except Exception:
                 existing_fetch_time = None
         
         # Durum 1: Bugün için veri yok
         if not existing_fetch_time or (fetch_date and fetch_date != today):
-            print(f"📊 DURUM 1: Bugün için veri YOK")
-            print(f"   - Son fetch tarihi: {fetch_date or 'Yok'}")
-            print(f"   - Bugün: {today}")
-            print(f"   - Mantık: Saat >= 10:00 ise → Veri çek")
-            print(f"   - Kontrol: {current_minutes}dk >= {FETCH_10_00}dk?")
-            
             # Saat >= 10:00 ise → Veri çek
-            if current_minutes >= FETCH_10_00:
-                print(f"   ✅ SONUÇ: Saat 10:00'u geçtik ({current_time}), VERİ ÇEKİLECEK")
-                print(f"{'='*60}\n")
-                return True
-            else:
-                print(f"   ❌ SONUÇ: Saat 10:00'a henüz gelmedik ({current_time}), VERİ ÇEKİLMEYECEK")
-                print(f"{'='*60}\n")
-                return False
+            return current_minutes >= FETCH_10_00
         
         # Durum 2: Bugün için veri var
         if fetch_time_minutes is None:
-            # Parse edilemedi, güvenli tarafta kal
-            print(f"📊 DURUM 2: Bugün için veri VAR ama parse edilemedi")
-            print(f"   ❌ SONUÇ: Parse hatası, VERİ ÇEKİLMEYECEK")
-            print(f"{'='*60}\n")
             return False
-        
-        print(f"📊 DURUM 2: Bugün için veri VAR")
-        print(f"   - Son çekim saati: {fetch_time_minutes} dakika ({fetch_time_minutes // 60}:{fetch_time_minutes % 60:02d})")
-        print(f"   - Şu anki saat: {current_minutes} dakika ({current_time})")
         
         # Son çekim saati hangi aralıkta?
         if FETCH_10_00 <= fetch_time_minutes < FETCH_13_30:
-            # Son çekim 10:00-13:30 arasındaysa
-            print(f"   - Son çekim ARALIĞI: 10:00-13:30 arasında")
-            print(f"   - Mantık: Saat >= 14:00 ise → Veri çek (13:30'u kaçırdık mı?)")
-            print(f"   - Kontrol: {current_minutes}dk >= {FETCH_14_00}dk?")
-            
             # Saat >= 14:00 ise → Veri çek (13:30'u kaçırdık)
-            if current_minutes >= FETCH_14_00:
-                print(f"   ✅ SONUÇ: Saat 14:00'u geçtik ({current_time}), 13:30'u kaçırdık, VERİ ÇEKİLECEK")
-                print(f"{'='*60}\n")
-                return True
-            else:
-                print(f"   ❌ SONUÇ: Saat 14:00'a henüz gelmedik ({current_time}), VERİ ÇEKİLMEYECEK")
-                print(f"{'='*60}\n")
-                return False
+            return current_minutes >= FETCH_14_00
         
         elif FETCH_13_30 <= fetch_time_minutes < FETCH_17_00:
-            # Son çekim 13:30-17:00 arasındaysa
-            print(f"   - Son çekim ARALIĞI: 13:30-17:00 arasında")
-            print(f"   - Mantık: Saat >= 17:00 ise → Veri çek (17:00'ü kaçırdık mı?)")
-            print(f"   - Kontrol: {current_minutes}dk >= {FETCH_17_00}dk?")
-            
             # Saat >= 17:00 ise → Veri çek (17:00'ü kaçırdık)
-            if current_minutes >= FETCH_17_00:
-                print(f"   ✅ SONUÇ: Saat 17:00'u geçtik ({current_time}), VERİ ÇEKİLECEK")
-                print(f"{'='*60}\n")
-                return True
-            else:
-                print(f"   ❌ SONUÇ: Saat 17:00'a henüz gelmedik ({current_time}), VERİ ÇEKİLMEYECEK")
-                print(f"{'='*60}\n")
-                return False
+            return current_minutes >= FETCH_17_00
         
         elif fetch_time_minutes >= FETCH_17_00:
-            # Son çekim 17:00'den sonraysa
-            print(f"   - Son çekim ARALIĞI: 17:00'den sonra")
-            print(f"   - Mantık: Günün son verisi zaten çekilmiş")
-            print(f"   ❌ SONUÇ: Günün son verisi zaten çekilmiş, VERİ ÇEKİLMEYECEK")
-            print(f"{'='*60}\n")
+            # Günün son verisi zaten çekilmiş
             return False
         
         else:
-            # Son çekim 10:00'dan önceyse (normalde olmaz ama güvenlik için)
-            print(f"   - Son çekim ARALIĞI: 10:00'dan önce (beklenmedik)")
-            print(f"   ✅ SONUÇ: Beklenmedik durum, VERİ ÇEKİLECEK")
-            print(f"{'='*60}\n")
+            # Son çekim 10:00'dan önceyse (beklenmedik durum)
             return True
     
     def is_weekday(self) -> bool:
@@ -237,14 +173,7 @@ class BorsaService:
             return None
         
         try:
-            print("=" * 60)
-            print("📈 Borsa Servisi - Veri çekiliyor...")
-            print("=" * 60)
-            
-            print(f"📤 CollectAPI Borsa API çağrılıyor: {COLLECTAPI_BORSA_URL}")
-            
             # CollectAPI'yi çağır
-            # CollectAPI header formatı: "apikey {key}"
             response = self.session.get(
                 COLLECTAPI_BORSA_URL,
                 timeout=30,
@@ -255,16 +184,11 @@ class BorsaService:
                 }
             )
             
-            print(f"📥 Response Status: {response.status_code}")
-            
             if response.status_code != 200:
-                print(f"❌ HTTP Hatası: {response.status_code}")
-                print(f"Response: {response.text[:200]}")
                 logger.error(f"CollectAPI HTTP Hatası: {response.status_code}")
                 return None
             
             # JSON'u parse et
-            print("📊 JSON response parse ediliyor...")
             data = response.json()
             
             # CollectAPI response formatı kontrolü
@@ -275,7 +199,6 @@ class BorsaService:
             # Başarılı response kontrolü
             if data.get('success') == False:
                 error_msg = data.get('message', 'Bilinmeyen hata')
-                print(f"❌ CollectAPI hatası: {error_msg}")
                 logger.error(f"CollectAPI hatası: {error_msg}")
                 return None
             
@@ -283,7 +206,6 @@ class BorsaService:
             result_data = data.get('result', [])
             
             if not result_data:
-                print("⚠️ CollectAPI'den veri gelmedi")
                 logger.warning("CollectAPI'den boş veri döndü")
                 return None
             
@@ -333,18 +255,12 @@ class BorsaService:
                 
                 formatted_data['stocks'].append(formatted_stock)
             
-            print(f"✅ Parse başarılı. Hisse senetleri: {len(formatted_data['stocks'])} adet")
-            print("=" * 60)
             return formatted_data
             
         except json.JSONDecodeError as e:
-            print(f"❌ JSON parse hatası: {e}")
-            print("=" * 60)
             logger.error(f"CollectAPI JSON parse hatası: {e}")
             return None
         except Exception as e:
-            print(f"❌ Borsa servisi hatası: {e}")
-            print("=" * 60)
             logger.error(f"Borsa servisi hatası: {e}")
             return None
     
@@ -411,13 +327,10 @@ class BorsaService:
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             
-            print(f"💾 Lokal dosyaya kaydedildi: {filepath}")
             logger.info(f"Borsa verisi lokal dosyaya kaydedildi: {filepath}")
-            
             return str(filepath)
             
         except Exception as e:
-            print(f"❌ Lokal dosyaya kaydetme hatası: {e}")
             logger.error(f"Lokal dosyaya kaydetme hatası: {e}")
             return None
     
@@ -437,7 +350,6 @@ class BorsaService:
                 pattern = f'borsa_{date}_*.json'
                 files = list(BACKUP_DIR.glob(pattern))
                 if not files:
-                    print(f"⚠️ {date} tarihine ait lokal dosya bulunamadı")
                     return None
                 # En son kaydedileni al
                 filepath = max(files, key=lambda p: p.stat().st_mtime)
@@ -445,7 +357,6 @@ class BorsaService:
                 # En son kaydedilen dosyayı bul
                 files = list(BACKUP_DIR.glob('borsa_*.json'))
                 if not files:
-                    print("⚠️ Lokal backup dosyası bulunamadı")
                     return None
                 filepath = max(files, key=lambda p: p.stat().st_mtime)
             
@@ -453,13 +364,10 @@ class BorsaService:
             with open(filepath, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
-            print(f"📂 Lokal dosyadan yüklendi: {filepath}")
             logger.info(f"Borsa verisi lokal dosyadan yüklendi: {filepath}")
-            
             return data
             
         except Exception as e:
-            print(f"❌ Lokal dosyadan yükleme hatası: {e}")
             logger.error(f"Lokal dosyadan yükleme hatası: {e}")
             return None
 

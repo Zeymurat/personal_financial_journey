@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "title": "Calcul de pourcentages",
+    "subtitle": "Différents calculs de pourcentage"
+  },
+  "common": {
+    "number": "Nombre",
+    "percentage": "Pourcentage",
+    "result": "Résultat",
+    "resultPlaceholder": "Le résultat s’affiche ici",
+    "firstNumber": "Premier nombre",
+    "secondNumber": "Deuxième nombre",
+    "initialValue": "Valeur initiale",
+    "finalValue": "Valeur finale",
+    "value": "Valeur"
+  },
+  "s1": {
+    "title": "Pourcentage d’un nombre",
+    "ofNumber": "de",
+    "percentLabel": "Pourcentage"
+  },
+  "s2": {
+    "title": "Quel pourcentage représente A par rapport à B ?",
+    "firstSuffix": "est",
+    "secondSuffix": "de",
+    "resultPercent": "Résultat (%)"
+  },
+  "s3": {
+    "title": "Variation en pourcentage",
+    "suffix1": "de",
+    "suffix2": "à",
+    "resultLabel": "Résultat (% de variation)"
+  },
+  "s4": {
+    "title": "Augmenter ou diminuer d’un pourcentage",
+    "afterNumber": "→",
+    "increase": "augmenter",
+    "decrease": "diminuer"
+  },
+  "s5": {
+    "title": "Trouver le nombre tel que A % = B",
+    "percentSuffix": "",
+    "valueHint": "égale cette valeur"
+  }
+}

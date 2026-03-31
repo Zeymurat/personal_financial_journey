@@ -1,0 +1,62 @@
+{
+  "calendar": {
+    "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    "weekdaysShort": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "weekdaysLong": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+  },
+  "ui": {
+    "backToToday": "Back to today",
+    "loading": "Loading...",
+    "noEvents": "No events",
+    "deleteEventTitle": "Delete event",
+    "editEventTitle": "Edit event"
+  },
+  "recurrence": {
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly"
+  },
+  "toast": {
+    "loadError": "Could not load events.",
+    "titleRequired": "Please enter an event title.",
+    "updateSuccess": "Event updated successfully!",
+    "createSuccess": "Event created successfully!",
+    "saveError": "Could not save the event.",
+    "seriesCapped": "The series hit the maximum record limit. ",
+    "seriesCreated": "Event series created. {{total}} events in total.",
+    "deletedMany": "{{count}} events deleted successfully!",
+    "deleteManyError": "Could not delete events.",
+    "deleteOneSuccess": "Event deleted successfully!",
+    "deleteOneError": "Could not delete the event."
+  },
+  "modal": {
+    "editTitle": "Edit event",
+    "newTitle": "New event",
+    "titleLabel": "Title *",
+    "titlePlaceholder": "Event title",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Event description",
+    "dateLabel": "Date",
+    "timeLabel": "Time (optional)",
+    "recurringCheckbox": "Recurring event",
+    "recurrenceTypeLabel": "Recurrence",
+    "optDaily": "Every day",
+    "optWeekly": "Every week (same weekday)",
+    "optMonthly": "Every month on day {{day}}",
+    "optYearly": "Every year (same date)",
+    "creatingProgress": "Creating: {{created}}/{{total}}",
+    "deleteFromEditTitle": "Delete event",
+    "saving": "Creating...",
+    "update": "Update",
+    "save": "Save"
+  },
+  "deleteDialog": {
+    "title": "Delete event",
+    "bodySingle": "Are you sure you want to delete this event?",
+    "bodyRecurring": "Deleting this recurring series ({{count}} occurrences) will show progress.",
+    "deletingProgress": "Deleting: {{deleted}}/{{total}}",
+    "deleteSeries": "Delete entire series",
+    "deleteThisOnly": "This occurrence only"
+  }
+}

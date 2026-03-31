@@ -1,0 +1,20 @@
+{
+  "brand": {
+    "title": "Financial Journey",
+    "subtitle": "Persönliche Finanzverwaltung"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "transactions": "Transaktionen",
+    "investments": "Investitionen",
+    "track": "Verfolgen & vergleichen",
+    "reports": "Berichte",
+    "converter": "Währungsrechner",
+    "calculator": "Rechner",
+    "notifications": "Benachrichtigungen",
+    "agenda": "Agenda",
+    "settings": "Einstellungen"
+  },
+  "logout": "Abmelden",
+  "userFallback": "Benutzer"
+}

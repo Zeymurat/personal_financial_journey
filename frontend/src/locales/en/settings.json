@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "title": "Settings",
+    "subtitle": "Manage your app preferences"
+  },
+  "appearance": {
+    "title": "Appearance",
+    "description": "Theme and display",
+    "darkMode": "Dark mode",
+    "darkModeHint": "Use dark colors"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "In-app alerts for transactions, goals, and investments",
+    "budgetAlerts": "Budget alerts",
+    "budgetAlertsHint": "When off, the server will not create new transaction, goal, or investment notifications"
+  },
+  "language": {
+    "title": "Language & region",
+    "description": "Language preference",
+    "label": "Language"
+  },
+  "security": {
+    "title": "Security",
+    "description": "Account security",
+    "changePassword": "Change password",
+    "twoFactor": "Two-factor authentication",
+    "passwordChange": {
+      "title": "Change password",
+      "description": "Enter your current password, then your new password.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "submit": "Update password",
+      "success": "Your password was updated.",
+      "errorGeneric": "Could not update password. Please try again.",
+      "errorWrongPassword": "Current password is incorrect.",
+      "errorWeak": "Password must be at least 6 characters.",
+      "errorRecentLogin": "For security, sign out and sign in again, then try once more.",
+      "errorTooMany": "Too many attempts. Please try again later.",
+      "errorMismatch": "New passwords do not match.",
+      "errorNoEmail": "No email address on file.",
+      "errorNoPasswordProvider": "This account does not use email/password sign-in.",
+      "oauthHint": "You signed in with Google or another provider. There is no app password to change for this account."
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "description": "Manage your personal information",
+    "fullName": "Full name",
+    "email": "Email address"
+  },
+  "data": {
+    "title": "Data & privacy",
+    "description": "Manage your data",
+    "export": "Export my data",
+    "backup": "Back up account",
+    "deleteAccount": "Delete account"
+  }
+}

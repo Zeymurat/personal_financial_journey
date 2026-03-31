@@ -1,29 +1,26 @@
 import { 
-  collection, 
-  addDoc, 
   updateDoc, 
   deleteDoc, 
-  doc, 
-  getDocs, 
-  getDoc,
-  query, 
-  where, 
-  Timestamp,
-  writeBatch
+  doc,
+  Timestamp
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Investment, InvestmentTransaction } from '../types';
 
 // Investment Operations
+// Not: Bu fonksiyonlar artık kullanılmıyor, backend API kullanılıyor
+// Ama geriye dönük uyumluluk için bırakıldı
 export const addInvestment = async (userId: string, investment: Omit<Investment, 'id' | 'transactions'>) => {
   try {
-    const docRef = await addDoc(collection(db, 'investments'), {
-      ...investment,
-      userId,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    });
-    return docRef.id;
+    // Backend API kullan
+    const { investmentAPI } = await import('./apiService');
+    const response = await investmentAPI.create(investment);
+    
+    if (response.success && response.id) {
+      return response.id;
+    } else {
+      throw new Error(response.error || 'Investment oluşturulamadı');
+    }
   } catch (error) {
     console.error('Error adding investment:', error);
     throw error;
@@ -32,11 +29,13 @@ export const addInvestment = async (userId: string, investment: Omit<Investment,
 
 export const updateInvestment = async (investmentId: string, updates: Partial<Investment>) => {
   try {
-    const investmentRef = doc(db, 'investments', investmentId);
-    await updateDoc(investmentRef, {
-      ...updates,
-      updatedAt: Timestamp.now()
-    });
+    // Backend API kullan
+    const { investmentAPI } = await import('./apiService');
+    const response = await investmentAPI.update(investmentId, updates);
+    
+    if (!response.success) {
+      throw new Error(response.error || 'Investment güncellenemedi');
+    }
   } catch (error) {
     console.error('Error updating investment:', error);
     throw error;
@@ -45,23 +44,13 @@ export const updateInvestment = async (investmentId: string, updates: Partial<In
 
 export const deleteInvestment = async (investmentId: string) => {
   try {
-    // First delete all related transactions
-    const transactionsQuery = query(
-      collection(db, 'investment_transactions'),
-      where('investmentId', '==', investmentId)
-    );
+    // Backend API kullan
+    const { investmentAPI } = await import('./apiService');
+    const response = await investmentAPI.delete(investmentId);
     
-    const batch = writeBatch(db);
-    const querySnapshot = await getDocs(transactionsQuery);
-    
-    querySnapshot.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
-    
-    // Delete the investment
-    batch.delete(doc(db, 'investments', investmentId));
-    
-    await batch.commit();
+    if (!response.success) {
+      throw new Error(response.error || 'Investment silinemedi');
+    }
   } catch (error) {
     console.error('Error deleting investment:', error);
     throw error;
@@ -70,19 +59,53 @@ export const deleteInvestment = async (investmentId: string) => {
 
 export const getInvestments = async (userId: string) => {
   try {
-    const q = query(
-      collection(db, 'investments'),
-      where('userId', '==', userId),
-      orderBy('updatedAt', 'desc')
-    );
+    // Backend API kullan (users/{userId}/investments subcollection'ından okur)
+    const { investmentAPI } = await import('./apiService');
+    const response = await investmentAPI.getAll();
     
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate(),
-      updatedAt: doc.data().updatedAt?.toDate()
-    })) as Investment[];
+    if (response.success && response.data) {
+      // Backend'den gelen verileri Investment formatına çevir
+      return response.data.map((item: any) => {
+        // Firestore timestamp'lerini parse et
+        let createdAt = item.createdAt;
+        let updatedAt = item.updatedAt;
+        
+        // Eğer timestamp objesi varsa (Firestore formatı)
+        if (createdAt && typeof createdAt === 'object' && createdAt.toDate) {
+          createdAt = createdAt.toDate().toISOString();
+        } else if (createdAt && typeof createdAt === 'string') {
+          // Zaten string ise olduğu gibi bırak
+        } else {
+          createdAt = new Date().toISOString();
+        }
+        
+        if (updatedAt && typeof updatedAt === 'object' && updatedAt.toDate) {
+          updatedAt = updatedAt.toDate().toISOString();
+        } else if (updatedAt && typeof updatedAt === 'string') {
+          // Zaten string ise olduğu gibi bırak
+        } else {
+          updatedAt = new Date().toISOString();
+        }
+        
+        return {
+          id: item.id || item._id,
+          symbol: item.symbol || '',
+          name: item.name || '',
+          type: item.type || 'forex',
+          quantity: item.quantity || 0,
+          averagePrice: item.averagePrice || 0,
+          currentPrice: item.currentPrice || 0,
+          totalValue: item.totalValue || 0,
+          profitLoss: item.profitLoss || 0,
+          profitLossPercentage: item.profitLossPercentage || 0,
+          transactions: item.transactions || [],
+          createdAt,
+          updatedAt
+        };
+      }) as Investment[];
+    }
+    
+    return [];
   } catch (error) {
     console.error('Error getting investments:', error);
     throw error;
@@ -96,107 +119,111 @@ export const addInvestmentTransaction = async (
   transaction: Omit<InvestmentTransaction, 'id'>
 ) => {
   try {
-    const batch = writeBatch(db);
+    // Backend API kullan (users/{userId}/investments/{investmentId}/transactions subcollection'ına ekler)
+    const { investmentTransactionAPI } = await import('./apiService');
+    const response = await investmentTransactionAPI.create(investmentId, transaction);
     
-    // Add the transaction
-    const transactionRef = doc(collection(db, 'investment_transactions'));
-    batch.set(transactionRef, {
-      ...transaction,
-      userId,
-      investmentId,
-      date: Timestamp.fromDate(new Date(transaction.date)),
-      createdAt: Timestamp.now()
-    });
-    
-    // Update investment stats
-    await updateInvestmentStats(userId, investmentId, batch);
-    
-    await batch.commit();
-    return transactionRef.id;
-  } catch (error) {
+    if (response.success && response.id) {
+      return response.id;
+    } else {
+      const errorMsg = response.error || response.message || 'Investment transaction oluşturulamadı';
+      console.error('Backend response error:', response);
+      throw new Error(errorMsg);
+    }
+  } catch (error: any) {
     console.error('Error adding investment transaction:', error);
-    throw error;
+    // Daha detaylı hata mesajı
+    const errorMsg = error?.message || error?.error || 'Investment transaction eklenirken bir hata oluştu';
+    throw new Error(errorMsg);
   }
 };
 
 export const getInvestmentTransactions = async (investmentId: string) => {
   try {
-    const q = query(
-      collection(db, 'investment_transactions'),
-      where('investmentId', '==', investmentId),
-      orderBy('date', 'desc')
-    );
+    // Backend API kullan (users/{userId}/investments/{investmentId}/transactions subcollection'ından okur)
+    const { investmentTransactionAPI } = await import('./apiService');
+    const response = await investmentTransactionAPI.getByInvestment(investmentId);
     
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      date: doc.data().date?.toDate().toISOString().split('T')[0],
-      createdAt: doc.data().createdAt?.toDate()
-    })) as InvestmentTransaction[];
+    if (response.success && response.data) {
+      // Backend'den gelen verileri InvestmentTransaction formatına çevir
+      return response.data.map((item: any) => {
+        // Firestore timestamp'lerini parse et
+        let date = item.date;
+        let createdAt = item.createdAt;
+        
+        // Eğer timestamp objesi varsa (Firestore formatı)
+        if (date && typeof date === 'object' && date.toDate) {
+          date = date.toDate().toISOString().split('T')[0];
+        } else if (date && typeof date === 'string') {
+          // Zaten string ise olduğu gibi bırak
+        } else {
+          date = new Date().toISOString().split('T')[0];
+        }
+        
+        if (createdAt && typeof createdAt === 'object' && createdAt.toDate) {
+          createdAt = createdAt.toDate();
+        } else if (createdAt && typeof createdAt === 'string') {
+          createdAt = new Date(createdAt);
+        } else {
+          createdAt = new Date();
+        }
+        
+        return {
+          id: item.id || item._id,
+          type: item.type || 'buy',
+          quantity: item.quantity || 0,
+          price: item.price || 0,
+          totalAmount: item.totalAmount || 0,
+          date,
+          fees: item.fees || 0,
+          createdAt
+        };
+      }) as InvestmentTransaction[];
+    }
+    
+    return [];
   } catch (error) {
     console.error('Error getting investment transactions:', error);
     throw error;
   }
 };
 
-// Helper function to update investment statistics
-const updateInvestmentStats = async (
-  userId: string, 
-  investmentId: string, 
-  batch?: any
+export const updateInvestmentTransaction = async (
+  investmentId: string,
+  transactionId: string,
+  updates: Partial<InvestmentTransaction>
 ) => {
   try {
-    // Get all transactions for this investment
-    const transactionsQuery = query(
-      collection(db, 'investment_transactions'),
-      where('investmentId', '==', investmentId)
-    );
+    // Backend API kullan
+    const { investmentTransactionAPI } = await import('./apiService');
+    const response = await investmentTransactionAPI.update(investmentId, transactionId, updates);
     
-    const querySnapshot = await getDocs(transactionsQuery);
-    
-    let totalQuantity = 0;
-    let totalCost = 0;
-    
-    querySnapshot.forEach((doc) => {
-      const t = doc.data();
-      if (t.type === 'buy') {
-        totalQuantity += t.quantity;
-        totalCost += t.totalAmount;
-      } else {
-        totalQuantity -= t.quantity;
-        totalCost -= t.totalAmount;
-      }
-    });
-    
-    // Get current price from the investment
-    const investmentRef = doc(db, 'investments', investmentId);
-    const investmentSnap = await getDoc(investmentRef);
-    
-    if (investmentSnap.exists()) {
-      const investmentData = investmentSnap.data();
-      const currentPrice = investmentData.currentPrice;
-      const totalValue = totalQuantity * currentPrice;
-      const profitLoss = totalValue - totalCost;
-      const profitLossPercentage = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0;
-      
-      const updateData = {
-        quantity: totalQuantity,
-        averagePrice: totalQuantity > 0 ? totalCost / totalQuantity : 0,
-        totalValue,
-        profitLoss,
-        profitLossPercentage,
-        updatedAt: Timestamp.now()
-      };
-      
-      if (batch) {
-        batch.update(investmentRef, updateData);
-      } else {
-        await updateDoc(investmentRef, updateData);
-      }
+    if (!response.success) {
+      throw new Error(response.error || 'Investment transaction güncellenemedi');
     }
   } catch (error) {
-    console.error('Error updating investment stats:', error);
+    console.error('Error updating investment transaction:', error);
     throw error;
   }
 };
+
+export const deleteInvestmentTransaction = async (
+  investmentId: string,
+  transactionId: string
+) => {
+  try {
+    // Backend API kullan
+    const { investmentTransactionAPI } = await import('./apiService');
+    const response = await investmentTransactionAPI.delete(investmentId, transactionId);
+    
+    if (!response.success) {
+      throw new Error(response.error || 'Investment transaction silinemedi');
+    }
+  } catch (error) {
+    console.error('Error deleting investment transaction:', error);
+    throw error;
+  }
+};
+
+// Not: Investment stats güncellemesi backend'de yapılıyor (firestore_service.add_investment_transaction içinde)
+// Bu yüzden frontend'de ayrı bir updateInvestmentStats fonksiyonuna gerek yok

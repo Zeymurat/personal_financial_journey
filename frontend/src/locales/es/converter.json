@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "title": "Conversor de divisas",
+    "subtitle": "Convierte con tipos en vivo",
+    "disclaimer": "Puede haber pequeñas diferencias; revisa los informes."
+  },
+  "form": {
+    "amountToConvert": "Importe a convertir",
+    "convertedAmount": "Importe convertido",
+    "rateLine": "1 {{from}} = {{rate}} {{to}}",
+    "amountPlaceholder": "0,00"
+  },
+  "quick": {
+    "title": "Conversiones rápidas",
+    "add": "Añadir",
+    "manageTitle": "Gestionar conversiones",
+    "empty": "Aún no hay conversiones rápidas. Pulsa Añadir para crear una."
+  },
+  "modalQuick": {
+    "title": "Gestionar conversiones rápidas",
+    "subtitle": "Añade conversiones nuevas o edita las existentes.",
+    "from": "De",
+    "to": "A",
+    "amount": "Importe",
+    "addButton": "Añadir conversión",
+    "listTitle": "Conversiones actuales",
+    "addSectionTitle": "Nueva conversión",
+    "fromCurrencyLabel": "Divisa origen",
+    "toCurrencyLabel": "Divisa destino",
+    "listEmpty": "Aún no hay conversiones.",
+    "removeTitle": "Eliminar conversión",
+    "close": "Cerrar"
+  },
+  "modalCurrency": {
+    "title": "Elegir forex, oro, cripto y metales",
+    "subtitle": "Selecciona los tipos e instrumentos que quieres ver.",
+    "selectedCount": "{{count}} seleccionado(s)",
+    "categoryFilter": "Filtro de categoría",
+    "activeFilters": "{{count}} activo(s)",
+    "all": "Todos",
+    "categoryCurrency": "💱 Divisas",
+    "categoryGold": "🥇 Oro",
+    "categoryCrypto": "₿ Cripto",
+    "categoryMetal": "💎 Metales preciosos",
+    "searchPlaceholder": "Buscar por código o nombre (p. ej. USD, euro, Bitcoin)",
+    "noResults": "Sin resultados para «{{query}}»",
+    "sectionForex": "💱 Tipos de cambio",
+    "sectionGold": "🥇 Precios del oro",
+    "sectionCrypto": "₿ Criptomonedas",
+    "sectionMetal": "💎 Metales preciosos",
+    "buy": "Compra:",
+    "sell": "Venta:",
+    "price": "Precio:",
+    "footerSelected": "{{count}} seleccionado(s)",
+    "footerMinOne": "Selecciona al menos un elemento",
+    "close": "Cerrar"
+  },
+  "toast": {
+    "invalidConvert": "Introduce una conversión válida.",
+    "sameCurrency": "Origen y destino no pueden ser iguales.",
+    "duplicate": "Esta conversión ya existe.",
+    "addSuccess": "Conversión añadida.",
+    "addError": "No se pudo añadir la conversión.",
+    "removeSuccess": "Conversión eliminada.",
+    "removeError": "No se pudo eliminar la conversión."
+  },
+  "cards": {
+    "removeQuickConvert": "Quitar de la lista",
+    "dragToReorder": "Arrastra para ordenar",
+    "removeCurrencyCard": "Quitar de la lista",
+    "buy": "Compra:",
+    "sell": "Venta:",
+    "change": "Cambio:"
+  },
+  "tryName": "Lira turca"
+}

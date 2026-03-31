@@ -1,0 +1,20 @@
+{
+  "brand": {
+    "title": "Financial Journey",
+    "subtitle": "Kişisel Finans Yönetimi"
+  },
+  "nav": {
+    "dashboard": "Kişisel Özet",
+    "transactions": "İşlemler",
+    "investments": "Yatırımlar",
+    "track": "Takip ve Karşılaştırma",
+    "reports": "Raporlar",
+    "converter": "Döviz Çevirici",
+    "calculator": "Hesaplayıcı",
+    "notifications": "Bildirimler",
+    "agenda": "Ajanda",
+    "settings": "Ayarlar"
+  },
+  "logout": "Çıkış Yap",
+  "userFallback": "Kullanıcı"
+}

@@ -1,5 +1,4 @@
 // src/contexts/AuthContext.tsx
-console.log("AuthContext.tsx dosyası yüklendi!");
 import { createContext, useContext, useEffect, useState, useMemo, ReactNode } from 'react';
 import {
   User as FirebaseUser,
@@ -10,7 +9,10 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
-  UserCredential
+  UserCredential,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword
 } from 'firebase/auth';
 // Firestore için gerekli metodlar: doc, setDoc, getDoc
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -35,7 +37,10 @@ interface AuthContextType {
   signup: (email: string, password: string, name: string) => Promise<UserCredential>;
   logout: () => Promise<void>;
   signInWithGoogle: () => Promise<UserCredential>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  hasPasswordProvider: boolean;
   loading: boolean;
+  authenticating: boolean; // Tracks if backend authentication is in progress
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,24 +51,20 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [currentUser, setCurrentUser] = useState<User | null | undefined>(undefined);
+  const [hasPasswordProvider, setHasPasswordProvider] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [authenticating, setAuthenticating] = useState(false);
 
   const processUserAuthentication = async (user: FirebaseUser) => {
+    // Not: authenticating state'i çağıran yerlerde yönetiliyor
+    // (onAuthStateChanged ve login fonksiyonlarında)
     try {
       const idToken = await user.getIdToken();
       const backendResponse = await authAPI.firebaseLogin(idToken);
-
-      // apiService zaten token'ları localStorage'a kaydettiği için
-      // burada ekstra bir şey yapmamıza gerek yok.
-      console.log("Backend'den token alındı ve kaydedildi.");
-      
-      // Login başarılı - Finans API çağrısı artık FinanceContext'te yapılıyor (akıllı zaman kontrolü ile)
-      // Her login'de API çağrısı yapılmıyor, sadece gerekli durumlarda çağrılıyor
       
       return backendResponse;
 
     } catch (error) {
-      console.error("Backend'e login olurken hata:", error);
       // Hata durumunda, kullanıcının API istekleri yapmasını engellemek için
       // localStorage'daki token'ları temizlemek iyi bir pratik olabilir.
       authAPI.logout();
@@ -82,15 +83,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const avatarUrl = firebaseUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
 
       await setDoc(userDocRef, {
-        id: firebaseUser.uid, // ÖNEMLİ: Bu satırı ekleyin!
+        id: firebaseUser.uid,
         name: displayName,
         email: firebaseUser.email || '',
         avatar: avatarUrl,
         createdAt: new Date().toISOString(),
       });
-      console.log('Firestore: Yeni kullanıcı dokümanı oluşturuldu.');
-    } else {
-      console.log('Firestore: Kullanıcı dokümanı zaten mevcut.');
     }
   };
 
@@ -122,29 +120,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        setHasPasswordProvider(
+          firebaseUser.providerData.some((p) => p.providerId === EmailAuthProvider.PROVIDER_ID)
+        );
         await updateUserProfileAndState(firebaseUser);
         // Oturum açan her kullanıcı için Firestore dokümanını kontrol et
         try {
           await ensureFirestoreUserDocument(firebaseUser);
         } catch (error) {
           // Firestore permission hatası olsa bile login'i engelleme
-          console.warn("Firestore kullanıcı dokümanı kontrolü hatası (devam ediliyor):", error);
         }
         
         // Sayfa yenilendiğinde veya oturum devam ederken backend'e authenticate et
-        // (Sadece token yoksa veya yeni login olduysa)
         try {
           const token = localStorage.getItem('access_token');
           if (!token) {
-            // Token yoksa, backend'e authenticate et
-            await processUserAuthentication(firebaseUser);
+            setAuthenticating(true);
+            try {
+              await processUserAuthentication(firebaseUser);
+              console.log('✅ Giriş başarılı');
+            } finally {
+              setAuthenticating(false);
+            }
           }
         } catch (error) {
-          // Sessizce hata yakala, login'i engelleme
-          console.warn("Auth state değişikliğinde authentication hatası:", error);
+          setAuthenticating(false);
         }
       } else {
         setCurrentUser(null);
+        setHasPasswordProvider(false);
+        setAuthenticating(false);
         // Logout durumunda token'ları temizle
         localStorage.removeItem('access_token');
         localStorage.removeItem('refreshToken');
@@ -172,9 +177,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = async (email: string, password: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     // Giriş işleminden sonra Firestore'a kaydı garanti et
+    // Not: processUserAuthentication onAuthStateChanged içinde çağrılıyor
+    // Burada sadece Firestore dokümanını kontrol ediyoruz
     if (userCredential.user) {
       await ensureFirestoreUserDocument(userCredential.user);
-      await processUserAuthentication(userCredential.user);
     }
     return userCredential;
   };
@@ -185,9 +191,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       // Google ile girişten sonra Firestore'a kaydı garanti et
+      // Not: processUserAuthentication onAuthStateChanged içinde çağrılıyor
+      // Burada sadece Firestore dokümanını kontrol ediyoruz
       if (result.user) {
         await ensureFirestoreUserDocument(result.user);
-        await processUserAuthentication(result.user);
       }
 
       return result;
@@ -201,14 +208,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await signOut(auth);
   };
 
+  const changePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
+    const firebaseUser = auth.currentUser;
+    if (!firebaseUser?.email) {
+      throw new Error('auth/no-email');
+    }
+    if (
+      !firebaseUser.providerData.some((p) => p.providerId === EmailAuthProvider.PROVIDER_ID)
+    ) {
+      throw new Error('auth/no-password-provider');
+    }
+    const credential = EmailAuthProvider.credential(firebaseUser.email, currentPassword);
+    await reauthenticateWithCredential(firebaseUser, credential);
+    await updatePassword(firebaseUser, newPassword);
+  };
+
   const value = useMemo(() => ({
     currentUser,
     login,
     signup,
     logout,
     signInWithGoogle,
-    loading
-  }), [currentUser, loading]);
+    changePassword,
+    hasPasswordProvider,
+    loading,
+    authenticating
+  }), [currentUser, hasPasswordProvider, loading, authenticating]);
 
   return (
     <AuthContext.Provider value={value}>
@@ -222,5 +247,6 @@ export function useAuth(): AuthContextType {
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  return context;
+  // Explicitly return as AuthContextType to ensure type safety
+  return context as AuthContextType;
 }

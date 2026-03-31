@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "title": "Prozentrechner",
+    "subtitle": "Verschiedene Prozentberechnungen"
+  },
+  "common": {
+    "number": "Zahl",
+    "percentage": "Prozent",
+    "result": "Ergebnis",
+    "resultPlaceholder": "Ergebnis erscheint hier",
+    "firstNumber": "Erste Zahl",
+    "secondNumber": "Zweite Zahl",
+    "initialValue": "Anfangswert",
+    "finalValue": "Endwert",
+    "value": "Wert"
+  },
+  "s1": {
+    "title": "Prozentsatz einer Zahl",
+    "ofNumber": "von",
+    "percentLabel": "Prozent"
+  },
+  "s2": {
+    "title": "Wie viel Prozent ist A von B?",
+    "firstSuffix": "ist",
+    "secondSuffix": "von",
+    "resultPercent": "Ergebnis (%)"
+  },
+  "s3": {
+    "title": "Relative Veränderung in %",
+    "suffix1": "von",
+    "suffix2": "zu",
+    "resultLabel": "Ergebnis (% Veränderung)"
+  },
+  "s4": {
+    "title": "Um einen Prozentsatz erhöhen oder verringern",
+    "afterNumber": "→",
+    "increase": "erhöhen",
+    "decrease": "verringern"
+  },
+  "s5": {
+    "title": "Zahl finden, bei der A % gleich B ist",
+    "percentSuffix": "",
+    "valueHint": "entspricht diesem Wert"
+  }
+}

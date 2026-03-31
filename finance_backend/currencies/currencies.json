@@ -1,1438 +1,884 @@
 {
-  "exchange_rates": {
-    "USD": {
-      "code": "USD",
-      "name": "Amerikan Doları",
-      "name_tr": "Amerikan Doları",
-      "rate": 42.214749999999995,
-      "buy": 42.21,
-      "sell": 42.2195,
-      "change": 0.26,
-      "type": "currency"
-    },
-    "EUR": {
-      "code": "EUR",
-      "name": "Euro",
-      "name_tr": "Euro",
-      "rate": 48.91715,
-      "buy": 48.9131,
-      "sell": 48.9212,
-      "change": 0.38,
-      "type": "currency"
-    },
-    "GBP": {
-      "code": "GBP",
-      "name": "İngiliz Sterlini",
-      "name_tr": "İngiliz Sterlini",
-      "rate": 55.54145,
-      "buy": 55.5348,
-      "sell": 55.5481,
-      "change": 0.19,
-      "type": "currency"
-    },
-    "CHF": {
-      "code": "CHF",
-      "name": "İsviçre Frangı",
-      "name_tr": "İsviçre Frangı",
-      "rate": 52.43745,
-      "buy": 52.4228,
-      "sell": 52.4521,
-      "change": 0.4,
-      "type": "currency"
-    },
-    "CAD": {
-      "code": "CAD",
-      "name": "Kanada Doları",
-      "name_tr": "Kanada Doları",
-      "rate": 30.0066,
-      "buy": 30.0006,
-      "sell": 30.0126,
-      "change": 0.61,
-      "type": "currency"
-    },
-    "RUB": {
-      "code": "RUB",
-      "name": "Rus Rublesi",
-      "name_tr": "Rus Rublesi",
-      "rate": 0.5224,
-      "buy": 0.5189,
-      "sell": 0.5259,
-      "change": 0.81,
-      "type": "currency"
-    },
-    "AED": {
-      "code": "AED",
-      "name": "BAE Dirhemi",
-      "name_tr": "BAE Dirhemi",
-      "rate": 11.4948,
-      "buy": 11.49,
-      "sell": 11.4996,
-      "change": 0.27,
-      "type": "currency"
-    },
-    "AUD": {
-      "code": "AUD",
-      "name": "Avustralya Doları",
-      "name_tr": "Avustralya Doları",
-      "rate": 27.38475,
-      "buy": 27.379,
-      "sell": 27.3905,
-      "change": 0.38,
-      "type": "currency"
-    },
-    "DKK": {
-      "code": "DKK",
-      "name": "Danimarka Kronu",
-      "name_tr": "Danimarka Kronu",
-      "rate": 6.542199999999999,
-      "buy": 6.5405,
-      "sell": 6.5439,
-      "change": 0.47,
-      "type": "currency"
-    },
-    "SEK": {
-      "code": "SEK",
-      "name": "İsveç Kronu",
-      "name_tr": "İsveç Kronu",
-      "rate": 4.422700000000001,
-      "buy": 4.421,
-      "sell": 4.4244,
-      "change": 0.47,
-      "type": "currency"
-    },
-    "NOK": {
-      "code": "NOK",
-      "name": "Norveç Kronu",
-      "name_tr": "Norveç Kronu",
-      "rate": 4.14745,
-      "buy": 4.1464,
-      "sell": 4.1485,
-      "change": 0.48,
-      "type": "currency"
-    },
-    "JPY": {
-      "code": "JPY",
-      "name": "Japon Yeni",
-      "name_tr": "Japon Yeni",
-      "rate": 0.0027565000000000003,
-      "buy": 0.002753,
-      "sell": 0.0027600000000000003,
-      "change": 0,
-      "type": "currency"
-    },
-    "KWD": {
-      "code": "KWD",
-      "name": "Kuveyt Dinarı",
-      "name_tr": "Kuveyt Dinarı",
-      "rate": 137.5383,
-      "buy": 137.296,
-      "sell": 137.7806,
-      "change": 0.24,
-      "type": "currency"
-    },
-    "ZAR": {
-      "code": "ZAR",
-      "name": "Güney Afrika Randı",
-      "name_tr": "Güney Afrika Randı",
-      "rate": 2.43525,
-      "buy": 2.4347,
-      "sell": 2.4358,
-      "change": 0.46,
-      "type": "currency"
-    },
-    "BHD": {
-      "code": "BHD",
-      "name": "Bahreyn Dinarı",
-      "name_tr": "Bahreyn Dinarı",
-      "rate": 111.96950000000001,
-      "buy": 111.9569,
-      "sell": 111.9821,
-      "change": 0.26,
-      "type": "currency"
-    },
-    "LYD": {
-      "code": "LYD",
-      "name": "Libya Dinarı",
-      "name_tr": "Libya Dinarı",
-      "rate": 7.73435,
-      "buy": 7.7335,
-      "sell": 7.7352,
-      "change": 0.41,
-      "type": "currency"
-    },
-    "SAR": {
-      "code": "SAR",
-      "name": "Suudi Arabistan Riyali",
-      "name_tr": "Suudi Arabistan Riyali",
-      "rate": 11.2558,
-      "buy": 11.2413,
-      "sell": 11.2703,
-      "change": 0.26,
-      "type": "currency"
-    },
-    "IQD": {
-      "code": "IQD",
-      "name": "Irak Dinarı",
-      "name_tr": "Irak Dinarı",
-      "rate": 0.0322,
-      "buy": 0.0322,
-      "sell": 0.0322,
-      "change": 0.28,
-      "type": "currency"
-    },
-    "ILS": {
-      "code": "ILS",
-      "name": "İsrail Şekeli",
-      "name_tr": "İsrail Şekeli",
-      "rate": 12.93345,
-      "buy": 12.932,
-      "sell": 12.9349,
-      "change": 0.24,
-      "type": "currency"
-    },
-    "IRR": {
-      "code": "IRR",
-      "name": "İran Riyali",
-      "name_tr": "İran Riyali",
-      "rate": 0.001,
-      "buy": 0.001,
-      "sell": 0.001,
-      "change": 0,
-      "type": "currency"
-    },
-    "INR": {
-      "code": "INR",
-      "name": "Hindistan Rupisi",
-      "name_tr": "Hindistan Rupisi",
-      "rate": 0.47625,
-      "buy": 0.4762,
-      "sell": 0.4763,
-      "change": 0.28,
-      "type": "currency"
-    },
-    "MXN": {
-      "code": "MXN",
-      "name": "Meksika Pesosu",
-      "name_tr": "Meksika Pesosu",
-      "rate": 2.27635,
-      "buy": 2.2761,
-      "sell": 2.2766,
-      "change": 0.44,
-      "type": "currency"
-    },
-    "HUF": {
-      "code": "HUF",
-      "name": "Macar Forinti",
-      "name_tr": "Macar Forinti",
-      "rate": 0.12675,
-      "buy": 0.1267,
-      "sell": 0.1268,
-      "change": 0.65,
-      "type": "currency"
-    },
-    "NZD": {
-      "code": "NZD",
-      "name": "Yeni Zelanda Doları",
-      "name_tr": "Yeni Zelanda Doları",
-      "rate": 23.730800000000002,
-      "buy": 23.7286,
-      "sell": 23.733,
-      "change": 0.02,
-      "type": "currency"
-    },
-    "BRL": {
-      "code": "BRL",
-      "name": "Brezilya Reali",
-      "name_tr": "Brezilya Reali",
-      "rate": 7.87665,
-      "buy": 7.8759,
-      "sell": 7.8774,
-      "change": 0.09,
-      "type": "currency"
-    },
-    "IDR": {
-      "code": "IDR",
-      "name": "Endonezya Rupiahi",
-      "name_tr": "Endonezya Rupiahi",
-      "rate": 0.0025,
-      "buy": 0.0025,
-      "sell": 0.0025,
-      "change": 0.24,
-      "type": "currency"
-    },
-    "CZK": {
-      "code": "CZK",
-      "name": "Çek Korunası",
-      "name_tr": "Çek Korunası",
-      "rate": 2.0075,
-      "buy": 2.0073,
-      "sell": 2.0077,
-      "change": 0.5,
-      "type": "currency"
-    },
-    "PLN": {
-      "code": "PLN",
-      "name": "Polonya Zlotisi",
-      "name_tr": "Polonya Zlotisi",
-      "rate": 11.5039,
-      "buy": 11.5026,
-      "sell": 11.5052,
-      "change": 0.55,
-      "type": "currency"
-    },
-    "RON": {
-      "code": "RON",
-      "name": "Romanya Leyi",
-      "name_tr": "Romanya Leyi",
-      "rate": 9.604849999999999,
-      "buy": 9.6006,
-      "sell": 9.6091,
-      "change": 0.46,
-      "type": "currency"
-    },
-    "CNY": {
-      "code": "CNY",
-      "name": "Çin Yuanı",
-      "name_tr": "Çin Yuanı",
-      "rate": 5.9245,
-      "buy": 5.9238,
-      "sell": 5.9252,
-      "change": 0.22,
-      "type": "currency"
-    },
-    "ARS": {
-      "code": "ARS",
-      "name": "Arjantin Pesosu",
-      "name_tr": "Arjantin Pesosu",
-      "rate": 0.029,
-      "buy": 0.029,
-      "sell": 0.029,
-      "change": -0.03,
-      "type": "currency"
-    },
-    "ALL": {
-      "code": "ALL",
-      "name": "Arnavutluk Leki",
-      "name_tr": "Arnavutluk Leki",
-      "rate": 0.5055499999999999,
-      "buy": 0.5055,
-      "sell": 0.5056,
-      "change": 0.51,
-      "type": "currency"
-    },
-    "AZN": {
-      "code": "AZN",
-      "name": "Azerbaycan Manatı",
-      "name_tr": "Azerbaycan Manatı",
-      "rate": 24.8322,
-      "buy": 24.8294,
-      "sell": 24.835,
-      "change": 0.26,
-      "type": "currency"
-    },
-    "BAM": {
-      "code": "BAM",
-      "name": "Bosna-Hersek Markı",
-      "name_tr": "Bosna-Hersek Markı",
-      "rate": 24.957,
-      "buy": 24.9542,
-      "sell": 24.9598,
-      "change": 0.6,
-      "type": "currency"
-    },
-    "CLP": {
-      "code": "CLP",
-      "name": "Şili Pesosu",
-      "name_tr": "Şili Pesosu",
-      "rate": 0.0447,
-      "buy": 0.0447,
-      "sell": 0.0447,
-      "change": 0.11,
-      "type": "currency"
-    },
-    "COP": {
-      "code": "COP",
-      "name": "Kolombiya Pesosu",
-      "name_tr": "Kolombiya Pesosu",
-      "rate": 0.0112,
-      "buy": 0.0112,
-      "sell": 0.0112,
-      "change": 0.45,
-      "type": "currency"
-    },
-    "CRC": {
-      "code": "CRC",
-      "name": "Kostarika Kolonu",
-      "name_tr": "Kostarika Kolonu",
-      "rate": 0.0841,
-      "buy": 0.0841,
-      "sell": 0.0841,
-      "change": 0.26,
-      "type": "currency"
-    },
-    "DZD": {
-      "code": "DZD",
-      "name": "Cezayir Dinarı",
-      "name_tr": "Cezayir Dinarı",
-      "rate": 0.32355,
-      "buy": 0.3235,
-      "sell": 0.3236,
-      "change": 0.29,
-      "type": "currency"
-    },
-    "EGP": {
-      "code": "EGP",
-      "name": "Mısır Lirası",
-      "name_tr": "Mısır Lirası",
-      "rate": 0.8915,
-      "buy": 0.8914,
-      "sell": 0.8916,
-      "change": 0.2,
-      "type": "currency"
-    },
-    "HKD": {
-      "code": "HKD",
-      "name": "Hong Kong Doları",
-      "name_tr": "Hong Kong Doları",
-      "rate": 5.4284,
-      "buy": 5.4278,
-      "sell": 5.429,
-      "change": 0.24,
-      "type": "currency"
-    },
-    "ISK": {
-      "code": "ISK",
-      "name": "İzlanda Kronası",
-      "name_tr": "İzlanda Kronası",
-      "rate": 0.33405,
-      "buy": 0.334,
-      "sell": 0.3341,
-      "change": 0.47,
-      "type": "currency"
-    },
-    "KRW": {
-      "code": "KRW",
-      "name": "Güney Kore Wonu",
-      "name_tr": "Güney Kore Wonu",
-      "rate": 0.02895,
-      "buy": 0.0289,
-      "sell": 0.029,
-      "change": -0.42,
-      "type": "currency"
-    },
-    "KZT": {
-      "code": "KZT",
-      "name": "Kazak Tengesi",
-      "name_tr": "Kazak Tengesi",
-      "rate": 0.0804,
-      "buy": 0.0804,
-      "sell": 0.0804,
-      "change": 0.51,
-      "type": "currency"
-    },
-    "LBP": {
-      "code": "LBP",
-      "name": "Lübnan Lirası",
-      "name_tr": "Lübnan Lirası",
-      "rate": 0.0005,
-      "buy": 0.0005,
-      "sell": 0.0005,
-      "change": 0.27,
-      "type": "currency"
-    },
-    "LKR": {
-      "code": "LKR",
-      "name": "Sri Lanka Rupisi",
-      "name_tr": "Sri Lanka Rupisi",
-      "rate": 0.1385,
-      "buy": 0.1385,
-      "sell": 0.1385,
-      "change": 0.32,
-      "type": "currency"
-    },
-    "MAD": {
-      "code": "MAD",
-      "name": "Fas Dirhemi",
-      "name_tr": "Fas Dirhemi",
-      "rate": 4.55185,
-      "buy": 4.5513,
-      "sell": 4.5524,
-      "change": 0.32,
-      "type": "currency"
-    },
-    "MDL": {
-      "code": "MDL",
-      "name": "Moldovya Leusu",
-      "name_tr": "Moldovya Leusu",
-      "rate": 2.4898,
-      "buy": 2.4895,
-      "sell": 2.4901,
-      "change": 0.59,
-      "type": "currency"
-    },
-    "MKD": {
-      "code": "MKD",
-      "name": "Makedon Dinarı",
-      "name_tr": "Makedon Dinarı",
-      "rate": 0.79365,
-      "buy": 0.7936,
-      "sell": 0.7937,
-      "change": 0.6,
-      "type": "currency"
-    },
-    "MYR": {
-      "code": "MYR",
-      "name": "Malezya Ringgiti",
-      "name_tr": "Malezya Ringgiti",
-      "rate": 10.108149999999998,
-      "buy": 10.107,
-      "sell": 10.1093,
-      "change": 0.41,
-      "type": "currency"
-    },
-    "OMR": {
-      "code": "OMR",
-      "name": "Umman Riyali",
-      "name_tr": "Umman Riyali",
-      "rate": 109.79124999999999,
-      "buy": 109.7789,
-      "sell": 109.8036,
-      "change": 0.26,
-      "type": "currency"
-    },
-    "PEN": {
-      "code": "PEN",
-      "name": "Peru İnti",
-      "name_tr": "Peru İnti",
-      "rate": 12.5155,
-      "buy": 12.5141,
-      "sell": 12.5169,
-      "change": 0.32,
-      "type": "currency"
-    },
-    "PHP": {
-      "code": "PHP",
-      "name": "Filipinler Pesosu",
-      "name_tr": "Filipinler Pesosu",
-      "rate": 0.71415,
-      "buy": 0.7141,
-      "sell": 0.7142,
-      "change": 0.05,
-      "type": "currency"
-    },
-    "PKR": {
-      "code": "PKR",
-      "name": "Pakistan Rupisi",
-      "name_tr": "Pakistan Rupisi",
-      "rate": 0.14935,
-      "buy": 0.1486,
-      "sell": 0.1501,
-      "change": 0.27,
-      "type": "currency"
-    },
-    "QAR": {
-      "code": "QAR",
-      "name": "Katar Riyali",
-      "name_tr": "Katar Riyali",
-      "rate": 11.60205,
-      "buy": 11.1876,
-      "sell": 12.0165,
-      "change": 0.26,
-      "type": "currency"
-    },
-    "RSD": {
-      "code": "RSD",
-      "name": "Sırbistan Dinarı",
-      "name_tr": "Sırbistan Dinarı",
-      "rate": 0.41735,
-      "buy": 0.4169,
-      "sell": 0.4178,
-      "change": 0.38,
-      "type": "currency"
-    },
-    "SGD": {
-      "code": "SGD",
-      "name": "Singapur Doları",
-      "name_tr": "Singapur Doları",
-      "rate": 32.42795,
-      "buy": 32.4243,
-      "sell": 32.4316,
-      "change": 0.43,
-      "type": "currency"
-    },
-    "SYP": {
-      "code": "SYP",
-      "name": "Suriye Lirası",
-      "name_tr": "Suriye Lirası",
-      "rate": 0.0038,
-      "buy": 0.0038,
-      "sell": 0.0038,
-      "change": 0.25,
-      "type": "currency"
-    },
-    "THB": {
-      "code": "THB",
-      "name": "Tayland Bahtı",
-      "name_tr": "Tayland Bahtı",
-      "rate": 1.3056,
-      "buy": 1.3055,
-      "sell": 1.3057,
-      "change": 0.49,
-      "type": "currency"
-    },
-    "TWD": {
-      "code": "TWD",
-      "name": "Yeni Tayvan Doları",
-      "name_tr": "Yeni Tayvan Doları",
-      "rate": 1.3631,
-      "buy": 1.363,
-      "sell": 1.3632,
-      "change": 0.29,
-      "type": "currency"
-    },
-    "UAH": {
-      "code": "UAH",
-      "name": "Ukrayna Grivnası",
-      "name_tr": "Ukrayna Grivnası",
-      "rate": 1.0096,
-      "buy": 1.0095,
-      "sell": 1.0097,
-      "change": 0.74,
-      "type": "currency"
-    },
-    "UYU": {
-      "code": "UYU",
-      "name": "Uruguay Pesosu",
-      "name_tr": "Uruguay Pesosu",
-      "rate": 1.0607,
-      "buy": 1.0606,
-      "sell": 1.0608,
-      "change": 0.29,
-      "type": "currency"
-    },
-    "GEL": {
-      "code": "GEL",
-      "name": "Gürcistan Larisi",
-      "name_tr": "Gürcistan Larisi",
-      "rate": 15.6062,
-      "buy": 15.6047,
-      "sell": 15.6077,
-      "change": 0.63,
-      "type": "currency"
-    },
-    "TND": {
-      "code": "TND",
-      "name": "Tunus Dinarı",
-      "name_tr": "Tunus Dinarı",
-      "rate": 14.290700000000001,
-      "buy": 14.2894,
-      "sell": 14.292,
-      "change": 0.43,
-      "type": "currency"
-    },
-    "BGN": {
-      "code": "BGN",
-      "name": "Bulgar Levası",
-      "name_tr": "Bulgar Levası",
-      "rate": 25.01335,
-      "buy": 25.0047,
-      "sell": 25.022,
-      "change": 0.39,
-      "type": "currency"
-    },
-    "TRY": {
-      "code": "TRY",
-      "name": "Turkish Lira",
-      "name_tr": "TÜRK LİRASI",
-      "rate": 1,
-      "buy": 1,
-      "sell": 1,
-      "change": 0,
-      "type": "currency"
-    }
-  },
-  "gold_prices": {
-    "GRA": {
-      "code": "GRA",
-      "name": "GRAMALTIN",
-      "name_tr": "GRAMALTIN",
-      "rate": 5427.525,
-      "buy": 5427.14,
-      "sell": 5427.91,
-      "change": 0.72,
-      "type": "gold"
-    },
-    "XU100": {
-      "code": "XU100",
-      "name": "XU100",
-      "name_tr": "XU100",
-      "rate": 10963.34,
-      "buy": 10963.34,
-      "sell": 10963.34,
-      "change": -0.99,
-      "type": "gold"
-    },
-    "DBITCOIN": {
-      "code": "DBITCOIN",
-      "name": "DBITCOIN",
-      "name_tr": "DBITCOIN",
-      "rate": 0,
-      "buy": 0,
-      "sell": 0,
-      "change": -2.8,
-      "type": "gold"
-    },
-    "GUMUS": {
-      "code": "GUMUS",
-      "name": "GUMUS",
-      "name_tr": "GUMUS",
-      "rate": 65.85,
-      "buy": 65.82,
-      "sell": 65.88,
-      "change": 1.3,
-      "type": "gold"
-    },
-    "BRENT": {
-      "code": "BRENT",
-      "name": "BRENT",
-      "name_tr": "BRENT",
-      "rate": 0,
-      "buy": 0,
-      "sell": 0,
-      "change": 0.81,
-      "type": "gold"
-    },
-    "ONS": {
-      "code": "ONS",
-      "name": "ONS",
-      "name_tr": "ONS",
-      "rate": 0,
-      "buy": 0,
-      "sell": 0,
-      "change": 0.53,
-      "type": "gold"
-    },
-    "HAS": {
-      "code": "HAS",
-      "name": "GRAMHASALTIN",
-      "name_tr": "GRAMHASALTIN",
-      "rate": 5400.385,
-      "buy": 5400.0,
-      "sell": 5400.77,
-      "change": 0.72,
-      "type": "gold"
-    },
-    "CEYREKALTIN": {
-      "code": "CEYREKALTIN",
-      "name": "CEYREKALTIN",
-      "name_tr": "CEYREKALTIN",
-      "rate": 9113.57,
-      "buy": 9010.46,
-      "sell": 9216.68,
-      "change": 0.63,
-      "type": "gold"
-    },
-    "YARIMALTIN": {
-      "code": "YARIMALTIN",
-      "name": "YARIMALTIN",
-      "name_tr": "YARIMALTIN",
-      "rate": 18198.98,
-      "buy": 17964.6,
-      "sell": 18433.36,
-      "change": 0.63,
-      "type": "gold"
-    },
-    "TAMALTIN": {
-      "code": "TAMALTIN",
-      "name": "TAMALTIN",
-      "name_tr": "TAMALTIN",
-      "rate": 36397.9,
-      "buy": 36041.82,
-      "sell": 36753.98,
-      "change": 0.63,
-      "type": "gold"
-    },
-    "CUMHURIYETALTINI": {
-      "code": "CUMHURIYETALTINI",
-      "name": "CUMHURIYETALTINI",
-      "name_tr": "CUMHURIYETALTINI",
-      "rate": 37620.0,
-      "buy": 37338.0,
-      "sell": 37902.0,
-      "change": 0.59,
-      "type": "gold"
-    },
-    "ATAALTIN": {
-      "code": "ATAALTIN",
-      "name": "ATAALTIN",
-      "name_tr": "ATAALTIN",
-      "rate": 37637.505,
-      "buy": 37168.13,
-      "sell": 38106.88,
-      "change": 0.63,
-      "type": "gold"
-    },
-    "14AYARALTIN": {
-      "code": "14AYARALTIN",
-      "name": "14AYARALTIN",
-      "name_tr": "14AYARALTIN",
-      "rate": 3211.56,
-      "buy": 3209.97,
-      "sell": 3213.15,
-      "change": 0.63,
-      "type": "gold"
-    },
-    "18AYARALTIN": {
-      "code": "18AYARALTIN",
-      "name": "18AYARALTIN",
-      "name_tr": "18AYARALTIN",
-      "rate": 4113.055,
-      "buy": 4111.02,
-      "sell": 4115.09,
-      "change": 0.63,
-      "type": "gold"
-    },
-    "YIA": {
-      "code": "YIA",
-      "name": "22AYARBILEZIK",
-      "name_tr": "22AYARBILEZIK",
-      "rate": 5138.505,
-      "buy": 5135.96,
-      "sell": 5141.05,
-      "change": 0.63,
-      "type": "gold"
-    },
-    "IKIBUCUKALTIN": {
-      "code": "IKIBUCUKALTIN",
-      "name": "IKIBUCUKALTIN",
-      "name_tr": "IKIBUCUKALTIN",
-      "rate": 90825.64,
-      "buy": 90104.56,
-      "sell": 91546.72,
-      "change": 0.63,
-      "type": "gold"
-    },
-    "BESLIALTIN": {
-      "code": "BESLIALTIN",
-      "name": "BESLIALTIN",
-      "name_tr": "BESLIALTIN",
-      "rate": 184243.23,
-      "buy": 182461.73,
-      "sell": 186024.73,
-      "change": 0.63,
-      "type": "gold"
-    },
-    "GREMSEALTIN": {
-      "code": "GREMSEALTIN",
-      "name": "GREMSEALTIN",
-      "name_tr": "GREMSEALTIN",
-      "rate": 91135.68,
-      "buy": 90104.56,
-      "sell": 92166.8,
-      "change": 0.63,
-      "type": "gold"
-    },
-    "RESATALTIN": {
-      "code": "RESATALTIN",
-      "name": "RESATALTIN",
-      "name_tr": "RESATALTIN",
-      "rate": 37637.505,
-      "buy": 37168.13,
-      "sell": 38106.88,
-      "change": 0.63,
-      "type": "gold"
-    },
-    "HAMITALTIN": {
-      "code": "HAMITALTIN",
-      "name": "HAMITALTIN",
-      "name_tr": "HAMITALTIN",
-      "rate": 37637.505,
-      "buy": 37168.13,
-      "sell": 38106.88,
-      "change": 0.63,
-      "type": "gold"
-    }
-  },
-  "crypto_currencies": {
-    "BTC": {
-      "code": "BTC",
-      "name": "Bitcoin",
-      "name_tr": "Bitcoin",
-      "rate": 4237884.0,
-      "buy": 4237884.0,
-      "sell": 4237884.0,
-      "usd_price": 100389.0,
-      "change": -2.33,
-      "type": "crypto"
-    },
-    "ETH": {
-      "code": "ETH",
-      "name": "Ethereum",
-      "name_tr": "Ethereum",
-      "rate": 136912.0,
-      "buy": 136912.0,
-      "sell": 136912.0,
-      "usd_price": 3243.55,
-      "change": -3.51,
-      "type": "crypto"
-    },
-    "USDT": {
-      "code": "USDT",
-      "name": "Tether",
-      "name_tr": "Tether",
-      "rate": 42.19,
-      "buy": 42.19,
-      "sell": 42.19,
-      "usd_price": 0.999477,
-      "change": -0.02,
-      "type": "crypto"
-    },
-    "XRP": {
-      "code": "XRP",
-      "name": "Ripple",
-      "name_tr": "Ripple",
-      "rate": 92.5,
-      "buy": 92.5,
-      "sell": 92.5,
-      "usd_price": 2.1903,
-      "change": -4.23,
-      "type": "crypto"
-    },
-    "BNB": {
-      "code": "BNB",
-      "name": "BNB",
-      "name_tr": "BNB",
-      "rate": 39474.0,
-      "buy": 39474.0,
-      "sell": 39474.0,
-      "usd_price": 935.3,
-      "change": -0.74,
-      "type": "crypto"
-    },
-    "SOL": {
-      "code": "SOL",
-      "name": "Solana",
-      "name_tr": "Solana",
-      "rate": 6438.0,
-      "buy": 6438.0,
-      "sell": 6438.0,
-      "usd_price": 152.42,
-      "change": -4.42,
-      "type": "crypto"
-    },
-    "USDC": {
-      "code": "USDC",
-      "name": "USD Coin",
-      "name_tr": "USD Coin",
-      "rate": 42.23,
-      "buy": 42.23,
-      "sell": 42.23,
-      "usd_price": 1.0006,
-      "change": 0.03,
-      "type": "crypto"
-    },
-    "STETH": {
-      "code": "STETH",
-      "name": "Lido Staked Ether",
-      "name_tr": "Lido Staked Ether",
-      "rate": 136532.0,
-      "buy": 136532.0,
-      "sell": 136532.0,
-      "usd_price": 3234.23,
-      "change": -4.24,
-      "type": "crypto"
-    },
-    "TRX": {
-      "code": "TRX",
-      "name": "TRON",
-      "name_tr": "TRON",
-      "rate": 12.012,
-      "buy": 12.012,
-      "sell": 12.012,
-      "usd_price": 0.2845,
-      "change": -0.59,
-      "type": "crypto"
-    },
-    "DOGE": {
-      "code": "DOGE",
-      "name": "Dogecoin",
-      "name_tr": "Dogecoin",
-      "rate": 6.856,
-      "buy": 6.856,
-      "sell": 6.856,
-      "usd_price": 0.16247,
-      "change": 0.33,
-      "type": "crypto"
-    },
-    "ADA": {
-      "code": "ADA",
-      "name": "Cardano",
-      "name_tr": "Cardano",
-      "rate": 22.35,
-      "buy": 22.35,
-      "sell": 22.35,
-      "usd_price": 0.5291,
-      "change": -0.66,
-      "type": "crypto"
-    },
-    "WSTETH": {
-      "code": "WSTETH",
-      "name": "Wrapped stETH",
-      "name_tr": "Wrapped stETH",
-      "rate": 166384.0,
-      "buy": 166384.0,
-      "sell": 166384.0,
-      "usd_price": 3941.72,
-      "change": -4.4,
-      "type": "crypto"
-    },
-    "WBTC": {
-      "code": "WBTC",
-      "name": "Wrapped Bitcoin",
-      "name_tr": "Wrapped Bitcoin",
-      "rate": 4234382.63,
-      "buy": 4234382.63,
-      "sell": 4234382.63,
-      "usd_price": 100305.88,
-      "change": -2.38,
-      "type": "crypto"
-    },
-    "WBETH": {
-      "code": "WBETH",
-      "name": "Wrapped Beacon ETH",
-      "name_tr": "Wrapped Beacon ETH",
-      "rate": 148022.47,
-      "buy": 148022.47,
-      "sell": 148022.47,
-      "usd_price": 3506.42,
-      "change": -3.62,
-      "type": "crypto"
-    },
-    "WBT": {
-      "code": "WBT",
-      "name": "WhiteBIT Coin",
-      "name_tr": "WhiteBIT Coin",
-      "rate": 2210.71,
-      "buy": 2210.71,
-      "sell": 2210.71,
-      "usd_price": 52.37,
-      "change": -0.03,
-      "type": "crypto"
-    },
-    "HYPE": {
-      "code": "HYPE",
-      "name": "Hyperliquid",
-      "name_tr": "Hyperliquid",
-      "rate": 1663.3,
-      "buy": 1663.3,
-      "sell": 1663.3,
-      "usd_price": 39.4,
-      "change": -2.27,
-      "type": "crypto"
-    },
-    "ZEC": {
-      "code": "ZEC",
-      "name": "Zcash",
-      "name_tr": "Zcash",
-      "rate": 26880.21,
-      "buy": 26880.21,
-      "sell": 26880.21,
-      "usd_price": 636.75,
-      "change": 17.91,
-      "type": "crypto"
-    },
-    "LINK": {
-      "code": "LINK",
-      "name": "Chainlink",
-      "name_tr": "Chainlink",
-      "rate": 616.8,
-      "buy": 616.8,
-      "sell": 616.8,
-      "usd_price": 14.64,
-      "change": -1.81,
-      "type": "crypto"
-    },
-    "BCH": {
-      "code": "BCH",
-      "name": "Bitcoin Cash",
-      "name_tr": "Bitcoin Cash",
-      "rate": 20164.0,
-      "buy": 20164.0,
-      "sell": 20164.0,
-      "usd_price": 478.7,
-      "change": 0.17,
-      "type": "crypto"
-    },
-    "USDS": {
-      "code": "USDS",
-      "name": "USDS",
-      "name_tr": "USDS",
-      "rate": 42.17,
-      "buy": 42.17,
-      "sell": 42.17,
-      "usd_price": 0.99889,
-      "change": -0.09,
-      "type": "crypto"
-    },
-    "BSC-USD": {
-      "code": "BSC-USD",
-      "name": "Binance Bridged USDT (BNB Smart Chain)",
-      "name_tr": "Binance Bridged USDT (BNB Smart Chain)",
-      "rate": 42.19,
-      "buy": 42.19,
-      "sell": 42.19,
-      "usd_price": 0.999324,
-      "change": 0.03,
-      "type": "crypto"
-    },
-    "USDE": {
-      "code": "USDE",
-      "name": "Ethena USDe",
-      "name_tr": "Ethena USDe",
-      "rate": 42.1851,
-      "buy": 42.1851,
-      "sell": 42.1851,
-      "usd_price": 0.9993,
-      "change": 0.01,
-      "type": "crypto"
-    },
-    "XLM": {
-      "code": "XLM",
-      "name": "Stellar",
-      "name_tr": "Stellar",
-      "rate": 11.381,
-      "buy": 11.381,
-      "sell": 11.381,
-      "usd_price": 0.2712,
-      "change": -0.22,
-      "type": "crypto"
-    },
-    "WEETH": {
-      "code": "WEETH",
-      "name": "Wrapped eETH",
-      "name_tr": "Wrapped eETH",
-      "rate": 147375.0,
-      "buy": 147375.0,
-      "sell": 147375.0,
-      "usd_price": 3491.59,
-      "change": -4.48,
-      "type": "crypto"
-    },
-    "LEO": {
-      "code": "LEO",
-      "name": "LEO Token",
-      "name_tr": "LEO Token",
-      "rate": 371.4,
-      "buy": 371.4,
-      "sell": 371.4,
-      "usd_price": 8.8,
-      "change": -7.92,
-      "type": "crypto"
-    },
-    "CBBTC": {
-      "code": "CBBTC",
-      "name": "Coinbase Wrapped BTC",
-      "name_tr": "Coinbase Wrapped BTC",
-      "rate": 4230783.0,
-      "buy": 4230783.0,
-      "sell": 4230783.0,
-      "usd_price": 100221.0,
-      "change": -3.03,
-      "type": "crypto"
-    },
-    "SUI": {
-      "code": "SUI",
-      "name": "Sui",
-      "name_tr": "Sui",
-      "rate": 83.1,
-      "buy": 83.1,
-      "sell": 83.1,
-      "usd_price": 1.968,
-      "change": -0.98,
-      "type": "crypto"
-    },
-    "AVAX": {
-      "code": "AVAX",
-      "name": "Avalanche",
-      "name_tr": "Avalanche",
-      "rate": 693.6,
-      "buy": 693.6,
-      "sell": 693.6,
-      "usd_price": 16.43,
-      "change": 1.36,
-      "type": "crypto"
-    },
-    "HBAR": {
-      "code": "HBAR",
-      "name": "Hedera",
-      "name_tr": "Hedera",
-      "rate": 6.91,
-      "buy": 6.91,
-      "sell": 6.91,
-      "usd_price": 0.16397,
-      "change": -2.82,
-      "type": "crypto"
-    },
-    "WETH": {
-      "code": "WETH",
-      "name": "WETH",
-      "name_tr": "WETH",
-      "rate": 136718.0,
-      "buy": 136718.0,
-      "sell": 136718.0,
-      "usd_price": 3238.64,
-      "change": -4.3,
-      "type": "crypto"
-    },
-    "LTC": {
-      "code": "LTC",
-      "name": "Litecoin",
-      "name_tr": "Litecoin",
-      "rate": 3724.0,
-      "buy": 3724.0,
-      "sell": 3724.0,
-      "usd_price": 88.31,
-      "change": 0.59,
-      "type": "crypto"
-    },
-    "XMR": {
-      "code": "XMR",
-      "name": "Monero",
-      "name_tr": "Monero",
-      "rate": 15270.19,
-      "buy": 15270.19,
-      "sell": 15270.19,
-      "usd_price": 361.73,
-      "change": 2.91,
-      "type": "crypto"
-    },
-    "SHIB": {
-      "code": "SHIB",
-      "name": "Shiba Inu",
-      "name_tr": "Shiba Inu",
-      "rate": 0.0003874,
-      "buy": 0.0003874,
-      "sell": 0.0003874,
-      "usd_price": 1e-05,
-      "change": 2.45,
-      "type": "crypto"
-    },
-    "TON": {
-      "code": "TON",
-      "name": "Toncoin",
-      "name_tr": "Toncoin",
-      "rate": 82.6,
-      "buy": 82.6,
-      "sell": 82.6,
-      "usd_price": 1.957,
-      "change": 0.93,
-      "type": "crypto"
-    },
-    "SUSDE": {
-      "code": "SUSDE",
-      "name": "Ethena Staked USDe",
-      "name_tr": "Ethena Staked USDe",
-      "rate": 50.6,
-      "buy": 50.6,
-      "sell": 50.6,
-      "usd_price": 1.2,
-      "change": -0.07,
-      "type": "crypto"
-    },
-    "M": {
-      "code": "M",
-      "name": "MemeCore",
-      "name_tr": "MemeCore",
-      "rate": 116.68,
-      "buy": 116.68,
-      "sell": 116.68,
-      "usd_price": 2.76,
-      "change": 15.19,
-      "type": "crypto"
-    },
-    "DAI": {
-      "code": "DAI",
-      "name": "Dai",
-      "name_tr": "Dai",
-      "rate": 42.17,
-      "buy": 42.17,
-      "sell": 42.17,
-      "usd_price": 0.999039,
-      "change": -0.07,
-      "type": "crypto"
-    },
-    "DOT": {
-      "code": "DOT",
-      "name": "Polkadot",
-      "name_tr": "Polkadot",
-      "rate": 116.5,
-      "buy": 116.5,
-      "sell": 116.5,
-      "usd_price": 2.781,
-      "change": 6.59,
-      "type": "crypto"
-    },
-    "CRO": {
-      "code": "CRO",
-      "name": "Cronos",
-      "name_tr": "Cronos",
-      "rate": 5.17,
-      "buy": 5.17,
-      "sell": 5.17,
-      "usd_price": 0.122402,
-      "change": -1.3,
-      "type": "crypto"
-    },
-    "ICP": {
-      "code": "ICP",
-      "name": "Internet Computer",
-      "name_tr": "Internet Computer",
-      "rate": 324.4,
-      "buy": 324.4,
-      "sell": 324.4,
-      "usd_price": 7.688,
-      "change": 12.27,
-      "type": "crypto"
-    },
-    "MNT": {
-      "code": "MNT",
-      "name": "Mantle",
-      "name_tr": "Mantle",
-      "rate": 52.81,
-      "buy": 52.81,
-      "sell": 52.81,
-      "usd_price": 1.25,
-      "change": 2.14,
-      "type": "crypto"
-    },
-    "SUSDS": {
-      "code": "SUSDS",
-      "name": "sUSDS",
-      "name_tr": "sUSDS",
-      "rate": 45.36,
-      "buy": 45.36,
-      "sell": 45.36,
-      "usd_price": 1.074,
-      "change": 0.44,
-      "type": "crypto"
-    },
-    "USDT0": {
-      "code": "USDT0",
-      "name": "USDT0",
-      "name_tr": "USDT0",
-      "rate": 42.18,
-      "buy": 42.18,
-      "sell": 42.18,
-      "usd_price": 0.999285,
-      "change": -0.04,
-      "type": "crypto"
-    },
-    "TAO": {
-      "code": "TAO",
-      "name": "Bittensor",
-      "name_tr": "Bittensor",
-      "rate": 15060.0,
-      "buy": 15060.0,
-      "sell": 15060.0,
-      "usd_price": 357.8,
-      "change": -5.99,
-      "type": "crypto"
-    },
-    "UNI": {
-      "code": "UNI",
-      "name": "Uniswap",
-      "name_tr": "Uniswap",
-      "rate": 227.0,
-      "buy": 227.0,
-      "sell": 227.0,
-      "usd_price": 5.396,
-      "change": 2.33,
-      "type": "crypto"
-    },
-    "WLFI": {
-      "code": "WLFI",
-      "name": "World Liberty Financial",
-      "name_tr": "World Liberty Financial",
-      "rate": 4.9,
-      "buy": 4.9,
-      "sell": 4.9,
-      "usd_price": 0.116,
-      "change": -1.53,
-      "type": "crypto"
-    },
-    "NEAR": {
-      "code": "NEAR",
-      "name": "NEAR Protocol",
-      "name_tr": "NEAR Protocol",
-      "rate": 100.0,
-      "buy": 100.0,
-      "sell": 100.0,
-      "usd_price": 2.364,
-      "change": 18.32,
-      "type": "crypto"
-    },
-    "AAVE": {
-      "code": "AAVE",
-      "name": "Aave",
-      "name_tr": "Aave",
-      "rate": 8105.0,
-      "buy": 8105.0,
-      "sell": 8105.0,
-      "usd_price": 192.52,
-      "change": -3.02,
-      "type": "crypto"
-    },
-    "USD1": {
-      "code": "USD1",
-      "name": "USD1",
-      "name_tr": "USD1",
-      "rate": 42.1936,
-      "buy": 42.1936,
-      "sell": 42.1936,
-      "usd_price": 0.9995,
-      "change": 0.04,
-      "type": "crypto"
-    },
-    "PYUSD": {
-      "code": "PYUSD",
-      "name": "PayPal USD",
-      "name_tr": "PayPal USD",
-      "rate": 42.19,
-      "buy": 42.19,
-      "sell": 42.19,
-      "usd_price": 0.999515,
-      "change": -0.2,
-      "type": "crypto"
-    }
-  },
-  "precious_metals": {
-    "GPL": {
-      "code": "GPL",
-      "name": "GRAMPLATIN",
-      "name_tr": "GRAMPLATIN",
-      "rate": 2110.79,
-      "buy": 2108.7,
-      "sell": 2112.88,
-      "change": 1.55,
-      "type": "platinum"
-    },
-    "PAL": {
-      "code": "PAL",
-      "name": "GRAMPALADYUM",
-      "name_tr": "GRAMPALADYUM",
-      "rate": 1901.185,
-      "buy": 1900.07,
-      "sell": 1902.3,
-      "change": 1.63,
-      "type": "palladium"
+  "2026-03-31": {
+    "exchange_rates": {
+      "USD": {
+        "code": "USD",
+        "name": "USD",
+        "name_tr": "USD",
+        "rate": 44.47625,
+        "buy": 44.473,
+        "sell": 44.4795,
+        "change": 0.07,
+        "type": "currency"
+      },
+      "EUR": {
+        "code": "EUR",
+        "name": "EUR",
+        "name_tr": "EUR",
+        "rate": 51.444649999999996,
+        "buy": 51.4315,
+        "sell": 51.4578,
+        "change": 0.91,
+        "type": "currency"
+      },
+      "GBP": {
+        "code": "GBP",
+        "name": "GBP",
+        "name_tr": "GBP",
+        "rate": 58.958349999999996,
+        "buy": 58.9387,
+        "sell": 58.978,
+        "change": 0.61,
+        "type": "currency"
+      },
+      "CHF": {
+        "code": "CHF",
+        "name": "CHF",
+        "name_tr": "CHF",
+        "rate": 55.578050000000005,
+        "buy": 55.5638,
+        "sell": 55.5923,
+        "change": -0.05,
+        "type": "currency"
+      },
+      "CAD": {
+        "code": "CAD",
+        "name": "CAD",
+        "name_tr": "CAD",
+        "rate": 31.9238,
+        "buy": 31.9169,
+        "sell": 31.9307,
+        "change": 0.02,
+        "type": "currency"
+      },
+      "RUB": {
+        "code": "RUB",
+        "name": "RUB",
+        "name_tr": "RUB",
+        "rate": 0.5468,
+        "buy": 0.5458,
+        "sell": 0.5478,
+        "change": 0.04,
+        "type": "currency"
+      },
+      "AED": {
+        "code": "AED",
+        "name": "AED",
+        "name_tr": "AED",
+        "rate": 12.1083,
+        "buy": 12.1065,
+        "sell": 12.1101,
+        "change": 0.04,
+        "type": "currency"
+      },
+      "AUD": {
+        "code": "AUD",
+        "name": "AUD",
+        "name_tr": "AUD",
+        "rate": 30.6708,
+        "buy": 30.6641,
+        "sell": 30.6775,
+        "change": 0.7,
+        "type": "currency"
+      },
+      "DKK": {
+        "code": "DKK",
+        "name": "DKK",
+        "name_tr": "DKK",
+        "rate": 6.879250000000001,
+        "buy": 6.8779,
+        "sell": 6.8806,
+        "change": 0.88,
+        "type": "currency"
+      },
+      "SEK": {
+        "code": "SEK",
+        "name": "SEK",
+        "name_tr": "SEK",
+        "rate": 4.6925,
+        "buy": 4.6907,
+        "sell": 4.6943,
+        "change": 0.87,
+        "type": "currency"
+      },
+      "NOK": {
+        "code": "NOK",
+        "name": "NOK",
+        "name_tr": "NOK",
+        "rate": 4.58425,
+        "buy": 4.5819,
+        "sell": 4.5866,
+        "change": 0.54,
+        "type": "currency"
+      },
+      "JPY": {
+        "code": "JPY",
+        "name": "JPY",
+        "name_tr": "JPY",
+        "rate": 0.0028035000000000004,
+        "buy": 0.0028000000000000004,
+        "sell": 0.002807,
+        "change": 0.01,
+        "type": "currency"
+      },
+      "KWD": {
+        "code": "KWD",
+        "name": "KWD",
+        "name_tr": "KWD",
+        "rate": 143.70215000000002,
+        "buy": 143.5127,
+        "sell": 143.8916,
+        "change": -0.07,
+        "type": "currency"
+      },
+      "ZAR": {
+        "code": "ZAR",
+        "name": "ZAR",
+        "name_tr": "ZAR",
+        "rate": 2.6232499999999996,
+        "buy": 2.6226,
+        "sell": 2.6239,
+        "change": 1.43,
+        "type": "currency"
+      },
+      "BHD": {
+        "code": "BHD",
+        "name": "BHD",
+        "name_tr": "BHD",
+        "rate": 117.79599999999999,
+        "buy": 117.7874,
+        "sell": 117.8046,
+        "change": 0.06,
+        "type": "currency"
+      },
+      "LYD": {
+        "code": "LYD",
+        "name": "LYD",
+        "name_tr": "LYD",
+        "rate": 6.944,
+        "buy": 6.9435,
+        "sell": 6.9445,
+        "change": -0.48,
+        "type": "currency"
+      },
+      "SAR": {
+        "code": "SAR",
+        "name": "SAR",
+        "name_tr": "SAR",
+        "rate": 11.85135,
+        "buy": 11.8365,
+        "sell": 11.8662,
+        "change": 0.04,
+        "type": "currency"
+      },
+      "IQD": {
+        "code": "IQD",
+        "name": "IQD",
+        "name_tr": "IQD",
+        "rate": 0.03395,
+        "buy": 0.0339,
+        "sell": 0.034,
+        "change": 0.33,
+        "type": "currency"
+      },
+      "ILS": {
+        "code": "ILS",
+        "name": "ILS",
+        "name_tr": "ILS",
+        "rate": 14.1302,
+        "buy": 14.1292,
+        "sell": 14.1312,
+        "change": 0.89,
+        "type": "currency"
+      },
+      "INR": {
+        "code": "INR",
+        "name": "INR",
+        "name_tr": "INR",
+        "rate": 0.4743,
+        "buy": 0.4743,
+        "sell": 0.4743,
+        "change": 0.71,
+        "type": "currency"
+      },
+      "MXN": {
+        "code": "MXN",
+        "name": "MXN",
+        "name_tr": "MXN",
+        "rate": 2.4793,
+        "buy": 2.4791,
+        "sell": 2.4795,
+        "change": 1.06,
+        "type": "currency"
+      },
+      "HUF": {
+        "code": "HUF",
+        "name": "HUF",
+        "name_tr": "HUF",
+        "rate": 0.13365,
+        "buy": 0.1336,
+        "sell": 0.1337,
+        "change": 1.77,
+        "type": "currency"
+      },
+      "NZD": {
+        "code": "NZD",
+        "name": "NZD",
+        "name_tr": "NZD",
+        "rate": 25.52585,
+        "buy": 25.524,
+        "sell": 25.5277,
+        "change": 0.38,
+        "type": "currency"
+      },
+      "BRL": {
+        "code": "BRL",
+        "name": "BRL",
+        "name_tr": "BRL",
+        "rate": 8.582,
+        "buy": 8.5814,
+        "sell": 8.5826,
+        "change": 1.43,
+        "type": "currency"
+      },
+      "IDR": {
+        "code": "IDR",
+        "name": "IDR",
+        "name_tr": "IDR",
+        "rate": 0.0026,
+        "buy": 0.0026,
+        "sell": 0.0026,
+        "change": 0.39,
+        "type": "currency"
+      },
+      "CZK": {
+        "code": "CZK",
+        "name": "CZK",
+        "name_tr": "CZK",
+        "rate": 2.09355,
+        "buy": 2.0934,
+        "sell": 2.0937,
+        "change": 0.88,
+        "type": "currency"
+      },
+      "PLN": {
+        "code": "PLN",
+        "name": "PLN",
+        "name_tr": "PLN",
+        "rate": 11.974,
+        "buy": 11.9731,
+        "sell": 11.9749,
+        "change": 0.89,
+        "type": "currency"
+      },
+      "RON": {
+        "code": "RON",
+        "name": "RON",
+        "name_tr": "RON",
+        "rate": 10.0796,
+        "buy": 10.075,
+        "sell": 10.0842,
+        "change": 0.85,
+        "type": "currency"
+      },
+      "CNY": {
+        "code": "CNY",
+        "name": "CNY",
+        "name_tr": "CNY",
+        "rate": 6.4541,
+        "buy": 6.4533,
+        "sell": 6.4549,
+        "change": 0.43,
+        "type": "currency"
+      },
+      "ARS": {
+        "code": "ARS",
+        "name": "ARS",
+        "name_tr": "ARS",
+        "rate": 0.0322,
+        "buy": 0.0322,
+        "sell": 0.0322,
+        "change": 1.35,
+        "type": "currency"
+      },
+      "ALL": {
+        "code": "ALL",
+        "name": "ALL",
+        "name_tr": "ALL",
+        "rate": 0.53425,
+        "buy": 0.5342,
+        "sell": 0.5343,
+        "change": 0.78,
+        "type": "currency"
+      },
+      "AZN": {
+        "code": "AZN",
+        "name": "AZN",
+        "name_tr": "AZN",
+        "rate": 26.1625,
+        "buy": 26.1606,
+        "sell": 26.1644,
+        "change": 0.07,
+        "type": "currency"
+      },
+      "BAM": {
+        "code": "BAM",
+        "name": "BAM",
+        "name_tr": "BAM",
+        "rate": 26.072,
+        "buy": 26.0701,
+        "sell": 26.0739,
+        "change": -1.48,
+        "type": "currency"
+      },
+      "CLP": {
+        "code": "CLP",
+        "name": "CLP",
+        "name_tr": "CLP",
+        "rate": 0.0481,
+        "buy": 0.0481,
+        "sell": 0.0481,
+        "change": 0.98,
+        "type": "currency"
+      },
+      "COP": {
+        "code": "COP",
+        "name": "COP",
+        "name_tr": "COP",
+        "rate": 0.0121,
+        "buy": 0.0121,
+        "sell": 0.0121,
+        "change": 0.19,
+        "type": "currency"
+      },
+      "CRC": {
+        "code": "CRC",
+        "name": "CRC",
+        "name_tr": "CRC",
+        "rate": 0.0956,
+        "buy": 0.0956,
+        "sell": 0.0956,
+        "change": 0.02,
+        "type": "currency"
+      },
+      "DZD": {
+        "code": "DZD",
+        "name": "DZD",
+        "name_tr": "DZD",
+        "rate": 0.3339,
+        "buy": 0.3339,
+        "sell": 0.3339,
+        "change": 0.2,
+        "type": "currency"
+      },
+      "EGP": {
+        "code": "EGP",
+        "name": "EGP",
+        "name_tr": "EGP",
+        "rate": 0.81525,
+        "buy": 0.8152,
+        "sell": 0.8153,
+        "change": -0.06,
+        "type": "currency"
+      },
+      "HKD": {
+        "code": "HKD",
+        "name": "HKD",
+        "name_tr": "HKD",
+        "rate": 5.6724,
+        "buy": 5.672,
+        "sell": 5.6728,
+        "change": 0,
+        "type": "currency"
+      },
+      "ISK": {
+        "code": "ISK",
+        "name": "ISK",
+        "name_tr": "ISK",
+        "rate": 0.35814999999999997,
+        "buy": 0.3581,
+        "sell": 0.3582,
+        "change": 0.83,
+        "type": "currency"
+      },
+      "KRW": {
+        "code": "KRW",
+        "name": "KRW",
+        "name_tr": "KRW",
+        "rate": 0.0295,
+        "buy": 0.0295,
+        "sell": 0.0295,
+        "change": 0.76,
+        "type": "currency"
+      },
+      "KZT": {
+        "code": "KZT",
+        "name": "KZT",
+        "name_tr": "KZT",
+        "rate": 0.0932,
+        "buy": 0.0932,
+        "sell": 0.0932,
+        "change": 1.11,
+        "type": "currency"
+      },
+      "LBP": {
+        "code": "LBP",
+        "name": "LBP",
+        "name_tr": "LBP",
+        "rate": 0.0005,
+        "buy": 0.0005,
+        "sell": 0.0005,
+        "change": 0.61,
+        "type": "currency"
+      },
+      "LKR": {
+        "code": "LKR",
+        "name": "LKR",
+        "name_tr": "LKR",
+        "rate": 0.141,
+        "buy": 0.141,
+        "sell": 0.141,
+        "change": 0.06,
+        "type": "currency"
+      },
+      "MAD": {
+        "code": "MAD",
+        "name": "MAD",
+        "name_tr": "MAD",
+        "rate": 4.76155,
+        "buy": 4.7612,
+        "sell": 4.7619,
+        "change": 0.52,
+        "type": "currency"
+      },
+      "MDL": {
+        "code": "MDL",
+        "name": "MDL",
+        "name_tr": "MDL",
+        "rate": 2.52705,
+        "buy": 2.5269,
+        "sell": 2.5272,
+        "change": -0.22,
+        "type": "currency"
+      },
+      "MKD": {
+        "code": "MKD",
+        "name": "MKD",
+        "name_tr": "MKD",
+        "rate": 0.82715,
+        "buy": 0.8271,
+        "sell": 0.8272,
+        "change": 0.07,
+        "type": "currency"
+      },
+      "MYR": {
+        "code": "MYR",
+        "name": "MYR",
+        "name_tr": "MYR",
+        "rate": 10.9859,
+        "buy": 10.9851,
+        "sell": 10.9867,
+        "change": -0.61,
+        "type": "currency"
+      },
+      "OMR": {
+        "code": "OMR",
+        "name": "OMR",
+        "name_tr": "OMR",
+        "rate": 115.66995,
+        "buy": 115.6615,
+        "sell": 115.6784,
+        "change": 0.06,
+        "type": "currency"
+      },
+      "PEN": {
+        "code": "PEN",
+        "name": "PEN",
+        "name_tr": "PEN",
+        "rate": 12.72565,
+        "buy": 12.7247,
+        "sell": 12.7266,
+        "change": 0.1,
+        "type": "currency"
+      },
+      "PHP": {
+        "code": "PHP",
+        "name": "PHP",
+        "name_tr": "PHP",
+        "rate": 0.73615,
+        "buy": 0.7361,
+        "sell": 0.7362,
+        "change": 0.7,
+        "type": "currency"
+      },
+      "PKR": {
+        "code": "PKR",
+        "name": "PKR",
+        "name_tr": "PKR",
+        "rate": 0.1593,
+        "buy": 0.159,
+        "sell": 0.1596,
+        "change": 0.25,
+        "type": "currency"
+      },
+      "QAR": {
+        "code": "QAR",
+        "name": "QAR",
+        "name_tr": "QAR",
+        "rate": 12.20535,
+        "buy": 12.1972,
+        "sell": 12.2135,
+        "change": 0.51,
+        "type": "currency"
+      },
+      "RSD": {
+        "code": "RSD",
+        "name": "RSD",
+        "name_tr": "RSD",
+        "rate": 0.43805,
+        "buy": 0.4376,
+        "sell": 0.4385,
+        "change": 0.88,
+        "type": "currency"
+      },
+      "SGD": {
+        "code": "SGD",
+        "name": "SGD",
+        "name_tr": "SGD",
+        "rate": 34.576899999999995,
+        "buy": 34.5744,
+        "sell": 34.5794,
+        "change": 0.42,
+        "type": "currency"
+      },
+      "SYP": {
+        "code": "SYP",
+        "name": "SYP",
+        "name_tr": "SYP",
+        "rate": 0.38505,
+        "buy": 0.385,
+        "sell": 0.3851,
+        "change": 0.08,
+        "type": "currency"
+      },
+      "THB": {
+        "code": "THB",
+        "name": "THB",
+        "name_tr": "THB",
+        "rate": 1.3649,
+        "buy": 1.3648,
+        "sell": 1.365,
+        "change": 0.71,
+        "type": "currency"
+      },
+      "TWD": {
+        "code": "TWD",
+        "name": "TWD",
+        "name_tr": "TWD",
+        "rate": 1.3921000000000001,
+        "buy": 1.392,
+        "sell": 1.3922,
+        "change": 0.32,
+        "type": "currency"
+      },
+      "UAH": {
+        "code": "UAH",
+        "name": "UAH",
+        "name_tr": "UAH",
+        "rate": 1.0167,
+        "buy": 1.0166,
+        "sell": 1.0168,
+        "change": 0.3,
+        "type": "currency"
+      },
+      "UYU": {
+        "code": "UYU",
+        "name": "UYU",
+        "name_tr": "UYU",
+        "rate": 1.0968,
+        "buy": 1.0967,
+        "sell": 1.0969,
+        "change": 0.51,
+        "type": "currency"
+      },
+      "GEL": {
+        "code": "GEL",
+        "name": "GEL",
+        "name_tr": "GEL",
+        "rate": 16.5956,
+        "buy": 16.5944,
+        "sell": 16.5968,
+        "change": 1.0,
+        "type": "currency"
+      },
+      "TND": {
+        "code": "TND",
+        "name": "TND",
+        "name_tr": "TND",
+        "rate": 15.1796,
+        "buy": 15.1785,
+        "sell": 15.1807,
+        "change": 1.06,
+        "type": "currency"
+      },
+      "BGN": {
+        "code": "BGN",
+        "name": "BGN",
+        "name_tr": "BGN",
+        "rate": 26.080599999999997,
+        "buy": 25.9578,
+        "sell": 26.2034,
+        "change": -0.71,
+        "type": "currency"
+      },
+      "TRY": {
+        "code": "TRY",
+        "name": "Turkish Lira",
+        "name_tr": "TÜRK LİRASI",
+        "rate": 1,
+        "buy": 1,
+        "sell": 1,
+        "change": 0,
+        "type": "currency"
+      }
+    },
+    "gold_prices": {
+      "GRA": {
+        "code": "GRA",
+        "name": "GRAMALTIN",
+        "name_tr": "GRAMALTIN",
+        "rate": 6650.115,
+        "buy": 6649.66,
+        "sell": 6650.57,
+        "change": 3.14,
+        "type": "gold"
+      },
+      "XU100": {
+        "code": "XU100",
+        "name": "XU100",
+        "name_tr": "XU100",
+        "rate": 12790.98,
+        "buy": 12790.98,
+        "sell": 12790.98,
+        "change": 1.3,
+        "type": "gold"
+      },
+      "DBITCOIN": {
+        "code": "DBITCOIN",
+        "name": "DBITCOIN",
+        "name_tr": "DBITCOIN",
+        "rate": 0,
+        "buy": 0,
+        "sell": 0,
+        "change": 2.04,
+        "type": "gold"
+      },
+      "GUMUS": {
+        "code": "GUMUS",
+        "name": "GUMUS",
+        "name_tr": "GUMUS",
+        "rate": 106.77000000000001,
+        "buy": 106.73,
+        "sell": 106.81,
+        "change": 6.6,
+        "type": "gold"
+      },
+      "BRENT": {
+        "code": "BRENT",
+        "name": "BRENT",
+        "name_tr": "BRENT",
+        "rate": 0,
+        "buy": 0,
+        "sell": 0,
+        "change": -4.39,
+        "type": "gold"
+      },
+      "ONS": {
+        "code": "ONS",
+        "name": "ONS",
+        "name_tr": "ONS",
+        "rate": 0,
+        "buy": 0,
+        "sell": 0,
+        "change": 3.07,
+        "type": "gold"
+      },
+      "HAS": {
+        "code": "HAS",
+        "name": "GRAMHASALTIN",
+        "name_tr": "GRAMHASALTIN",
+        "rate": 6616.865,
+        "buy": 6616.41,
+        "sell": 6617.32,
+        "change": 3.14,
+        "type": "gold"
+      },
+      "CEYREKALTIN": {
+        "code": "CEYREKALTIN",
+        "name": "CEYREKALTIN",
+        "name_tr": "CEYREKALTIN",
+        "rate": 10820.575,
+        "buy": 10695.08,
+        "sell": 10946.07,
+        "change": 1.37,
+        "type": "gold"
+      },
+      "YARIMALTIN": {
+        "code": "YARIMALTIN",
+        "name": "YARIMALTIN",
+        "name_tr": "YARIMALTIN",
+        "rate": 21607.725,
+        "buy": 21323.31,
+        "sell": 21892.14,
+        "change": 1.37,
+        "type": "gold"
+      },
+      "TAMALTIN": {
+        "code": "TAMALTIN",
+        "name": "TAMALTIN",
+        "name_tr": "TAMALTIN",
+        "rate": 43215.34,
+        "buy": 42780.3,
+        "sell": 43650.38,
+        "change": 1.37,
+        "type": "gold"
+      },
+      "CUMHURIYETALTINI": {
+        "code": "CUMHURIYETALTINI",
+        "name": "CUMHURIYETALTINI",
+        "name_tr": "CUMHURIYETALTINI",
+        "rate": 44478.5,
+        "buy": 44145.0,
+        "sell": 44812.0,
+        "change": 0.77,
+        "type": "gold"
+      },
+      "ATAALTIN": {
+        "code": "ATAALTIN",
+        "name": "ATAALTIN",
+        "name_tr": "ATAALTIN",
+        "rate": 44687.17,
+        "buy": 44117.19,
+        "sell": 45257.15,
+        "change": 1.37,
+        "type": "gold"
+      },
+      "14AYARALTIN": {
+        "code": "14AYARALTIN",
+        "name": "14AYARALTIN",
+        "name_tr": "14AYARALTIN",
+        "rate": 3813.09,
+        "buy": 3810.12,
+        "sell": 3816.06,
+        "change": 1.37,
+        "type": "gold"
+      },
+      "18AYARALTIN": {
+        "code": "18AYARALTIN",
+        "name": "18AYARALTIN",
+        "name_tr": "18AYARALTIN",
+        "rate": 4883.4349999999995,
+        "buy": 4879.63,
+        "sell": 4887.24,
+        "change": 1.37,
+        "type": "gold"
+      },
+      "YIA": {
+        "code": "YIA",
+        "name": "22AYARBILEZIK",
+        "name_tr": "22AYARBILEZIK",
+        "rate": 6100.945,
+        "buy": 6096.19,
+        "sell": 6105.7,
+        "change": 1.37,
+        "type": "gold"
+      },
+      "IKIBUCUKALTIN": {
+        "code": "IKIBUCUKALTIN",
+        "name": "IKIBUCUKALTIN",
+        "name_tr": "IKIBUCUKALTIN",
+        "rate": 107837.51000000001,
+        "buy": 106950.75,
+        "sell": 108724.27,
+        "change": 1.37,
+        "type": "gold"
+      },
+      "BESLIALTIN": {
+        "code": "BESLIALTIN",
+        "name": "BESLIALTIN",
+        "name_tr": "BESLIALTIN",
+        "rate": 218752.56,
+        "buy": 216575.27,
+        "sell": 220929.85,
+        "change": 1.37,
+        "type": "gold"
+      },
+      "GREMSEALTIN": {
+        "code": "GREMSEALTIN",
+        "name": "GREMSEALTIN",
+        "name_tr": "GREMSEALTIN",
+        "rate": 108205.725,
+        "buy": 106950.75,
+        "sell": 109460.7,
+        "change": 1.37,
+        "type": "gold"
+      },
+      "RESATALTIN": {
+        "code": "RESATALTIN",
+        "name": "RESATALTIN",
+        "name_tr": "RESATALTIN",
+        "rate": 44687.17,
+        "buy": 44117.19,
+        "sell": 45257.15,
+        "change": 1.37,
+        "type": "gold"
+      },
+      "HAMITALTIN": {
+        "code": "HAMITALTIN",
+        "name": "HAMITALTIN",
+        "name_tr": "HAMITALTIN",
+        "rate": 44687.17,
+        "buy": 44117.19,
+        "sell": 45257.15,
+        "change": 1.37,
+        "type": "gold"
+      }
+    },
+    "crypto_currencies": {},
+    "precious_metals": {
+      "GPL": {
+        "code": "GPL",
+        "name": "GRAMPLATIN",
+        "name_tr": "GRAMPLATIN",
+        "rate": 2807.585,
+        "buy": 2802.58,
+        "sell": 2812.59,
+        "change": 3.22,
+        "type": "platinum"
+      },
+      "PAL": {
+        "code": "PAL",
+        "name": "GRAMPALADYUM",
+        "name_tr": "GRAMPALADYUM",
+        "rate": 2122.0299999999997,
+        "buy": 2118.16,
+        "sell": 2125.9,
+        "change": 5.28,
+        "type": "palladium"
+      }
+    },
+    "metadata": {
+      "date": "2026-03-31",
+      "date_en": "2026-03-31 20:26:02",
+      "fetch_time": "2026-03-31 20:27:00",
+      "timestamp": "2026-03-31T20:27:00.111528",
+      "source": "Finans API",
+      "last_updated": "2026-03-31T20:27:00.111528"
     }
   },
   "metadata": {
-    "date": "2025-11-07",
-    "date_en": "2025-11-07 17:14:01",
-    "fetch_time": "2025-11-07 17:14:41",
-    "timestamp": "2025-11-07T17:14:41.477259",
-    "source": "Finans API",
-    "last_updated": "2025-11-07T17:14:41.477259"
+    "fetch_time": "2026-03-31 20:27:00",
+    "date": "2026-03-31",
+    "last_updated": "2026-03-31T20:27:00.111528"
   }
 }

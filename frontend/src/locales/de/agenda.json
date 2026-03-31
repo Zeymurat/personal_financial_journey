@@ -1,0 +1,62 @@
+{
+  "calendar": {
+    "months": ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+    "weekdaysShort": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+    "weekdaysLong": ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"]
+  },
+  "ui": {
+    "backToToday": "Zurück zu heute",
+    "loading": "Wird geladen...",
+    "noEvents": "Keine Termine",
+    "deleteEventTitle": "Termin löschen",
+    "editEventTitle": "Termin bearbeiten"
+  },
+  "recurrence": {
+    "daily": "Täglich",
+    "weekly": "Wöchentlich",
+    "monthly": "Monatlich",
+    "yearly": "Jährlich"
+  },
+  "toast": {
+    "loadError": "Termine konnten nicht geladen werden.",
+    "titleRequired": "Bitte geben Sie einen Titel ein.",
+    "updateSuccess": "Termin wurde aktualisiert!",
+    "createSuccess": "Termin wurde erstellt!",
+    "saveError": "Termin konnte nicht gespeichert werden.",
+    "seriesCapped": "Die Serie hat das maximale Limit erreicht. ",
+    "seriesCreated": "Serie erstellt. Insgesamt {{total}} Termine.",
+    "deletedMany": "{{count}} Termine gelöscht!",
+    "deleteManyError": "Termine konnten nicht gelöscht werden.",
+    "deleteOneSuccess": "Termin gelöscht!",
+    "deleteOneError": "Termin konnte nicht gelöscht werden."
+  },
+  "modal": {
+    "editTitle": "Termin bearbeiten",
+    "newTitle": "Neuer Termin",
+    "titleLabel": "Titel *",
+    "titlePlaceholder": "Titel",
+    "descriptionLabel": "Beschreibung",
+    "descriptionPlaceholder": "Beschreibung",
+    "dateLabel": "Datum",
+    "timeLabel": "Uhrzeit (optional)",
+    "recurringCheckbox": "Wiederkehrender Termin",
+    "recurrenceTypeLabel": "Wiederholung",
+    "optDaily": "Täglich",
+    "optWeekly": "Jede Woche (gleicher Wochentag)",
+    "optMonthly": "Jeden Monat am {{day}}.",
+    "optYearly": "Jedes Jahr (gleiches Datum)",
+    "creatingProgress": "Erstelle: {{created}}/{{total}}",
+    "deleteFromEditTitle": "Termin löschen",
+    "saving": "Wird erstellt...",
+    "update": "Aktualisieren",
+    "save": "Speichern"
+  },
+  "deleteDialog": {
+    "title": "Termin löschen",
+    "bodySingle": "Diesen Termin wirklich löschen?",
+    "bodyRecurring": "Diese Serie ({{count}} Termine) wird mit Fortschrittsanzeige gelöscht.",
+    "deletingProgress": "Lösche: {{deleted}}/{{total}}",
+    "deleteSeries": "Gesamte Serie löschen",
+    "deleteThisOnly": "Nur diesen Termin"
+  }
+}

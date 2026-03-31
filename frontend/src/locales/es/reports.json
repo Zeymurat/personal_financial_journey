@@ -1,0 +1,47 @@
+{
+  "loading": "Loading reports...",
+  "header": {
+    "title": "Reports",
+    "subtitle": "Analyze your financial performance",
+    "disclaimer": "Figures may differ slightly; please verify in detail."
+  },
+  "summary": {
+    "title": "This month — {{month}}",
+    "trendLabel": "Overall trend:",
+    "trendPositive": "Positive",
+    "trendNegative": "Negative",
+    "income": "Income",
+    "expense": "Expense",
+    "netIncome": "Net income",
+    "vsPrevMonth": "(vs previous month)",
+    "assetBuyCost": "Asset purchase cost",
+    "assetSellGain": "Proceeds from sales",
+    "investmentGain": "Investment gain",
+    "gain": "Gain",
+    "loss": "Loss"
+  },
+  "trends": {
+    "incomeVsExpense": "Income vs expense trend",
+    "net": "Net:",
+    "incomeShort": "Income",
+    "expenseShort": "Expense",
+    "investmentPerformance": "Investment performance",
+    "month": "Month",
+    "buyCost": "Buy cost",
+    "sellProceeds": "Sale proceeds",
+    "return": "Return",
+    "value": "Value",
+    "noInvestmentData": "No investment data"
+  },
+  "detailed": {
+    "title": "Monthly detail report",
+    "subtitle": "Savings rate: (Net income / Income) × 100 — share of income saved",
+    "month": "Month",
+    "income": "Income",
+    "expense": "Expense",
+    "netIncome": "Net income",
+    "investmentGain": "Investment gain",
+    "savingsRate": "Savings rate",
+    "noData": "No data"
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "labels": {
+    "income": "Income",
+    "expense": "Expense"
+  },
+  "header": {
+    "title": "Transactions",
+    "subtitle": "Manage your income and expenses",
+    "disclaimer": "Figures may differ slightly; please verify reports.",
+    "newTransaction": "New transaction"
+  },
+  "summary": {
+    "totalIncome": "Total income",
+    "totalExpense": "Total expense",
+    "monthlyStatus": "Monthly balance",
+    "transactionCount": "Transaction count",
+    "thisMonth": "This month",
+    "netStatus": "Net position",
+    "vsPreviousMonth": "vs previous month"
+  },
+  "quickActions": {
+    "title": "Quick actions",
+    "subtitle": "Add frequent transactions with one tap",
+    "loading": "Loading...",
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right",
+    "confirmDelete": "Delete this quick action?",
+    "newAdd": "Add new",
+    "dragTitle": "Drag to reorder",
+    "editTitle": "Edit",
+    "deleteTitle": "Delete",
+    "setup": {
+      "titleEdit": "Edit quick action",
+      "titleCreate": "Create quick action",
+      "subtitle": "Save a transaction you use often",
+      "nameLabel": "Quick action name",
+      "namePlaceholder": "e.g. Rent payment",
+      "descriptionLabel": "Description (shown in the transaction column)",
+      "descriptionPlaceholder": "Transaction description",
+      "transactionType": "Type",
+      "amount": "Amount",
+      "currency": "Currency",
+      "category": "Category",
+      "selectCategory": "Select category",
+      "fillAllFields": "Please fill in all fields.",
+      "update": "Update"
+    }
+  },
+  "toast": {
+    "deleteSuccess": "Transaction deleted.",
+    "deleteError": "Could not delete transaction. Please try again.",
+    "loadError": "Could not load transactions.",
+    "addSuccess": "Transaction added.",
+    "addError": "Could not add transaction. Please try again.",
+    "updateSuccess": "Transaction updated.",
+    "updateError": "Could not update transaction. Please try again.",
+    "quickSaveSuccess": "Quick action saved.",
+    "quickSaveError": "Could not save quick action. Please try again.",
+    "quickDeleteSuccess": "Quick action deleted.",
+    "quickDeleteError": "Could not delete quick action. Please try again."
+  },
+  "list": {
+    "title": "All transactions",
+    "subtitleLoading": "Loading...",
+    "showingCount": "Showing {{count}} transactions",
+    "searchPlaceholder": "Search transactions...",
+    "filterAll": "All transactions",
+    "dateAll": "All dates",
+    "today": "Today",
+    "week": "Last 7 days",
+    "month": "This month",
+    "last30days": "Last 30 days",
+    "customRange": "Custom range",
+    "allCategories": "All categories",
+    "colTransaction": "Transaction",
+    "colCategory": "Category",
+    "colDate": "Date",
+    "colAmount": "Amount",
+    "colActions": "Actions",
+    "loading": "Loading transactions...",
+    "emptyTitle": "No transactions yet",
+    "emptyHint": "Add your first transaction to get started",
+    "firstAdd": "Add first transaction"
+  },
+  "pagination": {
+    "totalRecords": "{{count}} records total",
+    "perPage": "{{count}} / page",
+    "pageOf": "Page {{current}} / {{total}}"
+  },
+  "form": {
+    "transactionType": "Type",
+    "amount": "Amount",
+    "currency": "Currency",
+    "category": "Category",
+    "selectCategory": "Select category",
+    "description": "Description",
+    "descriptionPlaceholder": "Transaction description",
+    "date": "Date",
+    "addTitle": "Add transaction",
+    "addSubtitle": "Add an income or expense",
+    "addButton": "Add",
+    "editTitle": "Edit transaction",
+    "editSubtitle": "Update transaction details",
+    "updateButton": "Update"
+  },
+  "detail": {
+    "title": "Transaction details",
+    "subtitle": "Full transaction information",
+    "incomeLabel": "Income",
+    "expenseLabel": "Expense",
+    "amount": "Amount",
+    "category": "Category",
+    "date": "Date",
+    "currency": "Currency",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "deleteModal": {
+    "title": "Delete transaction",
+    "subtitle": "This will permanently remove the transaction",
+    "warning": "⚠️ This cannot be undone. Continue?"
+  },
+  "investmentSuggestion": {
+    "title": "Investment reminder",
+    "areaLabel": "Investments",
+    "body": "We recommend recording this transaction under {{area}}. That way you can track investments in more detail and review portfolio performance.",
+    "goToInvestments": "Go to investments",
+    "close": "Close"
+  },
+  "currencyLong": {
+    "TRY": "Turkish Lira",
+    "USD": "US Dollar",
+    "EUR": "Euro",
+    "GBP": "British Pound",
+    "JPY": "Japanese Yen",
+    "CHF": "Swiss Franc",
+    "AUD": "Australian Dollar",
+    "CAD": "Canadian Dollar",
+    "CNY": "Chinese Yuan"
+  }
+}

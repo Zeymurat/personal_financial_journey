@@ -1,0 +1,25 @@
+{
+  "fundSelection": {
+    "title": "Select mutual funds",
+    "subtitle": "Choose the funds you want to see.",
+    "selectedBanner": "{{count}} fund(s) selected",
+    "searchPlaceholder": "Search by name or key (e.g. AKBNK, Garanti)",
+    "noResults": "No results for \"{{query}}\"",
+    "footerSelected": "{{count}} selected",
+    "footerMinOne": "Select at least one fund",
+    "close": "Close"
+  },
+  "stockSelection": {
+    "title": "Select stocks",
+    "subtitle": "Choose the stocks you want to see.",
+    "selectedBanner": "{{count}} stock(s) selected",
+    "searchPlaceholder": "Search by ticker or name",
+    "noResults": "No results for \"{{query}}\"",
+    "footerSelected": "{{count}} selected",
+    "footerMinOne": "Select at least one stock",
+    "close": "Close",
+    "lastPrice": "Last price:",
+    "high": "High:",
+    "low": "Low:"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "toast": {
+    "loadError": "Benachrichtigungen konnten nicht geladen werden",
+    "genericError": "Etwas ist schiefgelaufen",
+    "markReadSuccess": "Als gelesen markiert",
+    "markAllSuccess": "Alle als gelesen markiert",
+    "deleteSuccess": "Benachrichtigung gelöscht",
+    "deleteReadSuccess": "Gelesene Benachrichtigungen gelöscht"
+  },
+  "category": {
+    "target": "Ziele",
+    "investment": "Investitionen",
+    "transaction": "Transaktionen",
+    "reminder": "Erinnerungen",
+    "other": "Sonstiges"
+  },
+  "filters": {
+    "all": "Alle",
+    "categoryLabel": "Kategorie:",
+    "unreadOnly": "Nur ungelesen"
+  },
+  "header": {
+    "title": "Benachrichtigungen",
+    "unreadCount": "{{count}} ungelesen",
+    "allRead": "Alles gelesen"
+  },
+  "actions": {
+    "markAllRead": "Alle als gelesen markieren",
+    "deleteRead": "Gelesene löschen",
+    "markReadTooltip": "Als gelesen markieren",
+    "deleteTooltip": "Löschen"
+  },
+  "badge": {
+    "new": "Neu"
+  },
+  "empty": {
+    "title": "Keine Benachrichtigungen",
+    "noUnread": "Keine ungelesenen Benachrichtigungen",
+    "noInCategory": "Keine Benachrichtigungen in dieser Kategorie",
+    "none": "Noch keine Benachrichtigungen"
+  },
+  "time": {
+    "justNow": "Gerade eben",
+    "minutesAgo": "vor {{count}} Min.",
+    "hoursAgo": "vor {{count}} Std.",
+    "daysAgo": "vor {{count}} Tag(en)"
+  }
+}

@@ -5,6 +5,19 @@ export const toDate = (timestamp: Timestamp | undefined): Date | null => {
   return timestamp ? timestamp.toDate() : null;
 };
 
+/** ISO string, Date veya { toDate } (Firestore benzeri) → Date — sıralama / gösterim için */
+export function coerceFlexibleDate(
+  value: string | Date | { toDate: () => Date } | undefined | null
+): Date {
+  if (value == null) return new Date(0);
+  if (value instanceof Date) return value;
+  if (typeof value === 'string') return new Date(value);
+  if (typeof value === 'object' && typeof value.toDate === 'function') {
+    return value.toDate();
+  }
+  return new Date(NaN);
+}
+
 // Convert JavaScript Date to Firestore Timestamp
 export const toTimestamp = (date: Date | string | undefined): Timestamp | null => {
   if (!date) return null;

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { Transaction, Investment, Currency } from '../types';
 import { 
   getTransactions as fetchTransactions,
@@ -12,11 +12,26 @@ import {
   updateInvestment as editInvestment,
   deleteInvestment as removeInvestment,
   addInvestmentTransaction as createInvestmentTransaction,
-  getInvestmentTransactions as fetchInvestmentTransactions
+  getInvestmentTransactions as fetchInvestmentTransactions,
+  updateInvestmentTransaction as editInvestmentTransaction,
+  deleteInvestmentTransaction as removeInvestmentTransaction
 } from '../services/investmentService';
 import { getExchangeRates, convertCurrency } from '../services/currencyService';
-import { tcmbAPI } from '../services/apiService';
+import { tcmbAPI, borsaAPI } from '../services/apiService';
 import { useAuth } from './AuthContext';
+
+// Borsa verisi tipi
+export interface StockData {
+  code: string;
+  name: string;
+  last_price: number;
+  rate: number;
+  volume: number;
+  high: number;
+  low: number;
+  time: string;
+  icon?: string;
+}
 
 interface FinanceContextType {
   // Transactions
@@ -49,6 +64,11 @@ interface FinanceContextType {
   convertCurrency: (amount: number, fromCurrency: string, toCurrency: string) => Promise<number>;
   refreshRates: () => Promise<void>;
   
+  // Borsa (Stock Market)
+  borsaData: StockData[];
+  loadingBorsa: boolean;
+  refreshBorsa: () => Promise<void>;
+  
   // Error handling
   error: string | null;
   clearError: () => void;
@@ -57,7 +77,8 @@ interface FinanceContextType {
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
 
 export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, authenticating } = useAuth();
+  
   
   // State
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -66,14 +87,18 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [goldPrices, setGoldPrices] = useState<Record<string, Currency>>({});
   const [cryptoCurrencies, setCryptoCurrencies] = useState<Record<string, Currency>>({});
   const [preciousMetals, setPreciousMetals] = useState<Record<string, Currency>>({});
+  const [borsaData, setBorsaData] = useState<StockData[]>([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [loadingInvestments, setLoadingInvestments] = useState(false);
   const [loadingRates, setLoadingRates] = useState(false);
+  const [loadingBorsa, setLoadingBorsa] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Verilerin yüklenip yüklenmediğini takip et
+  const dataLoadedRef = useRef(false);
 
   // Error handling
   const handleError = (err: any, defaultMessage: string) => {
-    console.error(defaultMessage, err);
     const message = err instanceof Error ? err.message : defaultMessage;
     setError(message);
     throw new Error(message);
@@ -83,11 +108,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Transactions
   const loadTransactions = async () => {
-    if (!currentUser?.uid) return;
+    if (!currentUser?.id) return;
     
     try {
       setLoadingTransactions(true);
-      const data = await fetchTransactions(currentUser.uid);
+      const data = await fetchTransactions(currentUser.id);
       setTransactions(data);
     } catch (err) {
       handleError(err, 'Failed to load transactions');
@@ -97,10 +122,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addTransaction = async (transaction: Omit<Transaction, 'id'>) => {
-    if (!currentUser?.uid) return;
+    if (!currentUser?.id) return;
     
     try {
-      await createTransaction(currentUser.uid, transaction);
+      await createTransaction(currentUser.id, transaction);
       await loadTransactions();
     } catch (err) {
       handleError(err, 'Failed to add transaction');
@@ -108,7 +133,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const updateTransaction = async (id: string, updates: Partial<Transaction>) => {
-    if (!currentUser?.uid) return;
+    if (!currentUser?.id) return;
     
     try {
       await editTransaction(id, updates);
@@ -119,7 +144,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const deleteTransaction = async (id: string) => {
-    if (!currentUser?.uid) return;
+    if (!currentUser?.id) return;
     
     try {
       await removeTransaction(id);
@@ -131,11 +156,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Investments
   const loadInvestments = async () => {
-    if (!currentUser?.uid) return;
+    if (!currentUser?.id) return;
     
     try {
       setLoadingInvestments(true);
-      const data = await fetchInvestments(currentUser.uid);
+      const data = await fetchInvestments(currentUser.id);
       setInvestments(data);
     } catch (err) {
       handleError(err, 'Failed to load investments');
@@ -145,10 +170,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addInvestment = async (investment: Omit<Investment, 'id' | 'transactions'>) => {
-    if (!currentUser?.uid) return;
+    if (!currentUser?.id) return;
     
     try {
-      await createInvestment(currentUser.uid, investment);
+      await createInvestment(currentUser.id, investment);
       await loadInvestments();
     } catch (err) {
       handleError(err, 'Failed to add investment');
@@ -156,7 +181,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const updateInvestment = async (id: string, updates: Partial<Investment>) => {
-    if (!currentUser?.uid) return;
+    if (!currentUser?.id) return;
     
     try {
       await editInvestment(id, updates);
@@ -167,7 +192,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const deleteInvestment = async (id: string) => {
-    if (!currentUser?.uid) return;
+    if (!currentUser?.id) return;
     
     try {
       await removeInvestment(id);
@@ -181,18 +206,54 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     investmentId: string, 
     transaction: Omit<import('../types').InvestmentTransaction, 'id'>
   ) => {
-    if (!currentUser?.uid) return;
+    if (!currentUser?.id) return;
     
     try {
-      await createInvestmentTransaction(currentUser.uid, investmentId, transaction);
+      await createInvestmentTransaction(currentUser.id, investmentId, transaction);
       await loadInvestments();
-    } catch (err) {
-      handleError(err, 'Failed to add investment transaction');
+    } catch (err: any) {
+      // Hata mesajını daha detaylı yap
+      const errorMessage = err?.message || err?.error || 'Failed to add investment transaction';
+      console.error('Investment transaction ekleme hatası:', errorMessage, err);
+      throw new Error(errorMessage);
+    }
+  };
+
+  const updateInvestmentTransaction = async (
+    investmentId: string,
+    transactionId: string,
+    updates: Partial<import('../types').InvestmentTransaction>
+  ) => {
+    if (!currentUser?.id) return;
+    
+    try {
+      await editInvestmentTransaction(investmentId, transactionId, updates);
+      await loadInvestments();
+    } catch (err: any) {
+      const errorMessage = err?.message || err?.error || 'Failed to update investment transaction';
+      console.error('Investment transaction güncelleme hatası:', errorMessage, err);
+      throw new Error(errorMessage);
+    }
+  };
+
+  const deleteInvestmentTransaction = async (
+    investmentId: string,
+    transactionId: string
+  ) => {
+    if (!currentUser?.id) return;
+    
+    try {
+      await removeInvestmentTransaction(investmentId, transactionId);
+      await loadInvestments();
+    } catch (err: any) {
+      const errorMessage = err?.message || err?.error || 'Failed to delete investment transaction';
+      console.error('Investment transaction silme hatası:', errorMessage, err);
+      throw new Error(errorMessage);
     }
   };
 
   const getInvestmentTransactions = async (investmentId: string) => {
-    if (!currentUser?.uid) return [];
+    if (!currentUser?.id) return [];
     
     try {
       return await fetchInvestmentTransactions(investmentId);
@@ -205,28 +266,13 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Currency - Firestore'dan oku (akıllı zaman kontrolü backend'de yapılıyor)
   const loadExchangeRates = async () => {
     try {
-      console.log("🚀 Döviz kurları yükleniyor (Backend akıllı kontrol yapıyor)...");
       setLoadingRates(true);
       
       // Backend API'yi çağır (akıllı zaman kontrolü backend'de yapılıyor)
-      // Backend Firestore'u kontrol eder, gerekirse API'den çeker
       try {
-        console.log("💱 FinanceContext: Backend API çağrılıyor...");
         const tcmbData = await tcmbAPI.getMain();
         
-        console.log("💱 FinanceContext: Backend response alındı:", {
-          success: tcmbData?.success,
-          hasData: !!tcmbData?.data,
-          source: tcmbData?.source,
-          exchangeRatesCount: Object.keys(tcmbData?.data?.exchange_rates || {}).length,
-          goldPricesCount: Object.keys(tcmbData?.data?.gold_prices || {}).length,
-          cryptoCount: Object.keys(tcmbData?.data?.crypto_currencies || {}).length,
-          metalsCount: Object.keys(tcmbData?.data?.precious_metals || {}).length
-        });
-        
         if (tcmbData?.success && tcmbData?.data) {
-          console.log(`✅ Döviz kurları başarıyla alındı (kaynak: ${tcmbData.source || 'API'})`);
-          
           // Döviz kurlarını formatla
           const formattedRates: Record<string, Currency> = {};
           if (tcmbData.data.exchange_rates) {
@@ -297,39 +343,27 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             });
           }
           
-          console.log("📊 Formatlanmış veriler:", {
-            döviz: Object.keys(formattedRates).length,
-            altın: Object.keys(formattedGold).length,
-            kripto: Object.keys(formattedCrypto).length,
-            metaller: Object.keys(formattedMetals).length
-          });
-          
           setExchangeRates(formattedRates);
           setGoldPrices(formattedGold);
           setCryptoCurrencies(formattedCrypto);
           setPreciousMetals(formattedMetals);
           
-          // Backend zaten Firestore'a kaydediyor, burada tekrar kaydetmeye gerek yok
+          const source = tcmbData.source || 'api';
+          const date = tcmbData.date || 'bilinmiyor';
+          console.log(`💱 Döviz verileri yüklendi (kaynak: ${source}, tarih: ${date})`);
           return;
-        } else {
-          console.warn("⚠️ Backend'den beklenen formatta veri gelmedi, Firestore'a fallback yapılıyor...");
         }
       } catch (tcmbError) {
-        console.warn("⚠️ Backend hatası, Firestore'a fallback yapılıyor:", tcmbError);
+        // Fallback: Firestore'dan direkt oku
+        const rates = await getExchangeRates();
+        setExchangeRates(rates);
+        console.log('💱 Döviz verileri yüklendi (kaynak: cache)');
       }
 
-      // Fallback: Firestore'dan direkt oku
-      console.log("📚 Firestore'dan döviz kurları okunuyor...");
-      const rates = await getExchangeRates();
-      console.log("✅ Firestore döviz kurları yüklendi:", rates);
-      setExchangeRates(rates);
-
     } catch (err) {
-      console.error("❌ Döviz kurları yüklenirken hata:", err);
       handleError(err, 'Failed to load exchange rates');
     } finally {
       setLoadingRates(false);
-      console.log("🏁 Döviz kurları yükleme işlemi tamamlandı");
     }
   };
 
@@ -342,23 +376,92 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  // Borsa verilerini yükle (akıllı zaman kontrolü backend'de yapılıyor)
+  const loadBorsaData = async () => {
+    try {
+      setLoadingBorsa(true);
+      
+      // Backend API'yi çağır (akıllı zaman kontrolü backend'de yapılıyor)
+      try {
+        const response = await borsaAPI.getBorsaData();
+        
+        if (response?.success && response?.data?.stocks) {
+          const stocks: StockData[] = response.data.stocks.map((stock: any) => ({
+            code: stock.code,
+            name: stock.name,
+            last_price: stock.last_price || 0,
+            rate: stock.rate || 0,
+            volume: stock.volume || 0,
+            high: stock.high || 0,
+            low: stock.low || 0,
+            time: stock.time || '',
+            icon: stock.icon
+          }));
+          
+          setBorsaData(stocks);
+          const source = response.source || 'api';
+          const date = response.date || 'bilinmiyor';
+          console.log(`📈 Hisse verileri yüklendi (kaynak: ${source}, tarih: ${date}, adet: ${stocks.length})`);
+          return;
+        }
+      } catch (borsaError) {
+        // Fallback: Boş array set et
+        setBorsaData([]);
+      }
+      
+      setBorsaData([]);
+    } catch (err) {
+      handleError(err, 'Failed to load borsa data');
+      setBorsaData([]);
+    } finally {
+      setLoadingBorsa(false);
+    }
+  };
+
   // Initial data loading - Login olduğunda çalışır
   useEffect(() => {
-    if (currentUser?.uid) {
-      console.log("👤 Kullanıcı login oldu, veriler yükleniyor...", currentUser.email);
-      console.log("📊 İşlemler yükleniyor...");
-      loadTransactions();
-      console.log("💼 Yatırımlar yükleniyor...");
-      loadInvestments();
-      console.log("💱 Döviz kurları Firestore'dan yükleniyor (akıllı zaman kontrolü backend'de)...");
-      loadExchangeRates();
-      
-      // Otomatik güncelleme kaldırıldı - Backend akıllı zaman kontrolü yapıyor
-      // Sadece gerekli durumlarda (10:00, 13:30, 17:00) API çağrısı yapılıyor
-    } else {
-      console.log("👤 Kullanıcı login olmadı, veriler yüklenmedi");
+    // currentUser undefined veya null ise bekle
+    if (currentUser === undefined) {
+      return;
     }
-  }, [currentUser?.uid]);
+    
+    // currentUser null ise (logout durumu)
+    if (currentUser === null) {
+      dataLoadedRef.current = false;
+      setTransactions([]);
+      setInvestments([]);
+      setExchangeRates({});
+      setGoldPrices({});
+      setCryptoCurrencies({});
+      setPreciousMetals({});
+      setBorsaData([]);
+      return;
+    }
+    
+    // Authentication devam ediyorsa bekle (token henüz hazır değil)
+    if (authenticating) {
+      return;
+    }
+    
+    // Token kontrolü - token yoksa bekle
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      return;
+    }
+    
+    // currentUser.id varsa ve token hazırsa verileri yükle (sadece bir kez)
+    if (currentUser?.id && !dataLoadedRef.current) {
+      dataLoadedRef.current = true;
+      loadTransactions();
+      loadInvestments();
+      
+      // Currency ve Borsa verilerini paralel yükle
+      Promise.all([
+        loadExchangeRates().catch(() => {}),
+        loadBorsaData().catch(() => {})
+      ]);
+    }
+  }, [currentUser, authenticating]);
 
   const value = {
     // Transactions
@@ -377,6 +480,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     deleteInvestment,
     addInvestmentTransaction,
     getInvestmentTransactions,
+    updateInvestmentTransaction,
+    deleteInvestmentTransaction,
     refreshInvestments: loadInvestments,
     
     // Currency
@@ -387,6 +492,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     loadingRates,
     convertCurrency: convertCurrencyAmount,
     refreshRates: loadExchangeRates,
+    
+    // Borsa
+    borsaData,
+    loadingBorsa,
+    refreshBorsa: loadBorsaData,
     
     // Error handling
     error,

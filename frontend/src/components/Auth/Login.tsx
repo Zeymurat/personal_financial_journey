@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Wallet, TrendingUp, Shield, Users } from 'lucide-react';
 import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '../../contexts/AuthContext';
@@ -10,6 +11,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) => {
+  const { t } = useTranslation('auth');
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -24,15 +26,15 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
     const newErrors: { [key: string]: string } = {};
 
     if (!formData.email) {
-      newErrors.email = 'E-posta adresi gerekli';
+      newErrors.email = t('login.errors.emailRequired');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Geçerli bir e-posta adresi girin';
+      newErrors.email = t('login.errors.emailInvalid');
     }
 
     if (!formData.password) {
-      newErrors.password = 'Şifre gerekli';
+      newErrors.password = t('login.errors.passwordRequired');
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Şifre en az 6 karakter olmalı';
+      newErrors.password = t('login.errors.passwordMin');
     }
 
     setErrors(newErrors);
@@ -47,7 +49,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
       try {
         await onLogin(formData.email, formData.password);
       } catch (error: any) {
-        setFormError(error.message || 'Giriş yapılırken bir hata oluştu');
+        setFormError(error.message || t('login.toastLoginError'));
       }
     }
   };
@@ -66,7 +68,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
       // No need to handle navigation here as it's handled by the AuthProvider
     } catch (error: any) {
       console.error('Google sign in error:', error);
-      setFormError(error.message || 'Google ile giriş yapılırken bir hata oluştu');
+      setFormError(error.message || t('login.toastGoogleError'));
     } finally {
       setIsGoogleLoading(false);
     }
@@ -84,24 +86,22 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                 <Wallet className="w-12 h-12 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-black">FinansApp</h1>
-                <p className="text-xl text-blue-200 font-medium">Kişisel Finans Yöneticisi</p>
+                <h1 className="text-4xl font-black">{t('login.brandTitle')}</h1>
+                <p className="text-xl text-blue-200 font-medium">{t('login.brandSubtitle')}</p>
               </div>
             </div>
           </div>
 
           <div className="space-y-8 max-w-md">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-2">Hoş Geldiniz</h2>
-              <p className="text-gray-300 mb-4">Hesabınıza giriş yapın</p>
+              <h2 className="text-2xl font-bold text-white mb-2">{t('login.welcome')}</h2>
+              <p className="text-gray-300 mb-4">{t('login.signInPrompt')}</p>
 
             </div>
 
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-black mb-4">Finansal Geleceğinizi Yönetin</h2>
-              <p className="text-lg text-blue-200 leading-relaxed">
-                Gelirlerinizi takip edin, yatırımlarınızı analiz edin ve finansal hedeflerinize ulaşın.
-              </p>
+              <h2 className="text-3xl font-black mb-4">{t('login.heroTitle')}</h2>
+              <p className="text-lg text-blue-200 leading-relaxed">{t('login.heroBody')}</p>
             </div>
 
             <div className="grid grid-cols-1 gap-6">
@@ -110,8 +110,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                   <TrendingUp className="w-8 h-8 text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg">Yatırım Takibi</h3>
-                  <p className="text-blue-200 text-sm">Portföyünüzü analiz edin</p>
+                  <h3 className="font-bold text-lg">{t('login.featureInvestTitle')}</h3>
+                  <p className="text-blue-200 text-sm">{t('login.featureInvestDesc')}</p>
                 </div>
               </div>
 
@@ -120,8 +120,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                   <Shield className="w-8 h-8 text-blue-400" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg">Güvenli Platform</h3>
-                  <p className="text-blue-200 text-sm">Verileriniz güvende</p>
+                  <h3 className="font-bold text-lg">{t('login.featureSecureTitle')}</h3>
+                  <p className="text-blue-200 text-sm">{t('login.featureSecureDesc')}</p>
                 </div>
               </div>
 
@@ -130,8 +130,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                   <Users className="w-8 h-8 text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg">Kolay Kullanım</h3>
-                  <p className="text-blue-200 text-sm">Sezgisel arayüz</p>
+                  <h3 className="font-bold text-lg">{t('login.featureUxTitle')}</h3>
+                  <p className="text-blue-200 text-sm">{t('login.featureUxDesc')}</p>
                 </div>
               </div>
             </div>
@@ -148,16 +148,16 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                 <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl">
                   <Wallet className="w-8 h-8 text-white" />
                 </div>
-                <h1 className="text-2xl font-black text-slate-900 dark:text-white">FinansApp</h1>
+                <h1 className="text-2xl font-black text-slate-900 dark:text-white">{t('login.brandTitle')}</h1>
               </div>
-              <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Hoş Geldiniz</h2>
-              <p className="text-slate-600 dark:text-slate-400 font-medium">Hesabınıza giriş yapın</p>
+              <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2">{t('login.welcome')}</h2>
+              <p className="text-slate-600 dark:text-slate-400 font-medium">{t('login.signInPrompt')}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  E-posta Adresi
+                  {t('login.email')}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -167,7 +167,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     className={`w-full pl-12 pr-4 py-4 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${errors.email ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'
                       }`}
-                    placeholder="ornek@email.com"
+                    placeholder={t('login.emailPlaceholder')}
                   />
                 </div>
                 {errors.email && <p className="text-red-500 text-sm mt-2 font-medium">{errors.email}</p>}
@@ -175,7 +175,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Şifre
+                  {t('login.password')}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -201,10 +201,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
               <div className="flex items-center justify-between">
                 <label className="flex items-center">
                   <input type="checkbox" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                  <span className="ml-2 text-sm text-slate-600 dark:text-slate-400 font-medium">Beni hatırla</span>
+                  <span className="ml-2 text-sm text-slate-600 dark:text-slate-400 font-medium">{t('login.rememberMe')}</span>
                 </label>
                 <button type="button" className="text-sm text-blue-600 hover:text-blue-700 font-semibold">
-                  Şifremi unuttum
+                  {t('login.forgotPassword')}
                 </button>
               </div>
 
@@ -217,7 +217,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                   <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <>
-                    <span>Giriş Yap</span>
+                    <span>{t('login.submit')}</span>
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}
@@ -229,7 +229,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400">
-                    VEYA
+                    {t('login.or')}
                   </span>
                 </div>
               </div>
@@ -245,7 +245,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                 ) : (
                   <>
                     <FcGoogle className="w-5 h-5" />
-                    <span>Google ile Giriş Yap</span>
+                    <span>{t('login.googleSignIn')}</span>
                   </>
                 )}
               </button>
@@ -253,12 +253,12 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
 
             <div className="mt-8 text-center">
               <p className="text-slate-600 dark:text-slate-400 font-medium">
-                Hesabınız yok mu?{' '}
+                {t('login.noAccount')}{' '}
                 <button
                   onClick={onSwitchToRegister}
                   className="text-blue-600 hover:text-blue-700 font-bold hover:underline"
                 >
-                  Kayıt olun
+                  {t('login.register')}
                 </button>
               </p>
             </div>

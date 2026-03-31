@@ -1,0 +1,102 @@
+{
+  "header": {
+    "title": "Seguir y comparar",
+    "subtitle": "Sigue los activos que te interesen y compáralos",
+    "disclaimer": "Puede haber pequeñas diferencias; revisa los informes."
+  },
+  "typeLabels": {
+    "currency": "Divisas",
+    "gold": "Oro",
+    "crypto": "Cripto",
+    "metal": "Metal",
+    "fund": "Fondo",
+    "stock": "Acción"
+  },
+  "currencySection": {
+    "sectionTitle": "Divisas, cripto, oro y metales seguidos",
+    "add": "Añadir",
+    "selectTitle": "Elegir tipos de cambio",
+    "loading": "Cargando tipos...",
+    "empty": "Aún no sigues tipos. Pulsa «Añadir».",
+    "emptyCta": "Elegir tipos"
+  },
+  "funds": {
+    "sectionTitle": "Fondos de inversión seguidos",
+    "selectTitle": "Elegir fondos",
+    "add": "Añadir",
+    "empty": "Aún no sigues fondos. Pulsa «Añadir».",
+    "emptyCta": "Elegir fondos"
+  },
+  "borsa": {
+    "sectionTitle": "Valores seguidos",
+    "selectTitle": "Elegir acciones",
+    "loading": "Cargando mercado...",
+    "add": "Añadir",
+    "empty": "Aún no sigues acciones. Pulsa «Añadir».",
+    "emptyCta": "Elegir acciones"
+  },
+  "comparison": {
+    "tableTitle": "Tabla de comparación",
+    "tableSubtitle": "Todos tus activos seguidos en un solo lugar",
+    "searchPlaceholder": "Buscar activos...",
+    "addAsset": "Añadir activo",
+    "filterAll": "Todos los tipos",
+    "currency": "Divisas",
+    "gold": "Oro",
+    "crypto": "Cripto",
+    "metal": "Metal",
+    "fund": "Fondo",
+    "stock": "Acción",
+    "colName": "Nombre",
+    "colCode": "Código",
+    "colType": "Tipo",
+    "colPrice": "Precio",
+    "colChange": "Cambio (%)",
+    "colBuy": "Compra",
+    "colSell": "Venta",
+    "colTrend": "Tendencia",
+    "colActions": "Acciones",
+    "emptySearch": "Sin resultados.",
+    "emptyTracked": "Aún no sigues activos.",
+    "follow": "Seguir",
+    "addToWatchlistTitle": "Añadir a la lista de seguimiento",
+    "removeFromTableTitle": "Quitar de la tabla",
+    "priceCompareTitle": "Comparación de precios",
+    "priceCompareSubtitle": "Precios actuales (₺)",
+    "noPriceData": "Sin datos de precio.",
+    "changeCompareTitle": "Comparación de cambios",
+    "changeCompareSubtitle": "Cambio diario (%)"
+  },
+  "addModal": {
+    "title": "Añadir activo a la tabla",
+    "subtitle": "Añadir de forma temporal (lista de seguimiento para guardar)",
+    "searchPlaceholder": "Buscar activos...",
+    "filterAll": "Todos los tipos",
+    "currency": "Divisas",
+    "gold": "Oro",
+    "crypto": "Cripto",
+    "metal": "Metal",
+    "fund": "Fondo",
+    "stock": "Acción",
+    "sectionMixed": "Divisas / cripto / oro / metales",
+    "sectionStocks": "Acciones",
+    "sectionFunds": "Fondos de inversión",
+    "addHover": "Añadir →",
+    "addedCount": "{{count}} activo(s) en la tabla",
+    "close": "Cerrar"
+  },
+  "cards": {
+    "removeFromList": "Quitar de la lista",
+    "removeFund": "Quitar de la lista",
+    "fundDetail": "Detalle del fondo",
+    "removeCard": "Quitar de la lista",
+    "high": "Máx.:",
+    "low": "Mín.:",
+    "change": "Cambio:",
+    "buy": "Compra:",
+    "sell": "Venta:",
+    "lastPrice": "Último precio:",
+    "volume": "Volumen:",
+    "detail": "Detalle"
+  }
+}

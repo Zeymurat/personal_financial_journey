@@ -1,0 +1,20 @@
+{
+  "brand": {
+    "title": "Financial Journey",
+    "subtitle": "Personal finance management"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "investments": "Investments",
+    "track": "Track & compare",
+    "reports": "Reports",
+    "converter": "Currency converter",
+    "calculator": "Calculator",
+    "notifications": "Notifications",
+    "agenda": "Agenda",
+    "settings": "Settings"
+  },
+  "logout": "Log out",
+  "userFallback": "User"
+}

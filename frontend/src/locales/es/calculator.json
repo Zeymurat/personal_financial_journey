@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "title": "Calculadora de porcentajes",
+    "subtitle": "Varios cálculos de porcentaje"
+  },
+  "common": {
+    "number": "Número",
+    "percentage": "Porcentaje",
+    "result": "Resultado",
+    "resultPlaceholder": "El resultado aparece aquí",
+    "firstNumber": "Primer número",
+    "secondNumber": "Segundo número",
+    "initialValue": "Valor inicial",
+    "finalValue": "Valor final",
+    "value": "Valor"
+  },
+  "s1": {
+    "title": "Porcentaje de un número",
+    "ofNumber": "de",
+    "percentLabel": "Porcentaje"
+  },
+  "s2": {
+    "title": "¿Qué porcentaje es A de B?",
+    "firstSuffix": "es",
+    "secondSuffix": "de",
+    "resultPercent": "Resultado (%)"
+  },
+  "s3": {
+    "title": "Variación porcentual",
+    "suffix1": "de",
+    "suffix2": "a",
+    "resultLabel": "Resultado (% de cambio)"
+  },
+  "s4": {
+    "title": "Aumentar o disminuir en un porcentaje",
+    "afterNumber": "→",
+    "increase": "aumentar",
+    "decrease": "disminuir"
+  },
+  "s5": {
+    "title": "Hallar el número donde A % = B",
+    "percentSuffix": "",
+    "valueHint": "igual a este valor"
+  }
+}
