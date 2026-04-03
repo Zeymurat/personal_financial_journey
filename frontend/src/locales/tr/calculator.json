@@ -41,5 +41,13 @@
     "title": "Yüzde A'sı B olan sayıyı bulmak",
     "percentSuffix": "sı",
     "valueHint": "sayısına eşit olan sayı"
+  },
+  "s6": {
+    "title": "Kredi kartı asgari ödeme (Türkiye)",
+    "creditLimit": "Kart limiti (TL)",
+    "statementBalance": "Dönem borcu / ekstre tutarı (TL)",
+    "appliedRate": "Uygulanan asgari ödeme oranı",
+    "minPayment": "Asgari ödeme tutarı (TL)",
+    "disclaimer": "Hesap, kart limitine göre BDDK düzenlemesindeki oranları kullanır: limit 50.000 TL ve altıysa dönem borcunun %20’si, üzeriyse %40’ı. Banka yuvarlaması ve güncel mevzuat farklılık gösterebilir; resmi teyit için bankanızın ekstresi ve BDDK duyurularına bakın."
   }
 }

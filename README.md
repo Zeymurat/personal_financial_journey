@@ -407,18 +407,6 @@ python manage.py runserver
 
 ---
 
-## Yayın Öncesi Kontrol Listesi
-
-- [ ] `.env` ve tüm gizli anahtarlar repoya dahil değil
-- [ ] Hardcoded API key yok
-- [ ] Firestore Rules production için doğrulandı
-- [ ] `npm run build` başarılı
-- [ ] Backend `python manage.py runserver` ile hatasız açılıyor
-- [ ] Frontend + backend entegrasyon smoke test tamam
-- [ ] README adımları temiz bir makinede doğrulandı
-
----
-
 ## Sorun Giderme
 
 ### 1) `Firebase Admin SDK başlatılamadı`

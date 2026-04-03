@@ -41,5 +41,13 @@
     "title": "Find the number where A% equals B",
     "percentSuffix": "",
     "valueHint": "equals this value"
+  },
+  "s6": {
+    "title": "Credit card minimum payment (Turkey)",
+    "creditLimit": "Card limit (TRY)",
+    "statementBalance": "Statement balance (TRY)",
+    "appliedRate": "Minimum payment rate applied",
+    "minPayment": "Minimum payment (TRY)",
+    "disclaimer": "Uses BDDK-style rates by card limit: if the limit is up to 50,000 TRY, 20% of the statement balance; above that, 40%. Banks may round differently; rules can change—check your statement and official BDDK notices."
   }
 }

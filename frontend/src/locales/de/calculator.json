@@ -41,5 +41,13 @@
     "title": "Zahl finden, bei der A % gleich B ist",
     "percentSuffix": "",
     "valueHint": "entspricht diesem Wert"
+  },
+  "s6": {
+    "title": "Mindestzahlung Kreditkarte (Türkei)",
+    "creditLimit": "Kartenlimit (TRY)",
+    "statementBalance": "Ausgleich / Kontoauszug (TRY)",
+    "appliedRate": "Angewendeter Mindestzahlungssatz",
+    "minPayment": "Mindestbetrag (TRY)",
+    "disclaimer": "Orientiert sich an türkischen BDDK-Regeln: Limit bis 50.000 TRY → 20 % des Umsatzes; darüber → 40 %. Banken runden abweichend; Regeln können sich ändern—Auszug und amtliche Hinweise beachten."
   }
 }

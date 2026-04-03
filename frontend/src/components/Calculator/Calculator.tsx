@@ -7,6 +7,11 @@ import CalculatorSection2 from './cards/CalculatorSection2';
 import CalculatorSection3 from './cards/CalculatorSection3';
 import CalculatorSection4 from './cards/CalculatorSection4';
 import CalculatorSection5 from './cards/CalculatorSection5';
+import CalculatorSection6 from './cards/CalculatorSection6';
+import { parseTrIntegerString } from '../../utils/trNumberInput';
+
+/** BDDK: limit ≤ this → %20 asgari; üzeri → %40 (Türkiye kredi kartı, yaklaşık 2024 sonrası tablo). */
+const CC_MIN_PAYMENT_LIMIT_THRESHOLD = 50_000;
 
 const Calculator: React.FC = () => {
   const { t } = useTranslation('calculator');
@@ -46,6 +51,14 @@ const Calculator: React.FC = () => {
     percentage: '',
     value: '',
     result: ''
+  });
+
+  // Section 6: Kredi kartı asgari ödeme (TR / BDDK)
+  const [section6, setSection6] = useState({
+    creditLimit: '',
+    statementBalance: '',
+    minPayment: '',
+    appliedRatePercent: ''
   });
 
   // Auto-calculate on input change
@@ -114,6 +127,24 @@ const Calculator: React.FC = () => {
     }
   }, [section5.percentage, section5.value]);
 
+  React.useEffect(() => {
+    const limit = parseTrIntegerString(section6.creditLimit);
+    const balance = parseTrIntegerString(section6.statementBalance);
+
+    if (isNaN(limit) || isNaN(balance) || limit <= 0 || balance < 0) {
+      setSection6((prev) => ({ ...prev, minPayment: '', appliedRatePercent: '' }));
+      return;
+    }
+
+    const ratePercent = limit <= CC_MIN_PAYMENT_LIMIT_THRESHOLD ? 20 : 40;
+    const min = (balance * ratePercent) / 100;
+    setSection6((prev) => ({
+      ...prev,
+      minPayment: min.toFixed(2),
+      appliedRatePercent: String(ratePercent)
+    }));
+  }, [section6.creditLimit, section6.statementBalance]);
+
   const onSection1NumberChange = (value: string) => {
     setSection1((prev) => ({ ...prev, number: value, result: '' }));
   };
@@ -156,6 +187,14 @@ const Calculator: React.FC = () => {
 
   const onSection5ValueChange = (value: string) => {
     setSection5((prev) => ({ ...prev, value: value, result: '' }));
+  };
+
+  const onSection6CreditLimitChange = (value: string) => {
+    setSection6((prev) => ({ ...prev, creditLimit: value, minPayment: '', appliedRatePercent: '' }));
+  };
+
+  const onSection6StatementBalanceChange = (value: string) => {
+    setSection6((prev) => ({ ...prev, statementBalance: value, minPayment: '', appliedRatePercent: '' }));
   };
 
   return (
@@ -214,6 +253,15 @@ const Calculator: React.FC = () => {
           result={section5.result}
           onPercentageChange={onSection5PercentageChange}
           onValueChange={onSection5ValueChange}
+        />
+
+        <CalculatorSection6
+          creditLimit={section6.creditLimit}
+          statementBalance={section6.statementBalance}
+          minPayment={section6.minPayment}
+          appliedRatePercent={section6.appliedRatePercent}
+          onCreditLimitChange={onSection6CreditLimitChange}
+          onStatementBalanceChange={onSection6StatementBalanceChange}
         />
       </div>
     </div>

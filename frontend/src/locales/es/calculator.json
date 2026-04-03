@@ -41,5 +41,13 @@
     "title": "Hallar el número donde A % = B",
     "percentSuffix": "",
     "valueHint": "igual a este valor"
+  },
+  "s6": {
+    "title": "Pago mínimo tarjeta (Turquía)",
+    "creditLimit": "Límite de tarjeta (TRY)",
+    "statementBalance": "Saldo del extracto (TRY)",
+    "appliedRate": "Tipo de pago mínimo aplicado",
+    "minPayment": "Pago mínimo (TRY)",
+    "disclaimer": "Usa las tasas tipo BDDK según el límite: hasta 50.000 TRY, 20 % del saldo; por encima, 40 %. El banco puede redondear; las normas cambian—consulte su extracto y los avisos oficiales."
   }
 }

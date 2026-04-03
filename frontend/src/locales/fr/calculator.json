@@ -41,5 +41,13 @@
     "title": "Trouver le nombre tel que A % = B",
     "percentSuffix": "",
     "valueHint": "égale cette valeur"
+  },
+  "s6": {
+    "title": "Paiement minimum carte (Turquie)",
+    "creditLimit": "Plafond de la carte (TRY)",
+    "statementBalance": "Solde relevé (TRY)",
+    "appliedRate": "Taux de paiement minimum appliqué",
+    "minPayment": "Paiement minimum (TRY)",
+    "disclaimer": "S’appuie sur les règles type BDDK : plafond jusqu’à 50 000 TRY → 20 % du solde ; au-delà → 40 %. L’arrondi bancaire peut varier ; les règles évoluent—voir relevé et communications officielles."
   }
 }
