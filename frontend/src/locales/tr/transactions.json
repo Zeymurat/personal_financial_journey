@@ -90,6 +90,7 @@
   "form": {
     "transactionType": "İşlem Türü",
     "amount": "Miktar",
+    "amountInvalid": "Geçerli bir tutar girin (örn. 1.234,56).",
     "currency": "Döviz",
     "category": "Kategori",
     "selectCategory": "Kategori Seçin",

@@ -4,6 +4,10 @@ import toast from 'react-hot-toast';
 import { ModalPortal } from '../../common/ModalPortal';
 import { BarChart3, TrendingUp, TrendingDown, Coins, Gem, DollarSign, X, Search, AlertCircle, Loader2 } from 'lucide-react';
 import { fundsAPI } from '../../../services/apiService';
+import { formatTrMoneyInput, formatTrMoneyFromNumber, parseTrMoneyString } from '../../../utils/trNumberInput';
+
+/** Döviz / altın / kripto / fon fiyat ve miktar girişi (kuruş + uzun ondalık) */
+const INV_AMOUNT_FRAC = 8;
 
 interface CurrencyRate {
   code: string;
@@ -181,7 +185,7 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
         // Hisseler için güncel fiyatı al
         const stock = allStocks.find(s => s.code === code);
         if (stock) {
-          price = stock.last_price.toString();
+          price = formatTrMoneyFromNumber(stock.last_price, INV_AMOUNT_FRAC);
         }
         break;
       
@@ -192,9 +196,10 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
         const currency = allCurrencies.find(c => c.code === code);
         if (currency) {
           // Alış işlemi için buy, satış için sell fiyatını kullan
-          price = formData.transactionType === 'buy' 
-            ? currency.buy.toString() 
-            : currency.sell.toString();
+          price = formatTrMoneyFromNumber(
+            formData.transactionType === 'buy' ? currency.buy : currency.sell,
+            INV_AMOUNT_FRAC
+          );
         }
         break;
       
@@ -202,9 +207,10 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
         // Kripto paralar için güncel fiyatı al
         const crypto = allCurrencies.find(c => c.code === code && c.type === 'crypto');
         if (crypto) {
-          price = formData.transactionType === 'buy' 
-            ? crypto.buy.toString() 
-            : crypto.sell.toString();
+          price = formatTrMoneyFromNumber(
+            formData.transactionType === 'buy' ? crypto.buy : crypto.sell,
+            INV_AMOUNT_FRAC
+          );
         }
         break;
       
@@ -239,7 +245,7 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
           // Fiyat bulundu, otomatik doldur
           setFormData(prev => ({
             ...prev,
-            price: response.price.toString()
+            price: formatTrMoneyFromNumber(response.price, INV_AMOUNT_FRAC)
           }));
           setFundPriceInfo({
             needsApiRequest: false,
@@ -313,7 +319,7 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
         if (price !== null) {
           setFormData(prev => ({
             ...prev,
-            price: price!.toString()
+            price: formatTrMoneyFromNumber(price!, INV_AMOUNT_FRAC)
           }));
           setFundPriceInfo({
             needsApiRequest: false,
@@ -367,9 +373,10 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
     if (formData.symbol && (formData.type === 'currency' || formData.type === 'gold' || formData.type === 'preciousMetal' || formData.type === 'crypto')) {
       const currency = allCurrencies.find(c => c.code === formData.symbol);
       if (currency) {
-        const newPrice = formData.transactionType === 'buy' 
-          ? currency.buy.toString() 
-          : currency.sell.toString();
+        const newPrice = formatTrMoneyFromNumber(
+          formData.transactionType === 'buy' ? currency.buy : currency.sell,
+          INV_AMOUNT_FRAC
+        );
         setFormData(prev => ({ ...prev, price: newPrice }));
       }
     }
@@ -401,12 +408,13 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
       return;
     }
     
-    if (!formData.quantity || parseFloat(formData.quantity) <= 0) {
+    const quantity = parseTrMoneyString(formData.quantity);
+    const price = parseTrMoneyString(formData.price);
+    if (Number.isNaN(quantity) || quantity <= 0) {
       toast.error(t('addModal.validQuantity'));
       return;
     }
-    
-    if (!formData.price || parseFloat(formData.price) <= 0) {
+    if (Number.isNaN(price) || price <= 0) {
       toast.error(t('addModal.validPrice'));
       return;
     }
@@ -707,10 +715,16 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
                 {t('form.quantity')}
               </label>
               <input
-                type="number"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
                 value={formData.quantity}
-                onChange={(e) => setFormData({...formData, quantity: e.target.value})}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    quantity: formatTrMoneyInput(e.target.value, INV_AMOUNT_FRAC)
+                  })
+                }
                 className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
                 placeholder="10"
                 required
@@ -723,12 +737,18 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
               </label>
               <div className="relative">
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
+                  autoComplete="off"
                   value={formData.price}
-                  onChange={(e) => setFormData({...formData, price: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      price: formatTrMoneyInput(e.target.value, INV_AMOUNT_FRAC)
+                    })
+                  }
                   className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
-                  placeholder="150.00"
+                  placeholder="0,00"
                   required
                 />
                 {fundPriceLoading && (

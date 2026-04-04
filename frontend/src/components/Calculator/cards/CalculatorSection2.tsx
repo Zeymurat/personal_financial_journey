@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowUpDown } from 'lucide-react';
+import { formatTrMoneyInput, formatTrFixedTwoFromEnDecimal } from '../../../utils/trNumberInput';
 
 interface CalculatorSection2Props {
   number1: string;
@@ -34,9 +35,11 @@ const CalculatorSection2: React.FC<CalculatorSection2Props> = ({
               {t('common.firstNumber')}
             </label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
               value={number1}
-              onChange={(e) => onNumber1Change(e.target.value)}
+              onChange={(e) => onNumber1Change(formatTrMoneyInput(e.target.value))}
               placeholder="0"
               className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white transition-all"
             />
@@ -51,9 +54,11 @@ const CalculatorSection2: React.FC<CalculatorSection2Props> = ({
               İkinci Sayı
             </label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
               value={number2}
-              onChange={(e) => onNumber2Change(e.target.value)}
+              onChange={(e) => onNumber2Change(formatTrMoneyInput(e.target.value))}
               placeholder="0"
               className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white transition-all"
             />
@@ -69,7 +74,7 @@ const CalculatorSection2: React.FC<CalculatorSection2Props> = ({
           <div className="relative">
             <input
               type="text"
-              value={result}
+              value={result ? formatTrFixedTwoFromEnDecimal(result) : ''}
               readOnly
               placeholder={t('common.resultPlaceholder')}
               className="w-full p-3 border-2 border-purple-200 dark:border-purple-800 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 dark:text-white font-bold text-lg pr-10"

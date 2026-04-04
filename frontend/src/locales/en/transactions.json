@@ -90,6 +90,7 @@
   "form": {
     "transactionType": "Type",
     "amount": "Amount",
+    "amountInvalid": "Enter a valid positive amount.",
     "currency": "Currency",
     "category": "Category",
     "selectCategory": "Select category",

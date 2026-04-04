@@ -2,21 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowUpRight, ArrowDownRight, Edit, Trash2 } from 'lucide-react';
 import { Transaction } from '../../../types';
-
-const getCurrencySymbol = (currency: string): string => {
-  const symbols: Record<string, string> = {
-    'TRY': '₺',
-    'USD': '$',
-    'EUR': '€',
-    'GBP': '£',
-    'JPY': '¥',
-    'CHF': 'CHF ',
-    'AUD': 'A$',
-    'CAD': 'C$',
-    'CNY': '¥'
-  };
-  return symbols[currency] || currency;
-};
+import { getCurrencySymbol } from '../utils';
 
 interface TransactionDetailModalProps {
   transaction: Transaction | null;

@@ -5,6 +5,9 @@ import { ModalPortal } from '../../common/ModalPortal';
 import { BarChart3, TrendingUp, Coins, Gem, DollarSign, X, Search, AlertCircle, Loader2, Save } from 'lucide-react';
 import { Investment } from '../../../types';
 import { fundsAPI } from '../../../services/apiService';
+import { formatTrMoneyInput, formatTrMoneyFromNumber, parseTrMoneyString } from '../../../utils/trNumberInput';
+
+const INV_AMOUNT_FRAC = 8;
 
 interface CurrencyRate {
   code: string;
@@ -130,8 +133,8 @@ const EditInvestmentModal: React.FC<EditInvestmentModalProps> = ({
         symbol: investment.symbol || '',
         name: investment.name || '',
         type: modalType,
-        quantity: investment.quantity?.toString() || '0',
-        averagePrice: investment.averagePrice?.toString() || '0'
+        quantity: formatTrMoneyFromNumber(Number(investment.quantity) || 0, INV_AMOUNT_FRAC),
+        averagePrice: formatTrMoneyFromNumber(Number(investment.averagePrice) || 0, INV_AMOUNT_FRAC)
       });
       
       // Search query'yi güncelle
@@ -205,7 +208,7 @@ const EditInvestmentModal: React.FC<EditInvestmentModalProps> = ({
       case 'stock':
         const stock = allStocks.find(s => s.code === code);
         if (stock) {
-          price = stock.last_price.toString();
+          price = formatTrMoneyFromNumber(stock.last_price, INV_AMOUNT_FRAC);
         }
         break;
       
@@ -214,14 +217,14 @@ const EditInvestmentModal: React.FC<EditInvestmentModalProps> = ({
       case 'preciousMetal':
         const currency = allCurrencies.find(c => c.code === code);
         if (currency) {
-          price = currency.buy.toString(); // Edit için buy fiyatını göster
+          price = formatTrMoneyFromNumber(currency.buy, INV_AMOUNT_FRAC);
         }
         break;
       
       case 'crypto':
         const crypto = allCurrencies.find(c => c.code === code && c.type === 'crypto');
         if (crypto) {
-          price = crypto.buy.toString();
+          price = formatTrMoneyFromNumber(crypto.buy, INV_AMOUNT_FRAC);
         }
         break;
       
@@ -257,7 +260,7 @@ const EditInvestmentModal: React.FC<EditInvestmentModalProps> = ({
           // Fiyat bulundu, otomatik doldur
           setFormData(prev => ({
             ...prev,
-            averagePrice: response.price.toString()
+            averagePrice: formatTrMoneyFromNumber(response.price, INV_AMOUNT_FRAC)
           }));
           setFundPriceInfo({
             needsApiRequest: false,
@@ -317,7 +320,7 @@ const EditInvestmentModal: React.FC<EditInvestmentModalProps> = ({
         if (price !== null) {
           setFormData(prev => ({
             ...prev,
-            averagePrice: price!.toString()
+            averagePrice: formatTrMoneyFromNumber(price!, INV_AMOUNT_FRAC)
           }));
           setFundPriceInfo({
             needsApiRequest: false,
@@ -374,15 +377,15 @@ const EditInvestmentModal: React.FC<EditInvestmentModalProps> = ({
       return;
     }
 
-    const quantity = parseFloat(formData.quantity);
-    const averagePrice = parseFloat(formData.averagePrice);
+    const quantity = parseTrMoneyString(formData.quantity);
+    const averagePrice = parseTrMoneyString(formData.averagePrice);
 
-    if (isNaN(quantity) || quantity < 0) {
+    if (Number.isNaN(quantity) || quantity < 0) {
       toast.error(t('editInvestmentModal.validQuantity'));
       return;
     }
 
-    if (isNaN(averagePrice) || averagePrice < 0) {
+    if (Number.isNaN(averagePrice) || averagePrice < 0) {
       toast.error(t('editInvestmentModal.validUnitPrice'));
       return;
     }
@@ -603,11 +606,16 @@ const EditInvestmentModal: React.FC<EditInvestmentModalProps> = ({
                 {t('editInvestmentModal.quantityLabel')}
               </label>
               <input
-                type="number"
-                step="any"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
                 value={formData.quantity}
-                onChange={(e) => setFormData({...formData, quantity: e.target.value})}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    quantity: formatTrMoneyInput(e.target.value, INV_AMOUNT_FRAC)
+                  })
+                }
                 className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
                 placeholder="10"
                 required
@@ -620,13 +628,18 @@ const EditInvestmentModal: React.FC<EditInvestmentModalProps> = ({
               </label>
               <div className="relative">
                 <input
-                  type="number"
-                  step="any"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
+                  autoComplete="off"
                   value={formData.averagePrice}
-                  onChange={(e) => setFormData({...formData, averagePrice: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      averagePrice: formatTrMoneyInput(e.target.value, INV_AMOUNT_FRAC)
+                    })
+                  }
                   className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
-                  placeholder="150.00"
+                  placeholder="0,00"
                   required
                 />
                 {fundPriceLoading && (

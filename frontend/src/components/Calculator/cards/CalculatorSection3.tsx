@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TrendingUp } from 'lucide-react';
+import { formatTrMoneyInput, formatTrFixedTwoFromEnDecimal } from '../../../utils/trNumberInput';
 
 interface CalculatorSection3Props {
   initial: string;
@@ -34,9 +35,11 @@ const CalculatorSection3: React.FC<CalculatorSection3Props> = ({
               {t('common.initialValue')}
             </label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
               value={initial}
-              onChange={(e) => onInitialChange(e.target.value)}
+              onChange={(e) => onInitialChange(formatTrMoneyInput(e.target.value))}
               placeholder="0"
               className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white transition-all"
             />
@@ -51,9 +54,11 @@ const CalculatorSection3: React.FC<CalculatorSection3Props> = ({
               {t('common.finalValue')}
             </label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
               value={final}
-              onChange={(e) => onFinalChange(e.target.value)}
+              onChange={(e) => onFinalChange(formatTrMoneyInput(e.target.value))}
               placeholder="0"
               className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white transition-all"
             />
@@ -69,7 +74,7 @@ const CalculatorSection3: React.FC<CalculatorSection3Props> = ({
           <div className="relative">
             <input
               type="text"
-              value={result}
+              value={result ? formatTrFixedTwoFromEnDecimal(result) : ''}
               readOnly
               placeholder={t('common.resultPlaceholder')}
               className={`w-full p-3 border-2 rounded-xl font-bold text-lg pr-10 transition-all ${

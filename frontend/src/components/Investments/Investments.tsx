@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTokenValidation } from '../../hooks/useTokenValidation';
 import { useFinance } from '../../contexts/FinanceContext';
 import { HisseSelectionModal, FundsSelectionModal, CurrencySelectionModal } from '../shared/modals';
+import { parseTrMoneyString } from '../../utils/trNumberInput';
 import AddInvestmentModal from './modals/AddInvestmentModal';
 import InvestmentDetailModal from './modals/InvestmentDetailModal';
 import FundDetailModal from './modals/FundDetailModal';
@@ -954,8 +955,16 @@ const Investments: React.FC = () => {
 
             setIsAddingInvestment(true);
             try {
-              const quantity = parseFloat(formData.quantity);
-              const price = parseFloat(formData.price);
+              const quantity = parseTrMoneyString(formData.quantity);
+              const price = parseTrMoneyString(formData.price);
+              if (Number.isNaN(quantity) || quantity <= 0) {
+                toast.error(t('addModal.validQuantity'));
+                return;
+              }
+              if (Number.isNaN(price) || price <= 0) {
+                toast.error(t('addModal.validPrice'));
+                return;
+              }
               const totalAmount = quantity * price;
 
               // Type mapping: modal type'larını backend type'larına çevir

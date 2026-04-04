@@ -106,7 +106,7 @@ const SortableQuickConvertCard: React.FC<SortableQuickConvertCardProps> = ({
             </p>
           </div>
           <p className="text-base font-semibold text-gray-700 dark:text-gray-300">
-            {convert.amount.toLocaleString(undefined, {
+            {convert.amount.toLocaleString('tr-TR', {
               minimumFractionDigits: fromDecimals,
               maximumFractionDigits: fromDecimals
             })}
@@ -131,7 +131,7 @@ const SortableQuickConvertCard: React.FC<SortableQuickConvertCardProps> = ({
             </p>
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-            {result.toLocaleString(undefined, {
+            {result.toLocaleString('tr-TR', {
               minimumFractionDigits: toDecimals,
               maximumFractionDigits: toDecimals
             })}

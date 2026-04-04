@@ -8,7 +8,11 @@ import CalculatorSection3 from './cards/CalculatorSection3';
 import CalculatorSection4 from './cards/CalculatorSection4';
 import CalculatorSection5 from './cards/CalculatorSection5';
 import CalculatorSection6 from './cards/CalculatorSection6';
-import { parseTrIntegerString } from '../../utils/trNumberInput';
+import {
+  parseTrIntegerString,
+  parseTrMoneyString,
+  parseTrPercentageString
+} from '../../utils/trNumberInput';
 
 /** BDDK: limit ≤ this → %20 asgari; üzeri → %40 (Türkiye kredi kartı, yaklaşık 2024 sonrası tablo). */
 const CC_MIN_PAYMENT_LIMIT_THRESHOLD = 50_000;
@@ -63,8 +67,8 @@ const Calculator: React.FC = () => {
 
   // Auto-calculate on input change
   React.useEffect(() => {
-    const num = parseFloat(section1.number);
-    const percent = parseFloat(section1.percentage);
+    const num = parseTrMoneyString(section1.number);
+    const percent = parseTrPercentageString(section1.percentage);
     
     if (!isNaN(num) && !isNaN(percent)) {
       const result = (num * percent) / 100;
@@ -75,8 +79,8 @@ const Calculator: React.FC = () => {
   }, [section1.number, section1.percentage]);
 
   React.useEffect(() => {
-    const num1 = parseFloat(section2.number1);
-    const num2 = parseFloat(section2.number2);
+    const num1 = parseTrMoneyString(section2.number1);
+    const num2 = parseTrMoneyString(section2.number2);
     
     if (!isNaN(num1) && !isNaN(num2) && num2 !== 0) {
       const result = (num1 / num2) * 100;
@@ -87,8 +91,8 @@ const Calculator: React.FC = () => {
   }, [section2.number1, section2.number2]);
 
   React.useEffect(() => {
-    const initial = parseFloat(section3.initial);
-    const final = parseFloat(section3.final);
+    const initial = parseTrMoneyString(section3.initial);
+    const final = parseTrMoneyString(section3.final);
     
     if (!isNaN(initial) && !isNaN(final) && initial !== 0) {
       const result = ((final - initial) / initial) * 100;
@@ -99,8 +103,8 @@ const Calculator: React.FC = () => {
   }, [section3.initial, section3.final]);
 
   React.useEffect(() => {
-    const num = parseFloat(section4.number);
-    const percent = parseFloat(section4.percentage);
+    const num = parseTrMoneyString(section4.number);
+    const percent = parseTrPercentageString(section4.percentage);
     
     if (!isNaN(num) && !isNaN(percent)) {
       let result: number;
@@ -116,8 +120,8 @@ const Calculator: React.FC = () => {
   }, [section4.number, section4.percentage, section4.operation]);
 
   React.useEffect(() => {
-    const percent = parseFloat(section5.percentage);
-    const value = parseFloat(section5.value);
+    const percent = parseTrPercentageString(section5.percentage);
+    const value = parseTrMoneyString(section5.value);
     
     if (!isNaN(percent) && !isNaN(value) && percent !== 0) {
       const result = (value / percent) * 100;

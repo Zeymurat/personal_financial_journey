@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Minus } from 'lucide-react';
+import { formatTrMoneyInput, formatTrPercentageInput, formatTrFixedTwoFromEnDecimal } from '../../../utils/trNumberInput';
 
 type Section4Operation = 'increase' | 'decrease';
 
@@ -47,9 +48,11 @@ const CalculatorSection4: React.FC<CalculatorSection4Props> = ({
               {t('common.number')}
             </label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
               value={number}
-              onChange={(e) => onNumberChange(e.target.value)}
+              onChange={(e) => onNumberChange(formatTrMoneyInput(e.target.value))}
               placeholder="0"
               className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white transition-all"
             />
@@ -66,9 +69,11 @@ const CalculatorSection4: React.FC<CalculatorSection4Props> = ({
             </label>
             <div className="relative">
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
                 value={percentage}
-                onChange={(e) => onPercentageChange(e.target.value)}
+                onChange={(e) => onPercentageChange(formatTrPercentageInput(e.target.value))}
                 placeholder="0"
                 className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white transition-all"
               />
@@ -95,7 +100,7 @@ const CalculatorSection4: React.FC<CalculatorSection4Props> = ({
           </label>
           <input
             type="text"
-            value={result}
+            value={result ? formatTrFixedTwoFromEnDecimal(result) : ''}
             readOnly
             placeholder={t('common.resultPlaceholder')}
             className="w-full p-3 border-2 border-orange-200 dark:border-orange-800 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 dark:text-white font-bold text-lg"

@@ -4,6 +4,9 @@ import toast from 'react-hot-toast';
 import { ModalPortal } from '../../common/ModalPortal';
 import { X, Save, TrendingUp, TrendingDown } from 'lucide-react';
 import { InvestmentTransaction } from '../../../types';
+import { formatTrMoneyInput, formatTrMoneyFromNumber, parseTrMoneyString } from '../../../utils/trNumberInput';
+
+const INV_AMOUNT_FRAC = 8;
 
 interface EditInvestmentTransactionModalProps {
   transaction: InvestmentTransaction | null;
@@ -34,10 +37,10 @@ const EditInvestmentTransactionModal: React.FC<EditInvestmentTransactionModalPro
     if (transaction && isOpen) {
       setFormData({
         type: transaction.type || 'buy',
-        quantity: transaction.quantity?.toString() || '0',
-        price: transaction.price?.toString() || '0',
+        quantity: formatTrMoneyFromNumber(Number(transaction.quantity) || 0, INV_AMOUNT_FRAC),
+        price: formatTrMoneyFromNumber(Number(transaction.price) || 0, INV_AMOUNT_FRAC),
         date: transaction.date || new Date().toISOString().split('T')[0],
-        fees: transaction.fees?.toString() || '0'
+        fees: formatTrMoneyFromNumber(Number(transaction.fees ?? 0) || 0, INV_AMOUNT_FRAC)
       });
     }
   }, [transaction, isOpen]);
@@ -45,17 +48,18 @@ const EditInvestmentTransactionModal: React.FC<EditInvestmentTransactionModalPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const quantity = parseFloat(formData.quantity);
-    const price = parseFloat(formData.price);
-    const fees = parseFloat(formData.fees) || 0;
+    const quantity = parseTrMoneyString(formData.quantity);
+    const price = parseTrMoneyString(formData.price);
+    const feesParsed = parseTrMoneyString(formData.fees);
+    const fees = Number.isNaN(feesParsed) ? 0 : Math.max(0, feesParsed);
     const totalAmount = quantity * price;
 
-    if (isNaN(quantity) || quantity <= 0) {
+    if (Number.isNaN(quantity) || quantity <= 0) {
       toast.error(t('addModal.validQuantity'));
       return;
     }
 
-    if (isNaN(price) || price <= 0) {
+    if (Number.isNaN(price) || price <= 0) {
       toast.error(t('addModal.validPrice'));
       return;
     }
@@ -159,11 +163,16 @@ const EditInvestmentTransactionModal: React.FC<EditInvestmentTransactionModalPro
                 {t('form.quantity')}
               </label>
               <input
-                type="number"
-                step="any"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
                 value={formData.quantity}
-                onChange={(e) => setFormData({...formData, quantity: e.target.value})}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    quantity: formatTrMoneyInput(e.target.value, INV_AMOUNT_FRAC)
+                  })
+                }
                 className="w-full px-4 py-3 border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
                 placeholder="10"
                 required
@@ -175,13 +184,18 @@ const EditInvestmentTransactionModal: React.FC<EditInvestmentTransactionModalPro
                 {t('form.unitPrice')}
               </label>
               <input
-                type="number"
-                step="any"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
                 value={formData.price}
-                onChange={(e) => setFormData({...formData, price: e.target.value})}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    price: formatTrMoneyInput(e.target.value, INV_AMOUNT_FRAC)
+                  })
+                }
                 className="w-full px-4 py-3 border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
-                placeholder="150.00"
+                placeholder="0,00"
                 required
               />
             </div>
@@ -206,11 +220,16 @@ const EditInvestmentTransactionModal: React.FC<EditInvestmentTransactionModalPro
                 {t('form.fees')}
               </label>
               <input
-                type="number"
-                step="any"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
                 value={formData.fees}
-                onChange={(e) => setFormData({...formData, fees: e.target.value})}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    fees: formatTrMoneyInput(e.target.value, INV_AMOUNT_FRAC)
+                  })
+                }
                 className="w-full px-4 py-3 border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
                 placeholder="0"
               />

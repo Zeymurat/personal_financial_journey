@@ -29,6 +29,17 @@ import {
 } from '@dnd-kit/sortable';
 import SortableQuickConvertCard from './cards/SortableQuickConvertCard';
 import type { CurrencyRate } from './types';
+import { formatTrMoneyInput, formatTrMoneyFromNumber, parseTrMoneyString } from '../../utils/trNumberInput';
+
+const CONV_AMOUNT_FRAC = 8;
+
+const displayDecimalsForCode = (code: string, allCurrencies: CurrencyRate[]): { min: number; max: number } => {
+  const c = allCurrencies.find((x) => x.code === code);
+  if (c?.type === 'crypto') return { min: 2, max: 6 };
+  if (c?.type === 'gold' || c?.type === 'metal') return { min: 2, max: 2 };
+  if (code === 'TRY') return { min: 2, max: 2 };
+  return { min: 2, max: 4 };
+};
 
 const CurrencyConverter: React.FC = () => {
   const { t } = useTranslation('converter');
@@ -36,7 +47,7 @@ const CurrencyConverter: React.FC = () => {
   const { currentUser } = useAuth();
 
   useTokenValidation();
-  const [amount, setAmount] = useState<string>('1000');
+  const [amount, setAmount] = useState<string>(() => formatTrMoneyFromNumber(1000, CONV_AMOUNT_FRAC));
   const [fromCurrency, setFromCurrency] = useState<string>('TRY');
   const [toCurrency, setToCurrency] = useState<string>('USD');
   const [convertedAmount, setConvertedAmount] = useState<number>(0);
@@ -319,16 +330,22 @@ const CurrencyConverter: React.FC = () => {
   };
 
   const handleConvert = () => {
+    const numAmount = parseTrMoneyString(amount);
+    if (Number.isNaN(numAmount) || numAmount <= 0) {
+      setConvertedAmount(0);
+      return;
+    }
+
     const fromRate = allCurrencies.find((c) => c.code === fromCurrency)?.rate || 1;
     const toRate = allCurrencies.find((c) => c.code === toCurrency)?.rate || 1;
 
     let result: number;
     if (fromCurrency === 'TRY') {
-      result = parseFloat(amount) / toRate;
+      result = numAmount / toRate;
     } else if (toCurrency === 'TRY') {
-      result = parseFloat(amount) * fromRate;
+      result = numAmount * fromRate;
     } else {
-      const inTRY = parseFloat(amount) * fromRate;
+      const inTRY = numAmount * fromRate;
       result = inTRY / toRate;
     }
 
@@ -342,7 +359,7 @@ const CurrencyConverter: React.FC = () => {
   };
 
   React.useEffect(() => {
-    if (amount && allCurrencies.length > 1) {
+    if (amount.trim() !== '' && allCurrencies.length > 1) {
       handleConvert();
     }
   }, [amount, fromCurrency, toCurrency, allCurrencies]);
@@ -365,9 +382,11 @@ const CurrencyConverter: React.FC = () => {
             </label>
             <div className="space-y-3">
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => setAmount(formatTrMoneyInput(e.target.value, CONV_AMOUNT_FRAC))}
                 className="w-full p-4 text-2xl font-bold border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                 placeholder={t('form.amountPlaceholder')}
               />
@@ -400,10 +419,13 @@ const CurrencyConverter: React.FC = () => {
             </label>
             <div className="space-y-3">
               <div className="w-full p-4 text-2xl font-bold bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
-                {convertedAmount.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })}
+                {(() => {
+                  const { min, max } = displayDecimalsForCode(toCurrency, allCurrencies);
+                  return convertedAmount.toLocaleString('tr-TR', {
+                    minimumFractionDigits: min,
+                    maximumFractionDigits: max
+                  });
+                })()}
               </div>
               <select
                 value={toCurrency}

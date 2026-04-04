@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CreditCard } from 'lucide-react';
-import { formatTrIntegerInput, formatTrFixedTwoFromEnDecimal } from '../../../utils/trNumberInput';
+import { formatTrIntegerInput, formatTrFromEnOptionalKurus } from '../../../utils/trNumberInput';
 
 interface CalculatorSection6Props {
   creditLimit: string;
@@ -81,7 +81,7 @@ const CalculatorSection6: React.FC<CalculatorSection6Props> = ({
           </label>
           <input
             type="text"
-            value={minPayment ? formatTrFixedTwoFromEnDecimal(minPayment) : ''}
+            value={minPayment ? formatTrFromEnOptionalKurus(minPayment) : ''}
             readOnly
             placeholder={t('common.resultPlaceholder')}
             className="w-full p-3 border-2 border-emerald-200 dark:border-emerald-800 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 dark:text-white font-bold text-lg"

@@ -6,6 +6,8 @@ import { Transaction } from '../../../types';
 import { transactionAPI } from '../../../services/apiService';
 import { getExchangeRates } from '../../../services/currencyService';
 import { tcmbAPI } from '../../../services/apiService';
+import { TRANSACTION_CURRENCIES } from '../constants';
+import { formatTrMoneyInput, formatTrMoneyFromNumber, parseTrMoneyString } from '../../../utils/trNumberInput';
 
 interface EditTransactionModalProps {
   isOpen: boolean;
@@ -17,18 +19,6 @@ interface EditTransactionModalProps {
     expense: string[];
   };
 }
-
-const CURRENCIES = [
-  { code: 'TRY', name: 'TRY (₺)' },
-  { code: 'USD', name: 'USD ($)' },
-  { code: 'EUR', name: 'EUR (€)' },
-  { code: 'GBP', name: 'GBP (£)' },
-  { code: 'JPY', name: 'JPY (¥)' },
-  { code: 'CHF', name: 'CHF' },
-  { code: 'AUD', name: 'AUD' },
-  { code: 'CAD', name: 'CAD' },
-  { code: 'CNY', name: 'CNY' }
-];
 
 const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
   isOpen,
@@ -53,7 +43,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     if (transaction) {
       setFormData({
         type: transaction.type,
-        amount: transaction.amount.toString(),
+        amount: formatTrMoneyFromNumber(transaction.amount, 2),
         category: transaction.category,
         description: transaction.description,
         date: transaction.date,
@@ -121,7 +111,11 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     if (!transaction) return;
 
     try {
-      const amount = parseFloat(formData.amount);
+      const amount = parseTrMoneyString(formData.amount);
+      if (Number.isNaN(amount) || amount <= 0) {
+        toast.error(t('form.amountInvalid'));
+        return;
+      }
       // Güncellenen değerler için yeni kur ile TL karşılığını hesapla
       const amountInTRY = await calculateAmountInTRY(amount, formData.currency);
       
@@ -215,12 +209,15 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                   {t('form.amount')}
                 </label>
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
+                  autoComplete="off"
                   value={formData.amount}
-                  onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, amount: formatTrMoneyInput(e.target.value) })
+                  }
                   className="w-full p-4 text-xl font-bold border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
-                  placeholder="0.00"
+                  placeholder="0,00"
                   required
                 />
               </div>
@@ -234,8 +231,10 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                   className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
                   required
                 >
-                  {CURRENCIES.map(currency => (
-                    <option key={currency.code} value={currency.code}>{currency.name}</option>
+                  {TRANSACTION_CURRENCIES.map((currency) => (
+                    <option key={currency.code} value={currency.code}>
+                      {currency.name}
+                    </option>
                   ))}
                 </select>
               </div>

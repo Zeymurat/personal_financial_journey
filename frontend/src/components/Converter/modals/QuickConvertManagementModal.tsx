@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { QuickConvert, addQuickConvert, removeQuickConvert, getQuickConverts } from '../../../services/userSettingsService';
+import { formatTrMoneyInput, formatTrMoneyFromNumber, parseTrMoneyString } from '../../../utils/trNumberInput';
+
+const CONV_AMOUNT_FRAC = 8;
 
 interface CurrencyRate {
   code: string;
@@ -32,19 +35,25 @@ const QuickConvertManagementModal: React.FC<QuickConvertManagementModalProps> = 
   currentUserId
 }) => {
   const { t } = useTranslation('converter');
+  const [newAmount, setNewAmount] = useState(() => formatTrMoneyFromNumber(100, CONV_AMOUNT_FRAC));
+
+  useEffect(() => {
+    if (isOpen) {
+      setNewAmount(formatTrMoneyFromNumber(100, CONV_AMOUNT_FRAC));
+    }
+  }, [isOpen]);
 
   const handleAddConvert = async () => {
     if (!currentUserId) return;
 
     const fromSelect = document.getElementById('newConvertFrom') as HTMLSelectElement;
     const toSelect = document.getElementById('newConvertTo') as HTMLSelectElement;
-    const amountInput = document.getElementById('newConvertAmount') as HTMLInputElement;
 
     const from = fromSelect.value;
     const to = toSelect.value;
-    const amount = parseFloat(amountInput.value);
+    const amount = parseTrMoneyString(newAmount);
 
-    if (!from || !to || isNaN(amount) || amount <= 0) {
+    if (!from || !to || Number.isNaN(amount) || amount <= 0) {
       toast.error(t('toast.invalidConvert'));
       return;
     }
@@ -69,8 +78,7 @@ const QuickConvertManagementModal: React.FC<QuickConvertManagementModalProps> = 
       const updated = await getQuickConverts(currentUserId);
       onConvertsChange(updated);
 
-      // Formu sıfırla
-      amountInput.value = '100';
+      setNewAmount(formatTrMoneyFromNumber(100, CONV_AMOUNT_FRAC));
       toast.success(t('toast.addSuccess'));
     } catch (error) {
       console.error('❌ Çevirim eklenirken hata:', error);
@@ -157,11 +165,12 @@ const QuickConvertManagementModal: React.FC<QuickConvertManagementModalProps> = 
                 {t('modalQuick.amount')}
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
                 id="newConvertAmount"
-                defaultValue="100"
-                min="0.01"
-                step="0.01"
+                value={newAmount}
+                onChange={(e) => setNewAmount(formatTrMoneyInput(e.target.value, CONV_AMOUNT_FRAC))}
                 className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
               />
             </div>
@@ -188,7 +197,10 @@ const QuickConvertManagementModal: React.FC<QuickConvertManagementModalProps> = 
                 >
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {convert.amount} {convert.from} → {convert.to}
+                      {convert.amount.toLocaleString('tr-TR', {
+                        maximumFractionDigits: CONV_AMOUNT_FRAC
+                      })}{' '}
+                      {convert.from} → {convert.to}
                     </p>
                   </div>
                   <button
