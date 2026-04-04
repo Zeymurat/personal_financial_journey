@@ -6,4 +6,5 @@ firebase-admin==6.4.0
 google-cloud-firestore==2.13.1
 python-dotenv==1.0.0
 asyncio==3.4.3
-zeep==4.1.0 
+zeep==4.1.0
+gunicorn==23.0.0

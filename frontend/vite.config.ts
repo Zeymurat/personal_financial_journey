@@ -23,6 +23,7 @@ export default defineConfig(({ mode }) => {
         VITE_FIREBASE_STORAGE_BUCKET: JSON.stringify(env.VITE_FIREBASE_STORAGE_BUCKET),
         VITE_FIREBASE_MESSAGING_SENDER_ID: JSON.stringify(env.VITE_FIREBASE_MESSAGING_SENDER_ID),
         VITE_FIREBASE_APP_ID: JSON.stringify(env.VITE_FIREBASE_APP_ID),
+        VITE_API_BASE_URL: JSON.stringify(env.VITE_API_BASE_URL ?? ''),
       },
     },
   };

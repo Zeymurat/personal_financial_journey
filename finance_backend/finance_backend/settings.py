@@ -51,8 +51,18 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'http://localhost:8000',
-    'http://127.0.0.1:8000'
+    'http://127.0.0.1:8000',
+    'https://zeynelcmurat.com',
+    'https://www.zeynelcmurat.com',
+    'https://finance.zeynelcmurat.com',
+    'https://www.finance.zeynelcmurat.com',
 ]
+# Render / Vercel önizleme URL'leri gibi ek kökler: virgülle ayırın, https:// ile başlasın
+_csrf_extra = os.getenv('CSRF_TRUSTED_ORIGINS_EXTRA', '')
+if _csrf_extra.strip():
+    CSRF_TRUSTED_ORIGINS.extend(
+        [o.strip() for o in _csrf_extra.split(',') if o.strip()]
+    )
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = False
 CSRF_USE_SESSIONS = False

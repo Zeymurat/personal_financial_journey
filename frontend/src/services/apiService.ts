@@ -2,8 +2,9 @@ import { Transaction, Investment, InvestmentTransaction, QuickTransaction, UserS
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
-// HTTP kullan, HTTPS değil!
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ||
+  'http://localhost:8000/api';
 
 // JWT token'ı localStorage'dan al
 const getAuthToken = (): string | null => {
