@@ -113,6 +113,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],
+    # Tüm APIView uçları: dakikada 120 istek (IP veya Firebase UID başına)
+    'DEFAULT_THROTTLE_CLASSES': [
+        'finance_backend.throttling.GlobalRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'global': '100/minute',
+    },
 }
 
 # --- FIREBASE AYARLARI VE BAŞLATMA ---

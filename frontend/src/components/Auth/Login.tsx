@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Wallet, TrendingUp, Shield, Users } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Wallet, TrendingUp, Shield, Users, Cross, Info } from 'lucide-react';
 import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -93,11 +93,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
           </div>
 
           <div className="space-y-8 max-w-md">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-2">{t('login.welcome')}</h2>
-              <p className="text-gray-300 mb-4">{t('login.signInPrompt')}</p>
-
-            </div>
+            
 
             <div className="text-center mb-12">
               <h2 className="text-3xl font-black mb-4">{t('login.heroTitle')}</h2>
@@ -132,6 +128,16 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                 <div>
                   <h3 className="font-bold text-lg">{t('login.featureUxTitle')}</h3>
                   <p className="text-blue-200 text-sm">{t('login.featureUxDesc')}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4 p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+                <div className="p-3 bg-blue-500/20 rounded-xl">
+                 <Info className="w-8 h-8 text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">{t('login.featureNoInfoTitle')}</h3>
+                  <p className="text-blue-200 text-sm">{t('login.featureNoInfoDesc')}</p>
                 </div>
               </div>
             </div>
