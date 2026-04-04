@@ -1,17 +1,26 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from firebase_admin import auth, exceptions
 import logging
 
 # Logger'ı tanımlayın
 logger = logging.getLogger(__name__)
 
+
+@method_decorator(csrf_exempt, name='dispatch')
 class FirebaseLoginView(APIView):
     """
     Firebase Authentication ID Token'ı doğrulayan API view'ı.
     Bu view, Django'nun veritabanı sistemini tamamen bypass eder.
+    Tarayıcıdan cross-origin POST için CSRF kontrolü kapalı (token tabanlı doğrulama).
     """
+    authentication_classes: list = []
+    permission_classes = [AllowAny]
+
     def post(self, request):
         id_token = request.data.get('id_token')
         
