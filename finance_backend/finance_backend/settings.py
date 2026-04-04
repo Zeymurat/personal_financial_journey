@@ -57,6 +57,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://finance.zeynelcmurat.com',
     'https://www.finance.zeynelcmurat.com',
     'https://personal-financial-journey.onrender.com',
+    'https://personal-financial-journey-1.onrender.com',
 ]
 # Render / Vercel önizleme URL'leri gibi ek kökler: virgülle ayırın, https:// ile başlasın
 _csrf_extra = os.getenv('CSRF_TRUSTED_ORIGINS_EXTRA', '')

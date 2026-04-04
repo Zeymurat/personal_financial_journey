@@ -4,8 +4,8 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // Load environment variables from the project root
-  const env = loadEnv(mode, path.resolve(__dirname, '..'), '');
+  // Repo kökündeki .env + build ortamındaki process.env (Render/Vercel panelindeki VITE_* dahil)
+  const env = loadEnv(mode, path.resolve(__dirname, '..'), 'VITE_');
   
   return {
     plugins: [react()],
