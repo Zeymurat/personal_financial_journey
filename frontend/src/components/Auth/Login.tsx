@@ -209,9 +209,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                   <input type="checkbox" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
                   <span className="ml-2 text-sm text-slate-600 dark:text-slate-400 font-medium">{t('login.rememberMe')}</span>
                 </label>
-                <button type="button" className="text-sm text-blue-600 hover:text-blue-700 font-semibold">
+                {/* <button type="button" className="text-sm text-blue-600 hover:text-blue-700 font-semibold">
                   {t('login.forgotPassword')}
-                </button>
+                </button> */}
               </div>
 
               <button
