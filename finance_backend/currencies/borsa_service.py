@@ -10,7 +10,14 @@ from datetime import datetime, time
 import json
 from pathlib import Path
 
+from django.utils import timezone as django_timezone
+
 logger = logging.getLogger(__name__)
+
+
+def _local_now() -> datetime:
+    """Sunucu UTC olsa bile TIME_ZONE (Europe/Istanbul) ile yerel zaman."""
+    return django_timezone.localtime()
 
 # Lokal backup dosyası dizini
 BACKUP_DIR = Path(__file__).parent.parent / 'data' / 'borsa_backups'
@@ -44,7 +51,7 @@ class BorsaService:
         Returns:
             True if current time matches one of the fetch times, False otherwise
         """
-        now = datetime.now()
+        now = _local_now()
         current_time = now.time()
         
         # Her fetch zamanı için ±5 dakika tolerans
@@ -83,7 +90,7 @@ class BorsaService:
         Returns:
             True if new data should be fetched, False otherwise
         """
-        now = datetime.now()
+        now = _local_now()
         today = now.strftime('%Y-%m-%d')
         current_time = now.time()
         current_minutes = current_time.hour * 60 + current_time.minute
@@ -126,7 +133,10 @@ class BorsaService:
         
         # Durum 1: Bugün için veri yok
         if not existing_fetch_time or (fetch_date and fetch_date != today):
-            # Saat >= 10:00 ise → Veri çek
+            # Son çekim başka takvim günüyse: dosyada güncel gün anahtarı olmayabilir; hafta içi API ile yenile
+            if fetch_date and fetch_date != today:
+                return True
+            # Metadata yok: ilk çekim — borsa açılışından (10:00) sonra
             return current_minutes >= FETCH_10_00
         
         # Durum 2: Bugün için veri var
@@ -157,7 +167,7 @@ class BorsaService:
         Returns:
             True if weekday, False otherwise
         """
-        now = datetime.now()
+        now = _local_now()
         return now.weekday() < 5  # 0=Monday, 4=Friday
     
     def get_borsa_data(self) -> Optional[Dict[str, Any]]:
@@ -316,8 +326,9 @@ class BorsaService:
             Kaydedilen dosya path'i veya None
         """
         try:
-            today = datetime.now().strftime('%Y-%m-%d')
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            _now = _local_now()
+            today = _now.strftime('%Y-%m-%d')
+            timestamp = _now.strftime('%Y%m%d_%H%M%S')
             
             # Dosya adı: borsa_YYYY-MM-DD_HHMMSS.json
             filename = f'borsa_{today}_{timestamp}.json'

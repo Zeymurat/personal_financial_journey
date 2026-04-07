@@ -1415,16 +1415,26 @@ class BorsaDataListView(APIView):
                 
                 # Yeni veri çekilmeli mi?
                 # Eğer dosya yoksa, ilk kez çalıştırılıyor demektir - her zaman API'den çek
+                today_row = read_borsa_from_file(today) if file_exists else None
                 if not file_exists:
                     should_fetch = True
                 else:
                     should_fetch = service.should_fetch_new_data(existing_fetch_time)
+                # Dosyada bugünün anahtarı yoksa (eski deploy / sadece metadata), saat <10 olsa bile hafta içi API dene
+                if today_row is None and service.is_weekday():
+                    if not should_fetch:
+                        logger.info(
+                            "[borsa/list] should_fetch zorlandı: borsa.json içinde %s tarihi yok",
+                            today,
+                        )
+                    should_fetch = True
                 
                 logger.info(
-                    "[borsa/list] bugun_dalı | should_fetch=%s | file_exists=%s | metadata_fetch_time=%s",
+                    "[borsa/list] bugun_dalı | should_fetch=%s | file_exists=%s | metadata_fetch_time=%s | bugun_satir_var=%s",
                     should_fetch,
                     file_exists,
                     (existing_fetch_time[:19] + "…") if existing_fetch_time and len(existing_fetch_time) > 19 else existing_fetch_time,
+                    today_row is not None,
                 )
                 
                 if should_fetch:
