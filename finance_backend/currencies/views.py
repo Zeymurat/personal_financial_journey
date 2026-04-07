@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from django.conf import settings
+from django.utils import timezone
 from firebase_admin import firestore
 from datetime import datetime, timedelta
 import logging
@@ -20,6 +21,12 @@ from .tcmb_service import get_tcmb_service
 from .borsa_service import get_borsa_service
 
 logger = logging.getLogger(__name__)
+
+
+def _local_today_str() -> str:
+    """Bugünün tarihi YYYY-MM-DD (TIME_ZONE, USE_TZ). Render UTC'de olsa bile İstanbul günü."""
+    return timezone.localdate().isoformat()
+
 
 # Borsa veri çekme için lock (aynı anda 2 istek atılmasını engellemek için)
 _borsa_fetch_lock = threading.Lock()
@@ -265,11 +272,16 @@ def read_borsa_from_file(date: str = None) -> dict:
         Borsa verisi dict'i veya None
     """
     if date is None:
-        date = datetime.now().strftime('%Y-%m-%d')
+        date = _local_today_str()
     
     file_path = get_json_file_path('borsa.json')
     
     if not os.path.exists(file_path):
+        logger.warning(
+            "[borsa] read_borsa_from_file: dosya yok | path=%s | istenen_tarih=%s",
+            file_path,
+            date,
+        )
         return None
     
     try:
@@ -279,12 +291,39 @@ def read_borsa_from_file(date: str = None) -> dict:
         # Eğer data bir dict ise ve 'data' key'i varsa, o tarih için veri ara
         if isinstance(data, dict):
             if date in data:
+                logger.debug(
+                    "[borsa] read_borsa_from_file: hit | tarih=%s | path=%s",
+                    date,
+                    file_path,
+                )
                 return data[date]
             else:
+                # Tarih anahtarları örneği (debug, çok uzun log yok)
+                sample_keys = [
+                    k for k in data.keys()
+                    if k != 'metadata' and isinstance(k, str) and len(k) == 10 and k[4] == '-' and k[7] == '-'
+                ]
+                sample_keys = sorted(sample_keys)[-12:]
+                logger.warning(
+                    "[borsa] read_borsa_from_file: miss | istenen=%s | dosyada_ornek_tarihler=%s | path=%s",
+                    date,
+                    sample_keys,
+                    file_path,
+                )
                 return None
         else:
+            logger.warning(
+                "[borsa] read_borsa_from_file: beklenmeyen format (dict değil) | path=%s",
+                file_path,
+            )
             return None
-    except Exception:
+    except Exception as e:
+        logger.exception(
+            "[borsa] read_borsa_from_file: okuma hatası | path=%s | istenen_tarih=%s | hata=%s",
+            file_path,
+            date,
+            e,
+        )
         return None
 
 
@@ -301,7 +340,7 @@ def write_borsa_to_file(borsa_data: dict, date: str = None) -> bool:
         True if successful, False otherwise
     """
     if date is None:
-        date = datetime.now().strftime('%Y-%m-%d')
+        date = _local_today_str()
     
     file_path = get_json_file_path('borsa.json')
     
@@ -323,7 +362,7 @@ def write_borsa_to_file(borsa_data: dict, date: str = None) -> bool:
     if not isinstance(existing_data, dict):
         existing_data = {}
     
-    today = datetime.now().strftime('%Y-%m-%d')
+    today = _local_today_str()
     
     # Eğer bugünün verisi yazılıyorsa, eski tarihleri temizle (sadece bugünü tut)
     if date == today:
@@ -370,7 +409,7 @@ def get_borsa_metadata_from_file() -> dict:
             return data['metadata']
         
         # Eğer bugünün tarihli veri varsa, ondan fetch_time al
-        today = datetime.now().strftime('%Y-%m-%d')
+        today = _local_today_str()
         if today in data and isinstance(data[today], dict):
             return {
                 'fetch_time': data[today].get('fetch_time'),
@@ -1265,7 +1304,7 @@ class BorsaDataView(APIView):
             
             # Local dosyaya kaydet
             try:
-                today = datetime.now().strftime('%Y-%m-%d')
+                today = _local_today_str()
                 
                 # Veri yapısını hazırla
                 stock_data = {
@@ -1344,9 +1383,17 @@ class BorsaDataListView(APIView):
             if date_param:
                 target_date = date_param
             else:
-                target_date = datetime.now().strftime('%Y-%m-%d')
+                target_date = _local_today_str()
             
-            today = datetime.now().strftime('%Y-%m-%d')
+            today = _local_today_str()
+            borsa_file_path = get_json_file_path('borsa.json')
+            logger.info(
+                "[borsa/list] istek | target_date=%s | today_local=%s | borsa_json=%s | dosya_var=%s",
+                target_date,
+                today,
+                borsa_file_path,
+                os.path.exists(borsa_file_path),
+            )
             
             # Eğer bugün için veri isteniyorsa, akıllı kontrol yap
             if target_date == today:
@@ -1372,6 +1419,13 @@ class BorsaDataListView(APIView):
                     should_fetch = True
                 else:
                     should_fetch = service.should_fetch_new_data(existing_fetch_time)
+                
+                logger.info(
+                    "[borsa/list] bugun_dalı | should_fetch=%s | file_exists=%s | metadata_fetch_time=%s",
+                    should_fetch,
+                    file_exists,
+                    (existing_fetch_time[:19] + "…") if existing_fetch_time and len(existing_fetch_time) > 19 else existing_fetch_time,
+                )
                 
                 if should_fetch:
                     # Aynı anda 2 istek atılmasını engelle (lock mekanizması)
@@ -1418,6 +1472,11 @@ class BorsaDataListView(APIView):
                         borsa_data = service.get_borsa_data()
                         
                         if borsa_data is None:
+                            logger.warning(
+                                "[borsa/list] API get_borsa_data None döndü | today=%s | mevcut_metadata=%s",
+                                today,
+                                bool(existing_fetch_time),
+                            )
                             # API hatası, mevcut veriyi döndür
                             if existing_fetch_time:
                                 borsa_data = read_borsa_from_file(today)
@@ -1485,8 +1544,7 @@ class BorsaDataListView(APIView):
             
             # Bugünün verisi yoksa, dünün verisini dene (dövizlerdeki gibi)
             if target_date == today:
-                from datetime import timedelta
-                yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+                yesterday = (timezone.localdate() - timedelta(days=1)).isoformat()
                 borsa_data = read_borsa_from_file(yesterday)
                 
                 if borsa_data:
@@ -1501,6 +1559,14 @@ class BorsaDataListView(APIView):
                     return Response(response_data, status=status.HTTP_200_OK)
             
             # Local dosyada bulunamadı
+            y_try = (timezone.localdate() - timedelta(days=1)).isoformat() if target_date == today else None
+            logger.warning(
+                "[borsa/list] 404 | target_date=%s | today=%s | dun_denendi=%s | borsa_json=%s",
+                target_date,
+                today,
+                y_try,
+                borsa_file_path,
+            )
             return Response(
                 {
                     "success": False,
