@@ -87,12 +87,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   }, [setActiveTab]);
 
   return (
-    <div className="w-64 flex flex-col border-r border-white/8 bg-[linear-gradient(165deg,hsl(213_55%_11%)_0%,hsl(213_58%_7%)_55%,hsl(213_60%_5%)_100%)] text-sidebar-foreground shadow-elite">
+    <div className="w-64 min-w-64 max-w-64 shrink-0 flex flex-col border-r border-white/8 bg-[linear-gradient(165deg,hsl(213_55%_11%)_0%,hsl(213_58%_7%)_55%,hsl(213_60%_5%)_100%)] text-sidebar-foreground shadow-elite">
       <div className="p-6 border-b border-white/8 relative">
         <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
-        <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-gradient text-primary-foreground ring-1 ring-gold/40 shadow-gold">
-            <Wallet className="w-5 h-5" />
+        <div className="flex items-center space-x-3 min-w-0">
+          <div className="flex h-10 w-10 min-w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-gradient text-primary-foreground ring-1 ring-gold/40 shadow-gold">
+            <Wallet className="h-5 w-5 shrink-0" />
           </div>
           <div>
             <h1 className="text-lg font-semibold tracking-tight text-sidebar-foreground">
@@ -128,8 +128,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
                         : 'text-sidebar-muted hover:bg-white/6 hover:text-sidebar-foreground'
                   }`}
                 >
-                  <div className="relative">
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-gold-soft' : ''}`} />
+                  <div className="relative shrink-0">
+                    <Icon className={`h-5 w-5 shrink-0 ${isActive ? 'text-gold-soft' : ''}`} />
                     {item.id === 'notifications' && unreadCount > 0 && (
                       <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center shadow-lg border-2 border-[hsl(213_55%_9%)]">
                         {unreadCount > 99 ? '99+' : unreadCount}
@@ -153,16 +153,16 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
 
       <div className="p-4 border-t border-white/8 relative">
         <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
-        <div className="flex items-center space-x-3 p-3 rounded-xl bg-white/5 mb-3 ring-1 ring-white/5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/20 text-sm font-semibold text-gold-soft ring-1 ring-gold/35">
+        <div className="flex items-center space-x-3 p-3 rounded-xl bg-white/5 mb-3 ring-1 ring-white/5 min-w-0">
+          <div className="flex h-10 w-10 min-w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gold/20 text-sm font-semibold text-gold-soft ring-1 ring-gold/35">
             {user?.avatar ? (
               <img
                 src={user.avatar}
                 alt={user.name}
-                className="w-10 h-10 rounded-full object-cover"
+                className="h-10 w-10 max-w-none shrink-0 aspect-square rounded-full object-cover"
               />
             ) : (
-              <User className="w-5 h-5" />
+              <User className="h-5 w-5 shrink-0" />
             )}
           </div>
           <div className="flex-1 min-w-0">
@@ -177,7 +177,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
           onClick={logout}
           className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl border border-white/10 text-sidebar-foreground hover:bg-white/8 hover:border-gold/25 transition-all duration-200 font-medium text-sm"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="h-5 w-5 shrink-0" />
           <span>{t('logout')}</span>
         </button>
       </div>
