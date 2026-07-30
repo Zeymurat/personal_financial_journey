@@ -45,7 +45,7 @@ const ReportsCurrentMonthSummary: React.FC<Props> = ({
     generalTrend === 'positive' ? t('summary.trendPositive') : t('summary.trendNegative');
 
   return (
-  <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 mb-6">
+  <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15 mb-6">
     <div className="flex items-center justify-between mb-6">
       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
         {t('summary.title', { month: formatMonthYear(currentDate) })}
@@ -88,8 +88,8 @@ const ReportsCurrentMonthSummary: React.FC<Props> = ({
       </div>
 
       <div className="text-center">
-        <div className="p-4 bg-blue-100 dark:bg-blue-900 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
-          <TrendingUp className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+        <div className="p-4 bg-brand-champagne dark:bg-brand-surface-dark rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+          <TrendingUp className="w-8 h-8 text-brand-ink dark:text-brand-champagne-dark" />
         </div>
         <p className="text-2xl font-bold text-gray-900 dark:text-white">
           ₺{currentMonthNetIncome.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -101,11 +101,11 @@ const ReportsCurrentMonthSummary: React.FC<Props> = ({
       </div>
 
       <div className="text-center">
-        <div className="p-4 bg-purple-100 dark:bg-purple-900 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
-          <Wallet className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+        <div className="p-4 bg-brand-champagne dark:bg-brand-surface-dark rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+          <Wallet className="w-8 h-8 text-brand-ink dark:text-brand-champagne-dark" />
         </div>
         <p
-          className={`text-2xl font-bold ${investmentData.buyTotal >= 0 ? 'text-purple-700 dark:text-purple-300' : 'text-rose-600 dark:text-rose-400'}`}
+          className={`text-2xl font-bold ${investmentData.buyTotal >= 0 ? 'text-brand-ink dark:text-brand-champagne' : 'text-rose-600 dark:text-rose-400'}`}
         >
           {investmentData.buyTotal >= 0 ? '+' : ''}₺
           {Math.abs(investmentData.buyTotal).toLocaleString(locale, {
@@ -117,11 +117,11 @@ const ReportsCurrentMonthSummary: React.FC<Props> = ({
       </div>
 
       <div className="text-center">
-        <div className="p-4 bg-purple-100 dark:bg-purple-900 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
-          <Wallet className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+        <div className="p-4 bg-brand-champagne dark:bg-brand-surface-dark rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+          <Wallet className="w-8 h-8 text-brand-ink dark:text-brand-champagne-dark" />
         </div>
         <p
-          className={`text-2xl font-bold ${investmentData.sellTotal >= 0 ? 'text-purple-700 dark:text-purple-300' : 'text-rose-600 dark:text-rose-400'}`}
+          className={`text-2xl font-bold ${investmentData.sellTotal >= 0 ? 'text-brand-ink dark:text-brand-champagne' : 'text-rose-600 dark:text-rose-400'}`}
         >
           {investmentData.sellTotal >= 0 ? '+' : ''}₺
           {Math.abs(investmentData.sellTotal).toLocaleString(locale, {

@@ -992,3 +992,285 @@ class FirestoreEventDetailView(BaseFirestoreView):
         except Exception as e:
             logger.error(f"Etkinlik silinirken beklenmedik hata: {e}", exc_info=True)
             return Response({'success': False, 'error': 'Sunucu hatası: Etkinlik silinemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def _run_async(coro):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
+
+
+class FirestorePreferenceView(BaseFirestoreView):
+    """
+    GET/PUT /api/auth/preferences/<resource>/
+    resource: selected-currencies | selected-hisse | ...
+    """
+
+    def get(self, request, resource: str):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            if resource not in firestore_service.PREFERENCE_RESOURCES:
+                return Response(
+                    {'success': False, 'error': 'Bilinmeyen preference resource'},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            items = _run_async(
+                firestore_service.list_preference_items(firebase_uid, resource)
+            )
+            return Response({'success': True, 'data': items})
+        except exceptions.PermissionDenied as e:
+            return Response(
+                {'success': False, 'error': f'Erişim hatası: {str(e)}'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        except ValueError as e:
+            return Response(
+                {'success': False, 'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            logger.error(f"Preferences GET hatası ({resource}): {e}", exc_info=True)
+            return Response(
+                {'success': False, 'error': 'Sunucu hatası: Tercihler getirilemedi.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    def put(self, request, resource: str):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            if resource not in firestore_service.PREFERENCE_RESOURCES:
+                return Response(
+                    {'success': False, 'error': 'Bilinmeyen preference resource'},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            items = request.data.get('items')
+            if items is None:
+                return Response(
+                    {'success': False, 'error': 'items alanı zorunlu'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            saved = _run_async(
+                firestore_service.replace_preference_items(
+                    firebase_uid, resource, items
+                )
+            )
+            return Response(
+                {'success': True, 'data': saved, 'message': 'Tercihler kaydedildi'}
+            )
+        except exceptions.PermissionDenied as e:
+            return Response(
+                {'success': False, 'error': f'Erişim hatası: {str(e)}'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        except ValueError as e:
+            return Response(
+                {'success': False, 'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            logger.error(f"Preferences PUT hatası ({resource}): {e}", exc_info=True)
+            return Response(
+                {'success': False, 'error': 'Sunucu hatası: Tercihler kaydedilemedi.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class AIChatView(BaseFirestoreView):
+    """
+    POST /api/auth/ai/chat/
+    Yatırım tavsiyesi değildir — bilgilendirici portföy asistanı.
+    """
+
+    DISCLAIMER = (
+        "Bu yanıt yatırım tavsiyesi değildir (YTD). "
+        "Yalnızca hesabınızdaki verilere dayalı bilgilendirme amaçlıdır."
+    )
+
+    SYSTEM_PROMPT = (
+        "Sen kişisel finans takip uygulamasında yardımcı bir asistansın. "
+        "Kullanıcıya yatırım tavsiyesi VERME; al/sat önerme. "
+        "Sadece verilen JSON context'e dayanarak özetle, açıkla, soruları yanıtla. "
+        "Context'te olmayan fiyat veya haber uydurma. "
+        "Türkçe yanıt ver. Yanıtın sonunda kısaca YTD uyarısını tekrarlama; "
+        "uygulama ayrıca disclaimer gösterir."
+    )
+
+    def post(self, request):
+        import os
+        import json
+        import hashlib
+        import urllib.request
+        import urllib.error
+
+        try:
+            firebase_uid = self.validate_user_access(request)
+            message = (request.data.get('message') or '').strip()
+            if not message:
+                return Response(
+                    {'success': False, 'error': 'message zorunlu'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            history = request.data.get('history') or []
+            if not isinstance(history, list):
+                history = []
+            history = history[-10:]
+
+            openai_key = os.getenv('OPENAI_API_KEY', '').strip()
+            anthropic_key = os.getenv('ANTHROPIC_API_KEY', '').strip()
+            if not openai_key and not anthropic_key:
+                return Response(
+                    {
+                        'success': False,
+                        'error': 'AI servisi yapılandırılmamış',
+                        'message': 'OPENAI_API_KEY veya ANTHROPIC_API_KEY tanımlı değil.',
+                    },
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
+
+            context = _run_async(
+                firestore_service.build_ai_user_context(firebase_uid)
+            )
+
+            user_payload = (
+                f"Kullanıcı sorusu:\n{message}\n\n"
+                f"Kullanıcı finansal context (JSON):\n{json.dumps(context, ensure_ascii=False, default=str)}"
+            )
+
+            reply_text = None
+            model_used = None
+
+            if openai_key:
+                model_used = os.getenv('AI_MODEL', 'gpt-4o-mini').strip() or 'gpt-4o-mini'
+                messages = [{'role': 'system', 'content': self.SYSTEM_PROMPT}]
+                for h in history:
+                    role = h.get('role')
+                    content = h.get('content')
+                    if role in ('user', 'assistant') and content:
+                        messages.append({'role': role, 'content': str(content)[:4000]})
+                messages.append({'role': 'user', 'content': user_payload})
+
+                body = json.dumps(
+                    {
+                        'model': model_used,
+                        'messages': messages,
+                        'temperature': 0.3,
+                        'max_tokens': 1200,
+                    }
+                ).encode('utf-8')
+                req = urllib.request.Request(
+                    'https://api.openai.com/v1/chat/completions',
+                    data=body,
+                    headers={
+                        'Content-Type': 'application/json',
+                        'Authorization': f'Bearer {openai_key}',
+                    },
+                    method='POST',
+                )
+                try:
+                    with urllib.request.urlopen(req, timeout=45) as resp:
+                        payload = json.loads(resp.read().decode('utf-8'))
+                    reply_text = (
+                        payload.get('choices', [{}])[0]
+                        .get('message', {})
+                        .get('content', '')
+                    )
+                except urllib.error.HTTPError as e:
+                    err_body = e.read().decode('utf-8', errors='replace')[:500]
+                    logger.error("OpenAI HTTP error: %s %s", e.code, err_body)
+                    return Response(
+                        {'success': False, 'error': 'AI sağlayıcı hatası'},
+                        status=status.HTTP_502_BAD_GATEWAY,
+                    )
+            else:
+                model_used = os.getenv('AI_MODEL', 'claude-3-5-haiku-20241022').strip()
+                messages = []
+                for h in history:
+                    role = h.get('role')
+                    content = h.get('content')
+                    if role in ('user', 'assistant') and content:
+                        messages.append({'role': role, 'content': str(content)[:4000]})
+                messages.append({'role': 'user', 'content': user_payload})
+                body = json.dumps(
+                    {
+                        'model': model_used,
+                        'max_tokens': 1200,
+                        'system': self.SYSTEM_PROMPT,
+                        'messages': messages,
+                    }
+                ).encode('utf-8')
+                req = urllib.request.Request(
+                    'https://api.anthropic.com/v1/messages',
+                    data=body,
+                    headers={
+                        'Content-Type': 'application/json',
+                        'x-api-key': anthropic_key,
+                        'anthropic-version': '2023-06-01',
+                    },
+                    method='POST',
+                )
+                try:
+                    with urllib.request.urlopen(req, timeout=45) as resp:
+                        payload = json.loads(resp.read().decode('utf-8'))
+                    parts = payload.get('content') or []
+                    reply_text = ''.join(
+                        p.get('text', '') for p in parts if p.get('type') == 'text'
+                    )
+                except urllib.error.HTTPError as e:
+                    err_body = e.read().decode('utf-8', errors='replace')[:500]
+                    logger.error("Anthropic HTTP error: %s %s", e.code, err_body)
+                    return Response(
+                        {'success': False, 'error': 'AI sağlayıcı hatası'},
+                        status=status.HTTP_502_BAD_GATEWAY,
+                    )
+
+            if not reply_text:
+                return Response(
+                    {'success': False, 'error': 'AI boş yanıt döndü'},
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
+
+            # Minimal audit (mesaj içeriğini saklamadan)
+            try:
+                msg_hash = hashlib.sha256(message.encode('utf-8')).hexdigest()[:16]
+                log_ref = (
+                    firestore_service.get_user_doc(firebase_uid)
+                    .collection('aiLogs')
+                    .document()
+                )
+                from firebase_admin import firestore as fb_fs
+
+                log_ref.set(
+                    {
+                        'messageHash': msg_hash,
+                        'model': model_used,
+                        'createdAt': fb_fs.SERVER_TIMESTAMP,
+                    }
+                )
+            except Exception as log_err:
+                logger.warning("AI audit log yazılamadı: %s", log_err)
+
+            return Response(
+                {
+                    'success': True,
+                    'data': {
+                        'reply': reply_text,
+                        'disclaimer': self.DISCLAIMER,
+                        'model': model_used,
+                    },
+                }
+            )
+        except exceptions.PermissionDenied as e:
+            return Response(
+                {'success': False, 'error': f'Erişim hatası: {str(e)}'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        except Exception as e:
+            logger.error(f"AI chat hatası: {e}", exc_info=True)
+            return Response(
+                {'success': False, 'error': 'Sunucu hatası: AI yanıtı alınamadı.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

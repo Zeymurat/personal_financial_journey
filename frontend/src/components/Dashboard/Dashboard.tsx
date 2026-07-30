@@ -6,6 +6,7 @@ import { useTokenValidation } from '../../hooks/useTokenValidation';
 import { useFinance } from '../../contexts/FinanceContext';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Wallet, DollarSign } from 'lucide-react';
 import { transactionAPI, investmentAPI, fundsAPI, settingsAPI } from '../../services/apiService';
+import { hasStoredAccessToken } from '../../services/authTokenStore';
 import type { Currency, Transaction } from '../../types';
 import AddTransactionModal from '../Transactions/modals/AddTransactionModal';
 import AddInvestmentModal from '../Investments/modals/AddInvestmentModal';
@@ -72,8 +73,7 @@ const Dashboard: React.FC = () => {
     if (authLoading || authenticating) return;
     if (!currentUser?.id) return;
 
-    const token = localStorage.getItem('access_token');
-    if (!token) {
+    if (!hasStoredAccessToken()) {
       return;
     }
 
@@ -96,8 +96,7 @@ const Dashboard: React.FC = () => {
       if (authLoading || authenticating) return;
       if (!currentUser?.id) return;
 
-      const token = localStorage.getItem('access_token');
-      if (!token) {
+      if (!hasStoredAccessToken()) {
         const retryTimeout = setTimeout(() => {
           void run();
         }, 500);
@@ -252,20 +251,32 @@ const Dashboard: React.FC = () => {
   }, [totalInvestmentGain, totalInvestmentCost]);
 
   useEffect(() => {
-    const loadTargets = async () => {
-      if (authLoading || authenticating) return;
-      if (!currentUser?.id || targetsLoaded) return;
+    if (authLoading || authenticating) return;
+    if (!currentUser?.id || targetsLoaded) return;
 
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        const retryTimeout = setTimeout(() => {
+    let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+    let attempts = 0;
+    const maxAttempts = 8;
+
+    const loadTargets = async () => {
+      if (cancelled) return;
+
+      if (!hasStoredAccessToken()) {
+        if (attempts >= maxAttempts) {
+          setTargetsLoaded(true);
+          return;
+        }
+        attempts += 1;
+        retryTimer = setTimeout(() => {
           void loadTargets();
-        }, 500);
-        return () => clearTimeout(retryTimeout);
+        }, 400);
+        return;
       }
 
       try {
         const settingsResponse = await settingsAPI.get();
+        if (cancelled) return;
         if (settingsResponse?.success && settingsResponse?.data) {
           const targets = settingsResponse.data.targets;
           if (targets) {
@@ -276,7 +287,6 @@ const Dashboard: React.FC = () => {
               setTotalSavingsTarget(targets.savings);
             }
           }
-          setTargetsLoaded(true);
         }
       } catch (error) {
         console.error('Hedefler yüklenirken hata:', error);
@@ -284,11 +294,17 @@ const Dashboard: React.FC = () => {
         const savedSavings = localStorage.getItem('totalSavingsTarget');
         if (savedMonthly) setMonthlyTarget(parseFloat(savedMonthly));
         if (savedSavings) setTotalSavingsTarget(parseFloat(savedSavings));
-        setTargetsLoaded(true);
+      } finally {
+        if (!cancelled) setTargetsLoaded(true);
       }
     };
 
     void loadTargets();
+
+    return () => {
+      cancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
+    };
   }, [currentUser, authLoading, authenticating, targetsLoaded]);
 
   const saveTargets = async (monthly: number | null, savings: number | null) => {
@@ -459,8 +475,8 @@ const Dashboard: React.FC = () => {
       change: incomeChange,
       changeType: thisMonthIncome >= lastMonthIncome ? 'positive' : 'negative',
       icon: ArrowUpRight,
-      color: 'from-emerald-500 via-green-500 to-teal-600',
-      bgColor: 'from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20',
+      color: 'from-brand-ink to-brand-ink-light',
+      bgColor: 'from-brand-surface to-brand-surface-muted dark:from-brand-surface-dark dark:to-brand-surface-dark-muted',
       changePeriod: 'thisMonth'
     },
     {
@@ -469,8 +485,8 @@ const Dashboard: React.FC = () => {
       change: expenseChange,
       changeType: thisMonthExpense <= lastMonthExpense ? 'positive' : 'negative',
       icon: ArrowDownRight,
-      color: 'from-rose-500 via-red-500 to-pink-600',
-      bgColor: 'from-rose-50 to-red-100 dark:from-rose-900/20 dark:to-red-900/20',
+      color: 'from-rose-600 to-red-700',
+      bgColor: 'from-brand-surface to-brand-surface-muted dark:from-brand-surface-dark dark:to-brand-surface-dark-muted',
       changePeriod: 'thisMonth'
     },
     {
@@ -479,8 +495,8 @@ const Dashboard: React.FC = () => {
       change: netIncomeChange,
       changeType: netIncome >= lastMonthNet ? 'positive' : 'negative',
       icon: DollarSign,
-      color: 'from-blue-500 via-indigo-500 to-purple-600',
-      bgColor: 'from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20',
+      color: 'from-brand-ink via-brand-ink-light to-brand-ink-deep',
+      bgColor: 'from-brand-surface to-brand-surface-muted dark:from-brand-surface-dark dark:to-brand-surface-dark-muted',
       changePeriod: 'thisMonth'
     },
     {
@@ -489,8 +505,8 @@ const Dashboard: React.FC = () => {
       change: netChangeText,
       changeType: netChangeAmount >= 0 ? 'positive' : 'negative',
       icon: Wallet,
-      color: 'from-amber-500 via-yellow-500 to-orange-600',
-      bgColor: 'from-amber-50 to-yellow-100 dark:from-amber-900/20 dark:to-yellow-900/20',
+      color: 'from-brand-ink to-brand-ink-muted',
+      bgColor: 'from-brand-surface to-brand-surface-muted dark:from-brand-surface-dark dark:to-brand-surface-dark-muted',
       changePeriod: 'vsLastMonth'
     },
     {
@@ -499,8 +515,8 @@ const Dashboard: React.FC = () => {
       change: `+₺${totalInvestmentGain.toLocaleString('tr-TR')}`,
       changeType: totalInvestmentGain >= 0 ? 'positive' : 'negative',
       icon: TrendingUp,
-      color: 'from-violet-500 via-purple-500 to-indigo-600',
-      bgColor: 'from-violet-50 to-purple-100 dark:from-violet-900/20 dark:to-purple-900/20',
+      color: 'from-brand-ink via-brand-ink-light to-brand-ink-deep',
+      bgColor: 'from-brand-surface to-brand-surface-muted dark:from-brand-surface-dark dark:to-brand-surface-dark-muted',
       changePeriod: 'thisMonth'
     }
   ];
@@ -528,7 +544,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900">
+    <div className="min-h-screen bg-transparent">
       <div className="p-8 space-y-8">
         <DashboardHeader totalNetWorth={totalNetWorth} totalInvestmentValue={totalInvestmentValue} />
 

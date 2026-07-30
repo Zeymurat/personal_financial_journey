@@ -1,0 +1,12 @@
+{
+  "title": "Asistente de seguimiento",
+  "subtitle": "Información sobre tu cartera y transacciones",
+  "disclaimer": "Este asistente no ofrece asesoramiento de inversión. Las respuestas son informativas y se basan solo en tus datos.",
+  "emptyHint": "Ej.: ¿Qué tan cerca estoy de mis objetivos mensuales?",
+  "placeholder": "Escribe tu pregunta…",
+  "send": "Enviar",
+  "thinking": "Pensando…",
+  "errors": {
+    "generic": "No se pudo obtener respuesta. Inténtalo de nuevo."
+  }
+}

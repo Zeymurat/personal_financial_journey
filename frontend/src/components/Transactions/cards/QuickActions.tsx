@@ -342,10 +342,10 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onTransactionAdded, categor
 
   return (
     <>
-      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl p-6 border border-slate-200/50 dark:border-slate-700/50 shadow-xl">
+      <div className="bg-brand-surface/95 dark:bg-brand-surface-dark backdrop-blur-sm rounded-3xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-brand">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
+            <div className="p-2 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-xl">
               <Zap className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -414,7 +414,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onTransactionAdded, categor
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md rounded-full shadow-xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800 hover:shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95"
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 bg-brand-surface/95 dark:bg-slate-800/95 backdrop-blur-md rounded-full shadow-brand border border-brand-ink/10 dark:border-brand-champagne/15 hover:bg-brand-surface dark:hover:bg-slate-800 hover:shadow-brand-lg transition-all duration-200 hover:scale-110 active:scale-95"
               aria-label={t('quickActions.scrollLeft')}
             >
               <ChevronLeft className="w-5 h-5 text-slate-700 dark:text-slate-300" />
@@ -437,7 +437,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onTransactionAdded, categor
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md rounded-full shadow-xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800 hover:shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95"
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 bg-brand-surface/95 dark:bg-slate-800/95 backdrop-blur-md rounded-full shadow-brand border border-brand-ink/10 dark:border-brand-champagne/15 hover:bg-brand-surface dark:hover:bg-slate-800 hover:shadow-brand-lg transition-all duration-200 hover:scale-110 active:scale-95"
               aria-label={t('quickActions.scrollRight')}
             >
               <ChevronRight className="w-5 h-5 text-slate-700 dark:text-slate-300" />
@@ -493,7 +493,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onTransactionAdded, categor
                   <div className="flex-shrink-0 w-[200px]">
                     <button
                       onClick={handleAddNew}
-                      className="w-full h-full p-5 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex flex-col items-center justify-center space-y-2"
+                      className="w-full h-full p-5 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 bg-brand-surface-muted dark:bg-brand-surface-dark-muted hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex flex-col items-center justify-center space-y-2"
                     >
                       <Plus className="w-7 h-7 text-slate-400" />
                       <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">{t('quickActions.newAdd')}</span>
@@ -600,7 +600,7 @@ const SortableQuickActionItem: React.FC<SortableQuickActionItemProps> = ({
         <button
           {...attributes}
           {...listeners}
-          className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1.5 bg-white dark:bg-slate-700 rounded-lg shadow-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 cursor-grab active:cursor-grabbing"
+          className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1.5 bg-brand-surface dark:bg-slate-700 rounded-lg shadow-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 cursor-grab active:cursor-grabbing"
           title={t('quickActions.dragTitle')}
         >
           <GripVertical className="w-4 h-4 text-slate-500 dark:text-slate-400" />
@@ -614,17 +614,17 @@ const SortableQuickActionItem: React.FC<SortableQuickActionItemProps> = ({
                 e.stopPropagation();
                 onEdit();
               }}
-              className="p-2 bg-white dark:bg-slate-700 rounded-lg shadow-lg border-2 border-slate-300 dark:border-slate-600 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-xl transition-all duration-200"
+              className="p-2 bg-brand-surface dark:bg-slate-700 rounded-lg shadow-lg border-2 border-slate-300 dark:border-slate-600 hover:bg-brand-champagne dark:hover:bg-brand-surface-dark-muted hover:border-brand-ink dark:hover:border-brand-ink hover:shadow-brand transition-all duration-200"
               title={t('quickActions.editTitle')}
             >
-              <Edit2 className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+              <Edit2 className="w-3 h-3 text-brand-ink dark:text-brand-champagne-dark" />
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();
               }}
-              className="p-2 bg-white dark:bg-slate-700 rounded-lg shadow-lg border-2 border-slate-300 dark:border-slate-600 hover:bg-red-100 dark:hover:bg-red-900/40 hover:border-red-500 dark:hover:border-red-500 hover:shadow-xl transition-all duration-200"
+              className="p-2 bg-brand-surface dark:bg-slate-700 rounded-lg shadow-lg border-2 border-slate-300 dark:border-slate-600 hover:bg-red-100 dark:hover:bg-red-900/40 hover:border-red-500 dark:hover:border-red-500 hover:shadow-brand transition-all duration-200"
               title={t('quickActions.deleteTitle')}
             >
               <Trash2 className="w-3 h-3 text-red-600 dark:text-red-400" />

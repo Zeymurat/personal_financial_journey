@@ -46,15 +46,15 @@ const AddToTableModal: React.FC<AddToTableModalProps> = ({
   const getTypeBadgeColor = (type: string) => {
     switch (type) {
       case 'currency':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+        return 'bg-brand-champagne text-brand-ink dark:bg-brand-surface-dark dark:text-brand-champagne';
       case 'gold':
         return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200';
       case 'crypto':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+        return 'bg-brand-champagne text-brand-ink dark:bg-brand-surface-dark dark:text-brand-champagne';
       case 'metal':
         return 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200';
       case 'fund':
-        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200';
+        return 'bg-brand-champagne text-brand-ink dark:bg-brand-surface-dark dark:text-brand-champagne';
       case 'stock':
         return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200';
       default:
@@ -228,9 +228,9 @@ const AddToTableModal: React.FC<AddToTableModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col">
+      <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl shadow-brand-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden border border-brand-ink/10 dark:border-brand-champagne/15 flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-6 border-b border-brand-ink/10 dark:border-brand-champagne/15">
           <div>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{t('addModal.title')}</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('addModal.subtitle')}</p>
@@ -244,7 +244,7 @@ const AddToTableModal: React.FC<AddToTableModalProps> = ({
         </div>
 
         {/* Arama ve Filtreleme */}
-        <div className="px-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-6 pb-4 border-b border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -253,7 +253,7 @@ const AddToTableModal: React.FC<AddToTableModalProps> = ({
                 placeholder={t('addModal.searchPlaceholder')}
                 value={modalSearchTerm}
                 onChange={(e) => setModalSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white w-full"
+                className="pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-gray-700 dark:text-white w-full"
               />
             </div>
 
@@ -262,7 +262,7 @@ const AddToTableModal: React.FC<AddToTableModalProps> = ({
               <select
                 value={modalTypeFilter}
                 onChange={(e) => setModalTypeFilter(e.target.value)}
-                className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-gray-700 dark:text-white"
               >
                 <option value="all">{t('addModal.filterAll')}</option>
                 <option value="currency">{t('addModal.currency')}</option>
@@ -295,22 +295,22 @@ const AddToTableModal: React.FC<AddToTableModalProps> = ({
                         key={currency.code}
                         onClick={() => handleCurrencyClick(currency)}
                         className={`p-3 border rounded-lg transition-all text-left group ${isInTable
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700'
+                          ? 'border-brand-ink bg-brand-champagne/60 dark:bg-brand-ink/30'
+                          : 'border-brand-ink/10 dark:border-brand-champagne/15 hover:bg-brand-champagne/60 dark:hover:bg-brand-surface-dark-muted hover:border-brand-ink-light dark:hover:border-brand-ink-light'
                           }`}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <div className="font-semibold text-sm text-gray-900 dark:text-white">{currency.code}</div>
                           {isInTable && (
-                            <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
-                              <div className="w-2 h-2 bg-white rounded-full" />
+                            <div className="w-4 h-4 bg-brand-ink rounded-full flex items-center justify-center">
+                              <div className="w-2 h-2 bg-brand-surface rounded-full" />
                             </div>
                           )}
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{currency.name}</div>
                         {!isInTable && (
                           <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold">Ekle →</span>
+                            <span className="text-xs text-brand-ink dark:text-brand-champagne-dark font-semibold">Ekle →</span>
                           </div>
                         )}
                       </button>
@@ -335,22 +335,22 @@ const AddToTableModal: React.FC<AddToTableModalProps> = ({
                         key={stock.code}
                         onClick={() => handleStockClick(stock)}
                         className={`p-3 border rounded-lg transition-all text-left group ${isInTable
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700'
+                          ? 'border-brand-ink bg-brand-champagne/60 dark:bg-brand-ink/30'
+                          : 'border-brand-ink/10 dark:border-brand-champagne/15 hover:bg-brand-champagne/60 dark:hover:bg-brand-surface-dark-muted hover:border-brand-ink-light dark:hover:border-brand-ink-light'
                           }`}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <div className="font-semibold text-sm text-gray-900 dark:text-white">{stock.code}</div>
                           {isInTable && (
-                            <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
-                              <div className="w-2 h-2 bg-white rounded-full" />
+                            <div className="w-4 h-4 bg-brand-ink rounded-full flex items-center justify-center">
+                              <div className="w-2 h-2 bg-brand-surface rounded-full" />
                             </div>
                           )}
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{stock.name}</div>
                         {!isInTable && (
                           <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold">Ekle →</span>
+                            <span className="text-xs text-brand-ink dark:text-brand-champagne-dark font-semibold">Ekle →</span>
                           </div>
                         )}
                       </button>
@@ -377,22 +377,22 @@ const AddToTableModal: React.FC<AddToTableModalProps> = ({
                         key={fund.key}
                         onClick={() => handleFundClick(fund)}
                         className={`p-3 border rounded-lg transition-all text-left group ${isInTable
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700'
+                          ? 'border-brand-ink bg-brand-champagne/60 dark:bg-brand-ink/30'
+                          : 'border-brand-ink/10 dark:border-brand-champagne/15 hover:bg-brand-champagne/60 dark:hover:bg-brand-surface-dark-muted hover:border-brand-ink-light dark:hover:border-brand-ink-light'
                           }`}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <div className="font-semibold text-sm text-gray-900 dark:text-white">{fund.key}</div>
                           {isInTable && (
-                            <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
-                              <div className="w-2 h-2 bg-white rounded-full" />
+                            <div className="w-4 h-4 bg-brand-ink rounded-full flex items-center justify-center">
+                              <div className="w-2 h-2 bg-brand-surface rounded-full" />
                             </div>
                           )}
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{fund.value}</div>
                         {!isInTable && (
                           <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold">Ekle →</span>
+                            <span className="text-xs text-brand-ink dark:text-brand-champagne-dark font-semibold">Ekle →</span>
                           </div>
                         )}
                       </button>
@@ -405,14 +405,14 @@ const AddToTableModal: React.FC<AddToTableModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+        <div className="p-6 border-t border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {temporaryItems.length > 0 && t('addModal.addedCount', { count: temporaryItems.length })}
             </p>
             <button
               onClick={handleClose}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold"
+              className="px-6 py-2 bg-brand-ink hover:bg-brand-ink-light text-white rounded-lg transition-colors font-semibold"
             >
               {t('addModal.close')}
             </button>

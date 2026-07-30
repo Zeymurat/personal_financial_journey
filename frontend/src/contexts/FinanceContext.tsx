@@ -18,6 +18,7 @@ import {
 } from '../services/investmentService';
 import { getExchangeRates, convertCurrency } from '../services/currencyService';
 import { tcmbAPI, borsaAPI } from '../services/apiService';
+import { hasStoredAccessToken } from '../services/authTokenStore';
 import { useAuth } from './AuthContext';
 
 // Borsa verisi tipi
@@ -444,8 +445,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
     
     // Token kontrolü - token yoksa bekle
-    const token = localStorage.getItem('access_token');
-    if (!token) {
+    if (!hasStoredAccessToken()) {
       return;
     }
     

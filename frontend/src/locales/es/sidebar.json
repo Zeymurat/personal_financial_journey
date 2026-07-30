@@ -13,7 +13,10 @@
     "calculator": "Calculadora",
     "notifications": "Notificaciones",
     "agenda": "Agenda",
-    "settings": "Ajustes"
+    "settings": "Ajustes",
+    "assistant": "Asistente de seguimiento",
+    "beta": "Beta",
+    "assistantComingSoon": "Próximamente — en desarrollo"
   },
   "logout": "Cerrar sesión",
   "userFallback": "Usuario"

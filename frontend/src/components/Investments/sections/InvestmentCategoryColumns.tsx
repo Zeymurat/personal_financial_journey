@@ -18,30 +18,30 @@ const InvestmentCategoryColumns: React.FC<InvestmentCategoryColumnsProps> = ({
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl p-8 border border-slate-200/50 dark:border-slate-700/50 shadow-2xl">
+      <div className="bg-brand-surface/95 dark:bg-brand-surface-dark backdrop-blur-sm rounded-3xl p-8 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-brand-lg">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-black text-slate-900 dark:text-white">{t('category.stocksFundsTitle')}</h2>
             <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">{t('category.stocksFundsSubtitle')}</p>
           </div>
-          <span className="text-sm font-bold bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-4 py-2 rounded-full">
+          <span className="text-sm font-bold bg-brand-champagne dark:bg-brand-surface-dark text-brand-ink dark:text-brand-champagne px-4 py-2 rounded-full">
             {t('category.positions', { count: stockInvestments.length })}
           </span>
         </div>
         <div className="space-y-4">
           {stockInvestments.map((investment) => {
             const displayType = (investment as Investment & { displayType?: string }).displayType || investment.type;
-            let iconGradient = 'from-blue-500 to-cyan-600';
+            let iconGradient = 'from-brand-ink to-brand-ink-light';
             if (displayType === 'fund') {
-              iconGradient = 'from-purple-500 to-pink-600';
+              iconGradient = 'from-brand-ink to-brand-ink-light';
             } else if (displayType === 'stock') {
-              iconGradient = 'from-blue-500 to-cyan-600';
+              iconGradient = 'from-brand-ink to-brand-ink-light';
             }
 
             return (
               <div
                 key={investment.id}
-                className="flex items-center justify-between p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-2xl transition-all duration-300 hover:scale-102 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 group cursor-pointer"
+                className="flex items-center justify-between p-6 hover:bg-brand-surface-muted dark:hover:bg-brand-surface-dark-muted rounded-2xl transition-all duration-300 hover:scale-102 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 group cursor-pointer"
               >
                 <div className="flex items-center space-x-4">
                   <div
@@ -81,7 +81,7 @@ const InvestmentCategoryColumns: React.FC<InvestmentCategoryColumnsProps> = ({
                   <button
                     type="button"
                     onClick={() => onSelectInvestment(investment)}
-                    className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-colors"
+                    className="p-3 text-slate-400 hover:text-brand-ink hover:bg-brand-champagne/60 dark:hover:bg-brand-surface-dark-muted rounded-xl transition-colors"
                   >
                     <Eye className="w-5 h-5" />
                   </button>
@@ -92,7 +92,7 @@ const InvestmentCategoryColumns: React.FC<InvestmentCategoryColumnsProps> = ({
         </div>
       </div>
 
-      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl p-8 border border-slate-200/50 dark:border-slate-700/50 shadow-2xl">
+      <div className="bg-brand-surface/95 dark:bg-brand-surface-dark backdrop-blur-sm rounded-3xl p-8 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-brand-lg">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-black text-slate-900 dark:text-white">{t('category.cryptoForexTitle')}</h2>
@@ -108,9 +108,9 @@ const InvestmentCategoryColumns: React.FC<InvestmentCategoryColumnsProps> = ({
             let iconGradient = 'from-yellow-500 to-orange-600';
 
             if (displayType === 'currency' || displayType === 'forex') {
-              iconGradient = 'from-green-500 to-emerald-600';
+              iconGradient = 'from-brand-ink to-brand-ink-light';
             } else if (displayType === 'gold') {
-              iconGradient = 'from-amber-500 to-yellow-600';
+              iconGradient = 'from-brand-ink to-brand-ink-light';
             } else if (displayType === 'preciousMetal') {
               iconGradient = 'from-slate-500 to-gray-600';
             } else if (displayType === 'crypto') {
@@ -120,7 +120,7 @@ const InvestmentCategoryColumns: React.FC<InvestmentCategoryColumnsProps> = ({
             return (
               <div
                 key={investment.id}
-                className="flex items-center justify-between p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-2xl transition-all duration-300 hover:scale-102 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 group cursor-pointer"
+                className="flex items-center justify-between p-6 hover:bg-brand-surface-muted dark:hover:bg-brand-surface-dark-muted rounded-2xl transition-all duration-300 hover:scale-102 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 group cursor-pointer"
               >
                 <div className="flex items-center space-x-4">
                   <div
@@ -160,7 +160,7 @@ const InvestmentCategoryColumns: React.FC<InvestmentCategoryColumnsProps> = ({
                   <button
                     type="button"
                     onClick={() => onSelectInvestment(investment)}
-                    className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-colors"
+                    className="p-3 text-slate-400 hover:text-brand-ink hover:bg-brand-champagne/60 dark:hover:bg-brand-surface-dark-muted rounded-xl transition-colors"
                   >
                     <Eye className="w-5 h-5" />
                   </button>

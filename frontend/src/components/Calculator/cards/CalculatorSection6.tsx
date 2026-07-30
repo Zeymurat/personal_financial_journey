@@ -23,9 +23,9 @@ const CalculatorSection6: React.FC<CalculatorSection6Props> = ({
   const { t } = useTranslation('calculator');
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 lg:col-span-2">
+    <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-2xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-lg hover:shadow-brand transition-all duration-300 lg:col-span-2">
       <div className="flex items-center space-x-3 mb-6">
-        <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg">
+        <div className="p-2 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-lg">
           <CreditCard className="w-5 h-5 text-white" />
         </div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('s6.title')}</h2>
@@ -84,7 +84,7 @@ const CalculatorSection6: React.FC<CalculatorSection6Props> = ({
             value={minPayment ? formatTrFromEnOptionalKurus(minPayment) : ''}
             readOnly
             placeholder={t('common.resultPlaceholder')}
-            className="w-full p-3 border-2 border-emerald-200 dark:border-emerald-800 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 dark:text-white font-bold text-lg"
+            className="w-full p-3 border-2 border-brand-ink/15 dark:border-brand-champagne/15 rounded-xl bg-gradient-to-r from-brand-surface to-brand-surface-muted dark:from-brand-surface-dark dark:to-brand-surface-dark-muted dark:text-white font-bold text-lg"
           />
         </div>
       </div>

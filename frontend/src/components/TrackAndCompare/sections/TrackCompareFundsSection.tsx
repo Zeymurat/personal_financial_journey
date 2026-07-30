@@ -29,8 +29,8 @@ const TrackCompareFundsSection: React.FC<Props> = ({
   const { t } = useTranslation('trackCompare');
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl border border-brand-ink/10 dark:border-brand-champagne/15 overflow-hidden mb-8">
+      <div className="px-6 py-4 border-b border-brand-ink/10 dark:border-brand-champagne/15">
         <div className="flex justify-between items-center">
           <div className="flex-1">
             <div className="flex items-center space-x-3">
@@ -38,10 +38,10 @@ const TrackCompareFundsSection: React.FC<Props> = ({
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            {loadingFunds && <Loader2 className="w-5 h-5 animate-spin text-blue-600" />}
+            {loadingFunds && <Loader2 className="w-5 h-5 animate-spin text-brand-ink" />}
             <button
               onClick={onOpenSelection}
-              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-all duration-200 text-sm"
+              className="flex items-center space-x-2 bg-brand-ink hover:bg-brand-ink-light text-white px-3 py-1.5 rounded-lg transition-all duration-200 text-sm"
               title={t('funds.selectTitle')}
               type="button"
             >
@@ -58,7 +58,7 @@ const TrackCompareFundsSection: React.FC<Props> = ({
               <p className="text-gray-500 dark:text-gray-400 mb-4">{t('funds.empty')}</p>
               <button
                 onClick={onOpenSelection}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                className="bg-brand-ink hover:bg-brand-ink-light text-white px-6 py-2 rounded-lg transition-colors"
                 type="button"
               >
                 {t('funds.emptyCta')}

@@ -48,9 +48,9 @@ const MainApp: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen bg-background">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto bg-transparent">
         {renderContent()}
       </main>
     </div>

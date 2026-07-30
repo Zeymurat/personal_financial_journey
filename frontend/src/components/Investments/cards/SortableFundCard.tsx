@@ -30,7 +30,7 @@ const SortableFundCard: React.FC<SortableFundCardProps> = ({ fund, onRemove, onV
     <div
       ref={setNodeRef}
       style={style}
-      className="relative p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-white dark:bg-gray-800 group"
+      className="relative p-4 border border-brand-ink/10 dark:border-brand-champagne/15 rounded-lg hover:shadow-md transition-shadow bg-brand-surface dark:bg-brand-surface-dark group"
     >
       {onRemove && (
         <button
@@ -65,7 +65,7 @@ const SortableFundCard: React.FC<SortableFundCardProps> = ({ fund, onRemove, onV
             e.stopPropagation();
             onViewDetail(fund.key, fund.value);
           }}
-          className="w-full mt-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center justify-center space-x-2"
+          className="w-full mt-2 px-3 py-2 bg-brand-ink hover:bg-brand-ink-light text-white rounded-lg transition-colors text-sm font-medium flex items-center justify-center space-x-2"
           title="Fon detay bilgilerini görüntüle"
         >
           <Eye className="w-4 h-4" />

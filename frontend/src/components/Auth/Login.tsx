@@ -75,19 +75,19 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex">
+    <div className="min-h-screen bg-gradient-to-br from-brand-ink-deep via-brand-ink to-brand-ink-light flex">
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-ink/25 to-brand-ink-light/20 backdrop-blur-sm"></div>
         <div className="relative z-10 flex flex-col justify-center items-center p-12  pl-60 text-white">
           <div className="mb-8">
             <div className="flex items-center space-x-4 mb-6">
-              <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-2xl">
-                <Wallet className="w-12 h-12 text-white" />
+              <div className="p-4 bg-brand-gradient rounded-2xl shadow-gold ring-1 ring-gold/40">
+                <Wallet className="w-12 h-12 text-brand-champagne" />
               </div>
               <div>
-                <h1 className="text-4xl font-black">{t('login.brandTitle')}</h1>
-                <p className="text-xl text-blue-200 font-medium">{t('login.brandSubtitle')}</p>
+                <h1 className="text-4xl font-semibold tracking-tight">{t('login.brandTitle')}</h1>
+                <p className="text-sm uppercase tracking-[0.16em] text-gold font-medium mt-1">{t('login.brandSubtitle')}</p>
               </div>
             </div>
           </div>
@@ -97,47 +97,47 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
 
             <div className="text-center mb-12">
               <h2 className="text-3xl font-black mb-4">{t('login.heroTitle')}</h2>
-              <p className="text-lg text-blue-200 leading-relaxed">{t('login.heroBody')}</p>
+              <p className="text-lg text-brand-champagne leading-relaxed">{t('login.heroBody')}</p>
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-              <div className="flex items-center space-x-4 p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+              <div className="flex items-center space-x-4 p-6 bg-brand-surface/10 backdrop-blur-sm rounded-2xl border border-white/20">
                 <div className="p-3 bg-emerald-500/20 rounded-xl">
                   <TrendingUp className="w-8 h-8 text-emerald-400" />
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">{t('login.featureInvestTitle')}</h3>
-                  <p className="text-blue-200 text-sm">{t('login.featureInvestDesc')}</p>
+                  <p className="text-brand-champagne text-sm">{t('login.featureInvestDesc')}</p>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4 p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
-                <div className="p-3 bg-blue-500/20 rounded-xl">
-                  <Shield className="w-8 h-8 text-blue-400" />
+              <div className="flex items-center space-x-4 p-6 bg-brand-surface/10 backdrop-blur-sm rounded-2xl border border-white/20">
+                <div className="p-3 bg-brand-ink/20 rounded-xl">
+                  <Shield className="w-8 h-8 text-brand-champagne-dark" />
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">{t('login.featureSecureTitle')}</h3>
-                  <p className="text-blue-200 text-sm">{t('login.featureSecureDesc')}</p>
+                  <p className="text-brand-champagne text-sm">{t('login.featureSecureDesc')}</p>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4 p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
-                <div className="p-3 bg-purple-500/20 rounded-xl">
-                  <Users className="w-8 h-8 text-purple-400" />
+              <div className="flex items-center space-x-4 p-6 bg-brand-surface/10 backdrop-blur-sm rounded-2xl border border-white/20">
+                <div className="p-3 bg-brand-ink/20 rounded-xl">
+                  <Users className="w-8 h-8 text-brand-champagne-dark" />
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">{t('login.featureUxTitle')}</h3>
-                  <p className="text-blue-200 text-sm">{t('login.featureUxDesc')}</p>
+                  <p className="text-brand-champagne text-sm">{t('login.featureUxDesc')}</p>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4 p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
-                <div className="p-3 bg-blue-500/20 rounded-xl">
-                 <Info className="w-8 h-8 text-blue-400" />
+              <div className="flex items-center space-x-4 p-6 bg-brand-surface/10 backdrop-blur-sm rounded-2xl border border-white/20">
+                <div className="p-3 bg-brand-ink/20 rounded-xl">
+                 <Info className="w-8 h-8 text-brand-champagne-dark" />
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">{t('login.featureNoInfoTitle')}</h3>
-                  <p className="text-blue-200 text-sm">{t('login.featureNoInfoDesc')}</p>
+                  <p className="text-brand-champagne text-sm">{t('login.featureNoInfoDesc')}</p>
                 </div>
               </div>
             </div>
@@ -148,10 +148,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
       {/* Right Side - Login Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50">
+          <div className="bg-brand-surface/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-3xl p-8 shadow-brand-lg border border-white/20 dark:border-slate-700/50">
             <div className="text-center mb-8">
               <div className="lg:hidden flex items-center justify-center space-x-3 mb-6">
-                <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl">
+                <div className="p-3 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-xl">
                   <Wallet className="w-8 h-8 text-white" />
                 </div>
                 <h1 className="text-2xl font-black text-slate-900 dark:text-white">{t('login.brandTitle')}</h1>
@@ -171,7 +171,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`w-full pl-12 pr-4 py-4 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${errors.email ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'
+                    className={`w-full pl-12 pr-4 py-4 border rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${errors.email ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'
                       }`}
                     placeholder={t('login.emailPlaceholder')}
                   />
@@ -189,7 +189,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                     type={showPassword ? 'text' : 'password'}
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
-                    className={`w-full pl-12 pr-12 py-4 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${errors.password ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'
+                    className={`w-full pl-12 pr-12 py-4 border rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${errors.password ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'
                       }`}
                     placeholder="••••••••"
                   />
@@ -206,10 +206,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
 
               <div className="flex items-center justify-between">
                 <label className="flex items-center">
-                  <input type="checkbox" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                  <input type="checkbox" className="rounded border-slate-300 text-brand-ink focus:ring-brand-ink" />
                   <span className="ml-2 text-sm text-slate-600 dark:text-slate-400 font-medium">{t('login.rememberMe')}</span>
                 </label>
-                {/* <button type="button" className="text-sm text-blue-600 hover:text-blue-700 font-semibold">
+                {/* <button type="button" className="text-sm text-brand-ink hover:text-brand-ink font-semibold">
                   {t('login.forgotPassword')}
                 </button> */}
               </div>
@@ -217,7 +217,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 font-bold text-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-brand-gradient text-brand-champagne py-4 rounded-xl hover:shadow-gold ring-1 ring-gold/30 hover:ring-gold/50 transition-all duration-200 font-semibold text-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -234,7 +234,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                   <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400">
+                  <span className="px-2 bg-brand-surface dark:bg-brand-surface-dark text-gray-500 dark:text-gray-400">
                     {t('login.or')}
                   </span>
                 </div>
@@ -244,10 +244,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={isGoogleLoading || loading}
-                className="w-full bg-white dark:bg-slate-700 text-gray-800 dark:text-white py-3 rounded-xl border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 transition-all duration-200 font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-brand-surface dark:bg-slate-700 text-gray-800 dark:text-white py-3 rounded-xl border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 transition-all duration-200 font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGoogleLoading ? (
-                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-brand-ink border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <>
                     <FcGoogle className="w-5 h-5" />
@@ -262,7 +262,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
                 {t('login.noAccount')}{' '}
                 <button
                   onClick={onSwitchToRegister}
-                  className="text-blue-600 hover:text-blue-700 font-bold hover:underline"
+                  className="text-brand-ink hover:text-brand-ink font-bold hover:underline"
                 >
                   {t('login.register')}
                 </button>
@@ -279,7 +279,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister, loading }) =
             )}
 
             {/* Demo Credentials */}
-            {/* <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-700/30">
+            {/* <div className="mt-6 p-4 bg-brand-champagne/60 dark:bg-brand-ink/30 rounded-xl border border-brand-champagne-dark dark:border-brand-ink-light/30">
               
             </div> */}
           </div>

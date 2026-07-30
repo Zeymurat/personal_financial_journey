@@ -7,23 +7,22 @@ from rest_framework.permissions import AllowAny
 from firebase_admin import auth, exceptions
 import logging
 
-# Logger'ı tanımlayın
 logger = logging.getLogger(__name__)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class FirebaseLoginView(APIView):
     """
-    Firebase Authentication ID Token'ı doğrulayan API view'ı.
-    Bu view, Django'nun veritabanı sistemini tamamen bypass eder.
-    Tarayıcıdan cross-origin POST için CSRF kontrolü kapalı (token tabanlı doğrulama).
+    Firebase ID Token doğrulama (stateless).
+    Access = doğrulanmış Firebase ID token.
+    Ayrı bir JWT refresh yok; istemci getIdToken() ile yeniler.
     """
     authentication_classes: list = []
     permission_classes = [AllowAny]
 
     def post(self, request):
         id_token = request.data.get('id_token')
-        
+
         if not id_token:
             return Response(
                 {"error": "ID Token sağlanmadı."},
@@ -33,30 +32,27 @@ class FirebaseLoginView(APIView):
         try:
             decoded_token = auth.verify_id_token(id_token)
             uid = decoded_token['uid']
-            email = decoded_token['email']
-            
-            logger.info(f"✅ Kullanıcı başarıyla doğrulandı: {email} (UID: {uid})")
-            
-            # Frontend'in beklediği format: access ve refresh token'ları
-            # Firebase ID Token'ı hem access hem refresh olarak kullanıyoruz
+            email = decoded_token.get('email')
+
+            logger.info("Kullanıcı doğrulandı: uid=%s", uid)
+
             return Response(
                 {
-                    "message": "Giriş başarılı", 
-                    "uid": uid, 
+                    "message": "Giriş başarılı",
+                    "uid": uid,
                     "email": email,
-                    "access": id_token,  # Firebase ID Token'ı access token olarak döndür
-                    "refresh": id_token  # Aynı token'ı refresh olarak da döndür
+                    "access": id_token,
                 },
                 status=status.HTTP_200_OK
             )
         except exceptions.AuthError as e:
-            logger.error(f"❌ Firebase ID Token doğrulama hatası: {e}")
+            logger.error("Firebase ID Token doğrulama hatası: %s", e)
             return Response(
                 {"error": "Geçersiz ID Token."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
         except Exception as e:
-            logger.error(f"❌ Genel hata: {e}")
+            logger.error("Firebase login genel hata: %s", e)
             return Response(
                 {"error": "Sunucu hatası."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

@@ -22,8 +22,8 @@ const ReportsDetailedTable: React.FC<Props> = ({ monthlyDetailedReportData }) =>
   }, [i18n.language]);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl border border-brand-ink/10 dark:border-brand-champagne/15 overflow-hidden">
+      <div className="px-6 py-4 border-b border-brand-ink/10 dark:border-brand-champagne/15">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('detailed.title')}</h2>
@@ -33,7 +33,7 @@ const ReportsDetailedTable: React.FC<Props> = ({ monthlyDetailedReportData }) =>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 dark:bg-gray-700">
+          <thead className="bg-brand-surface-muted dark:bg-brand-surface-dark-muted">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 {t('detailed.month')}
@@ -81,7 +81,7 @@ const ReportsDetailedTable: React.FC<Props> = ({ monthlyDetailedReportData }) =>
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-blue-600 font-semibold">
+                      <span className="text-brand-ink font-semibold">
                         ₺{report.netIncome.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </td>
@@ -99,7 +99,7 @@ const ReportsDetailedTable: React.FC<Props> = ({ monthlyDetailedReportData }) =>
                         <span className="text-gray-900 dark:text-white font-medium mr-2">{savingsRate}%</span>
                         <div className="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                           <div
-                            className="bg-blue-500 h-2 rounded-full"
+                            className="bg-brand-ink h-2 rounded-full"
                             style={{ width: `${Math.min(Math.max(savingsRate, 0), 100)}%` }}
                           />
                         </div>

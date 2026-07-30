@@ -172,7 +172,7 @@ const FundDetailModal: React.FC<FundDetailModalProps> = ({
             onClick={onClose}
         >
             <div
-                className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+                className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-brand-lg"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -197,20 +197,20 @@ const FundDetailModal: React.FC<FundDetailModalProps> = ({
                 {/* Quota Bilgisi */}
                 {quota && (
                     <div className={`mb-4 p-3 rounded-lg ${quota.remaining > 0
-                        ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
+                        ? 'bg-brand-champagne/60 dark:bg-brand-ink/30 border border-brand-champagne-dark dark:border-brand-ink-light'
                         : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
                         }`}>
                         <div className="flex flex-col">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-2">
-                                    <AlertCircle className={`w-5 h-5 ${quota.remaining > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'
+                                    <AlertCircle className={`w-5 h-5 ${quota.remaining > 0 ? 'text-brand-ink dark:text-brand-champagne-dark' : 'text-red-600 dark:text-red-400'
                                         }`} />
-                                    <span className={`font-medium ${quota.remaining > 0 ? 'text-blue-900 dark:text-blue-100' : 'text-red-900 dark:text-red-100'
+                                    <span className={`font-medium ${quota.remaining > 0 ? 'text-brand-ink dark:text-brand-champagne' : 'text-red-900 dark:text-red-100'
                                         }`}>
                                         {t('fundDetail.quotaTitle', { used: quota.request_count })}
                                     </span>
                                 </div>
-                                <span className={`text-sm font-semibold ${quota.remaining > 0 ? 'text-blue-700 dark:text-blue-300' : 'text-red-700 dark:text-red-300'
+                                <span className={`text-sm font-semibold ${quota.remaining > 0 ? 'text-brand-ink dark:text-brand-champagne' : 'text-red-700 dark:text-red-300'
                                     }`}>
                                     {t('fundDetail.remaining', { count: quota.remaining })}
                                 </span>
@@ -231,7 +231,7 @@ const FundDetailModal: React.FC<FundDetailModalProps> = ({
                         onClick={handleShowData}
                         disabled={!canShowData || loading}
                         className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${canShowData && !loading
-                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                            ? 'bg-brand-ink hover:bg-brand-ink-light text-white'
                             : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                             }`}
                         title={!canShowData ? t('fundDetail.titleTooltipLimit') : t('fundDetail.titleTooltipShow')}
@@ -270,9 +270,9 @@ const FundDetailModal: React.FC<FundDetailModalProps> = ({
                     <div className="space-y-6">
                         {/* Son Fiyat ve Günlük Getiri */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div className="p-4 bg-brand-surface dark:bg-brand-surface-dark rounded-lg border border-brand-champagne-dark dark:border-brand-ink-light">
                                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('fundDetail.lastPrice')}</p>
-                                <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                                <p className="text-2xl font-bold text-brand-ink dark:text-brand-champagne">
                                     {getTopListValue(LAST_PRICE_API_KEY) || t('fundDetail.na')}
                                 </p>
                             </div>
@@ -302,7 +302,7 @@ const FundDetailModal: React.FC<FundDetailModalProps> = ({
                             {fundDetail.topList
                                 .filter(item => ![LAST_PRICE_API_KEY, DAILY_RETURN_API_KEY].includes(item.key))
                                 .map((item, index) => (
-                                    <div key={index} className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                    <div key={index} className="p-3 bg-brand-surface-muted dark:bg-brand-surface-dark-muted/50 rounded-lg">
                                         <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">{item.key}</p>
                                         <p className="text-sm font-semibold text-gray-900 dark:text-white">{item.value}</p>
                                     </div>
@@ -315,9 +315,9 @@ const FundDetailModal: React.FC<FundDetailModalProps> = ({
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{t('fundDetail.returnIndicators')}</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                     {fundDetail.priceIndicators.map((indicator, index) => (
-                                        <div key={index} className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                                        <div key={index} className="p-3 bg-brand-surface dark:bg-brand-surface-dark rounded-lg border border-brand-champagne-dark dark:border-brand-ink-light">
                                             <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">{indicator.key}</p>
-                                            <p className="text-sm font-semibold text-purple-900 dark:text-purple-100">{indicator.value}</p>
+                                            <p className="text-sm font-semibold text-brand-ink dark:text-brand-champagne">{indicator.value}</p>
                                         </div>
                                     ))}
                                 </div>

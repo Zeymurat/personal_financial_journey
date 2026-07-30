@@ -21,7 +21,7 @@ const DashboardRecentTransactions: React.FC<DashboardRecentTransactionsProps> = 
   }, [i18n.language]);
 
   return (
-    <div className="xl:col-span-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl p-8 border border-slate-200/50 dark:border-slate-700/50 shadow-2xl">
+    <div className="xl:col-span-2 bg-brand-surface/95 dark:bg-brand-surface-dark backdrop-blur-sm rounded-3xl p-8 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-brand-lg">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-black text-slate-900 dark:text-white">{t('recent.title')}</h2>
@@ -30,7 +30,7 @@ const DashboardRecentTransactions: React.FC<DashboardRecentTransactionsProps> = 
         <button
           type="button"
           onClick={() => window.dispatchEvent(new CustomEvent('navigateToTab', { detail: 'transactions' }))}
-          className="text-blue-600 hover:text-blue-700 font-bold text-sm bg-blue-50 dark:bg-blue-900/30 px-6 py-3 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all duration-200 hover:scale-105"
+          className="text-brand-ink hover:text-brand-ink font-bold text-sm bg-brand-champagne/60 dark:bg-brand-surface-dark-muted px-6 py-3 rounded-xl hover:bg-brand-champagne dark:hover:bg-brand-surface-dark-muted transition-all duration-200 hover:scale-105"
         >
           {t('recent.seeAll')}
         </button>
@@ -46,7 +46,7 @@ const DashboardRecentTransactions: React.FC<DashboardRecentTransactionsProps> = 
             return (
               <div
                 key={transaction.id}
-                className="flex items-center justify-between p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-2xl transition-all duration-300 hover:scale-102 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 group cursor-pointer"
+                className="flex items-center justify-between p-6 hover:bg-brand-surface-muted dark:hover:bg-brand-surface-dark-muted rounded-2xl transition-all duration-300 hover:scale-102 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 group cursor-pointer"
               >
                 <div className="flex items-center space-x-4">
                   <div

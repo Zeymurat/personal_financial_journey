@@ -112,19 +112,19 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex">
+    <div className="min-h-screen bg-gradient-to-br from-brand-ink-deep via-brand-ink to-brand-ink-light flex">
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-blue-600/20 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-ink/25 to-brand-ink-light/20 backdrop-blur-sm"></div>
         <div className="relative z-10 flex flex-col justify-center items-center p-12 pl-60 text-white">
           <div className="mb-8">
             <div className="flex items-center space-x-4 mb-6">
-              <div className="p-4 bg-gradient-to-r from-purple-500 to-blue-600 rounded-2xl shadow-2xl">
+              <div className="p-4 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-2xl shadow-brand-lg">
                 <Wallet className="w-12 h-12 text-white" />
               </div>
               <div>
                 <h1 className="text-4xl font-black">{t('login.brandTitle')}</h1>
-                <p className="text-xl text-purple-200 font-medium">{t('register.brandSubtitle')}</p>
+                <p className="text-xl text-brand-champagne font-medium">{t('register.brandSubtitle')}</p>
               </div>
             </div>
           </div>
@@ -132,29 +132,29 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
           <div className="space-y-8 max-w-md">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-black mb-4">{t('register.heroTitle')}</h2>
-              <p className="text-lg text-purple-200 leading-relaxed">{t('register.heroBody')}</p>
+              <p className="text-lg text-brand-champagne leading-relaxed">{t('register.heroBody')}</p>
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center space-x-3 text-purple-200">
+              <div className="flex items-center space-x-3 text-brand-champagne">
                 <div className="p-2 bg-green-500/20 rounded-full">
                   <Check className="w-5 h-5 text-green-400" />
                 </div>
                 <span className="font-semibold">{t('register.bullet1')}</span>
               </div>
-              <div className="flex items-center space-x-3 text-purple-200">
+              <div className="flex items-center space-x-3 text-brand-champagne">
                 <div className="p-2 bg-green-500/20 rounded-full">
                   <Check className="w-5 h-5 text-green-400" />
                 </div>
                 <span className="font-semibold">{t('register.bullet2')}</span>
               </div>
-              <div className="flex items-center space-x-3 text-purple-200">
+              <div className="flex items-center space-x-3 text-brand-champagne">
                 <div className="p-2 bg-green-500/20 rounded-full">
                   <Check className="w-5 h-5 text-green-400" />
                 </div>
                 <span className="font-semibold">Aylık raporlar ve grafikler</span>
               </div>
-              <div className="flex items-center space-x-3 text-purple-200">
+              <div className="flex items-center space-x-3 text-brand-champagne">
                 <div className="p-2 bg-green-500/20 rounded-full">
                   <Check className="w-5 h-5 text-green-400" />
                 </div>
@@ -168,10 +168,10 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
       {/* Right Side - Register Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50">
+          <div className="bg-brand-surface/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-3xl p-8 shadow-brand-lg border border-white/20 dark:border-slate-700/50">
             <div className="text-center">
               <div className="lg:hidden flex items-center justify-center space-x-3 mb-6">
-                <div className="p-3 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl">
+                <div className="p-3 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-xl">
                   <Wallet className="w-8 h-8 text-white" />
                 </div>
                 <h1 className="text-2xl font-black text-slate-900 dark:text-white">{t('login.brandTitle')}</h1>
@@ -196,7 +196,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                     type="text"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    className={`w-full pl-12 pr-4 py-4 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${
+                    className={`w-full pl-12 pr-4 py-4 border rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${
                       errors.name ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'
                     }`}
                     placeholder={t('register.namePlaceholder')}
@@ -215,7 +215,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`w-full pl-12 pr-4 py-4 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${
+                    className={`w-full pl-12 pr-4 py-4 border rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${
                       errors.email ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'
                     }`}
                     placeholder={t('login.emailPlaceholder')}
@@ -234,7 +234,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                     type={showPassword ? 'text' : 'password'}
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
-                    className={`w-full pl-12 pr-12 py-4 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${
+                    className={`w-full pl-12 pr-12 py-4 border rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${
                       errors.password ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'
                     }`}
                     placeholder="••••••••"
@@ -275,7 +275,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                    className={`w-full pl-12 pr-12 py-4 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${
+                    className={`w-full pl-12 pr-12 py-4 border rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200 ${
                       errors.confirmPassword ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'
                     }`}
                     placeholder="••••••••"
@@ -302,7 +302,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                         setErrors(prev => ({ ...prev, terms: '' }));
                       }
                     }}
-                    className="mt-1 rounded border-slate-300 text-purple-600 focus:ring-purple-500" 
+                    className="mt-1 rounded border-slate-300 text-brand-ink focus:ring-brand-ink" 
                   />
                     <span className="text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
                     {t('register.termsCheckboxLabel')}
@@ -314,7 +314,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 font-bold text-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-brand-ink to-brand-ink-light text-white py-4 rounded-xl hover:shadow-brand hover:scale-105 transition-all duration-200 font-bold text-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -332,7 +332,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin, loadin
                 {t('register.hasAccount')}{' '}
                 <button
                   onClick={onSwitchToLogin}
-                  className="text-purple-600 hover:text-purple-700 font-bold hover:underline"
+                  className="text-brand-ink hover:text-brand-ink font-bold hover:underline"
                 >
                   {t('register.signIn')}
                 </button>

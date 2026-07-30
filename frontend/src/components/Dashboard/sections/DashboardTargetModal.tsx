@@ -31,7 +31,7 @@ const DashboardTargetModal: React.FC<DashboardTargetModalProps> = ({
         onClick={onClose}
       >
         <div
-          className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl border border-slate-200/50 dark:border-slate-700/50"
+          className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 w-full max-w-md mx-4 shadow-brand-lg border border-brand-ink/10 dark:border-brand-champagne/15"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between mb-6">
@@ -62,7 +62,7 @@ const DashboardTargetModal: React.FC<DashboardTargetModalProps> = ({
                 value={targetInputValue}
                 onChange={(e) => onChangeTargetInput(e.target.value)}
                 placeholder={t('targetModal.placeholder')}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-brand-surface dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition-all"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') void onSave();
@@ -84,8 +84,8 @@ const DashboardTargetModal: React.FC<DashboardTargetModalProps> = ({
                 className={`px-6 py-3 rounded-xl font-semibold text-white transition-all ${
                   targetModalType === 'monthly'
                     ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700'
-                    : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700'
-                } shadow-lg hover:shadow-xl`}
+                    : 'bg-gradient-to-r from-brand-ink to-brand-ink-light hover:from-brand-ink-light hover:to-brand-ink'
+                } shadow-lg hover:shadow-brand`}
               >
                 {tc('actions.save')}
               </button>

@@ -1,0 +1,12 @@
+{
+  "title": "Assistant de suivi",
+  "subtitle": "Informations sur votre portefeuille et vos transactions",
+  "disclaimer": "Cet assistant ne fournit pas de conseil en investissement. Les réponses sont informatives et basées uniquement sur vos données.",
+  "emptyHint": "Ex. : Suis-je proche de mes objectifs mensuels ?",
+  "placeholder": "Écrivez votre question…",
+  "send": "Envoyer",
+  "thinking": "Réflexion…",
+  "errors": {
+    "generic": "Réponse impossible. Réessayez."
+  }
+}

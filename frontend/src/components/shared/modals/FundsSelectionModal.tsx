@@ -35,7 +35,7 @@ const FundsSelectionModal: React.FC<FundsSelectionModalProps> = ({
         onClick={onClose}
       >
         <div
-          className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-4xl w-full max-h-[85vh] overflow-y-auto shadow-2xl"
+          className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 max-w-4xl w-full max-h-[85vh] overflow-y-auto shadow-brand-lg"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex justify-between items-center mb-6">
@@ -52,8 +52,8 @@ const FundsSelectionModal: React.FC<FundsSelectionModalProps> = ({
           </div>
 
           {selectedFunds.length > 0 && (
-            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
+            <div className="mb-4 p-3 bg-brand-champagne/60 dark:bg-brand-ink/30 border border-brand-champagne-dark dark:border-brand-ink-light rounded-lg">
+              <p className="text-sm text-brand-ink dark:text-brand-champagne">
                 {t('shared:fundSelection.selectedBanner', { count: selectedFunds.length })}
               </p>
             </div>
@@ -67,7 +67,7 @@ const FundsSelectionModal: React.FC<FundsSelectionModalProps> = ({
                 placeholder={t('shared:fundSelection.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
               />
               {searchQuery && (
                 <button
@@ -105,8 +105,8 @@ const FundsSelectionModal: React.FC<FundsSelectionModalProps> = ({
                     key={fund.key}
                     className={`relative flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
                       isSelected
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-md'
-                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 bg-white dark:bg-gray-700'
+                        ? 'border-brand-ink bg-brand-champagne/60 dark:bg-brand-surface-dark-muted shadow-md'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 bg-brand-surface dark:bg-gray-700'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
@@ -118,7 +118,7 @@ const FundsSelectionModal: React.FC<FundsSelectionModalProps> = ({
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => toggleFundSelection(fund.key)}
-                        className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 mt-0.5 cursor-pointer"
+                        className="w-5 h-5 text-brand-ink rounded focus:ring-brand-ink mt-0.5 cursor-pointer"
                       />
                     </div>
                   </label>
@@ -127,12 +127,12 @@ const FundsSelectionModal: React.FC<FundsSelectionModalProps> = ({
             })()}
           </div>
 
-          <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between items-center pt-4 border-t border-brand-ink/10 dark:border-brand-champagne/15">
             <div className="text-sm text-gray-600 dark:text-gray-400">
               {selectedFunds.length > 0 ? (
                 <span>{t('shared:fundSelection.footerSelected', { count: selectedFunds.length })}</span>
               ) : (
-                <span className="text-amber-600 dark:text-amber-400">{t('shared:fundSelection.footerMinOne')}</span>
+                <span className="text-brand-ink dark:text-brand-champagne-dark">{t('shared:fundSelection.footerMinOne')}</span>
               )}
             </div>
             <div className="flex space-x-3">
@@ -145,7 +145,7 @@ const FundsSelectionModal: React.FC<FundsSelectionModalProps> = ({
               <button
                 onClick={onClose}
                 disabled={selectedFunds.length === 0}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                className="px-4 py-2 bg-brand-ink hover:bg-brand-ink-light disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
               >
                 {t('common:actions.save')}
               </button>

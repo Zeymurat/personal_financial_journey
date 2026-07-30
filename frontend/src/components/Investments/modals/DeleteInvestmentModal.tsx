@@ -28,7 +28,7 @@ const DeleteInvestmentModal: React.FC<DeleteInvestmentModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl border border-slate-200/50 dark:border-slate-700/50"
+        className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 w-full max-w-md mx-4 shadow-brand-lg border border-brand-ink/10 dark:border-brand-champagne/15"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -45,10 +45,10 @@ const DeleteInvestmentModal: React.FC<DeleteInvestmentModalProps> = ({
         </div>
 
         <div className="space-y-6">
-          <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl px-6 py-4">
+          <div className="bg-brand-surface-muted dark:bg-brand-surface-dark-muted rounded-2xl px-6 py-4">
             <div className="flex items-center space-x-4">
-              <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-900/30">
-                <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <div className="p-3 rounded-xl bg-brand-champagne dark:bg-brand-surface-dark-muted">
+                <TrendingUp className="w-6 h-6 text-brand-ink dark:text-brand-champagne-dark" />
               </div>
               <div className="flex-1">
                 <p className="text-lg font-black text-slate-900 dark:text-white">
@@ -63,7 +63,7 @@ const DeleteInvestmentModal: React.FC<DeleteInvestmentModalProps> = ({
                     avg: investment.averagePrice.toLocaleString()
                   })}
                 </p>
-                <p className="text-xl font-black mt-2 text-blue-600 dark:text-blue-400">
+                <p className="text-xl font-black mt-2 text-brand-ink dark:text-brand-champagne-dark">
                   ₺{investment.totalValue.toLocaleString()}
                 </p>
               </div>
@@ -87,7 +87,7 @@ const DeleteInvestmentModal: React.FC<DeleteInvestmentModalProps> = ({
             <button
               type="button"
               onClick={onConfirm}
-              className="flex-1 px-6 py-4 bg-gradient-to-r from-rose-600 to-red-600 text-white rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold flex items-center justify-center space-x-2"
+              className="flex-1 px-6 py-4 bg-gradient-to-r from-rose-600 to-red-600 text-white rounded-xl hover:shadow-brand hover:scale-105 transition-all duration-200 font-semibold flex items-center justify-center space-x-2"
             >
               <Trash2 className="w-5 h-5" />
               <span>{t('deleteInvestmentModal.delete')}</span>

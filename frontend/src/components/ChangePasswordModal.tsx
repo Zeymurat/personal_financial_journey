@@ -90,10 +90,10 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
       aria-labelledby="change-password-title"
     >
       <div
-        className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full border border-gray-200 dark:border-gray-700"
+        className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl shadow-brand max-w-md w-full border border-brand-ink/10 dark:border-brand-champagne/15"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-brand-ink/10 dark:border-brand-champagne/15">
           <h2 id="change-password-title" className="text-lg font-semibold text-gray-900 dark:text-white">
             {t('security.passwordChange.title')}
           </h2>
@@ -122,7 +122,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               required
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink dark:bg-gray-700 dark:text-white"
             />
           </div>
 
@@ -138,7 +138,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
               onChange={(e) => setNewPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink dark:bg-gray-700 dark:text-white"
             />
           </div>
 
@@ -154,7 +154,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink dark:bg-gray-700 dark:text-white"
             />
           </div>
 
@@ -170,7 +170,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-brand-ink text-white rounded-lg hover:bg-brand-ink-light disabled:opacity-50"
             >
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
               {t('security.passwordChange.submit')}

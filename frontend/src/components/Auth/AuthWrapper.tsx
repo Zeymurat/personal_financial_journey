@@ -37,7 +37,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   // ... (Geri kalan JSX kodları aynı)
   if (currentUser === undefined) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-brand-ink-deep via-brand-ink to-brand-ink-light flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-white text-lg font-semibold">{t('wrapper.loading')}</p>

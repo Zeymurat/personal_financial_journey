@@ -114,7 +114,7 @@ const InvestmentDetailModal: React.FC<InvestmentDetailModalProps> = ({
   return (
     <ModalPortal>
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-[90rem] max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200/50 dark:border-slate-700/50">
+      <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 w-full max-w-[90rem] max-h-[90vh] overflow-y-auto shadow-brand-lg border border-brand-ink/10 dark:border-brand-champagne/15">
         <div className="flex justify-between items-start mb-8">
           <div>
             <h3 className="text-3xl font-black text-slate-900 dark:text-white">
@@ -132,35 +132,35 @@ const InvestmentDetailModal: React.FC<InvestmentDetailModalProps> = ({
 
         {/* Investment Summary */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-blue-200/50 dark:border-blue-700/30">
-            <p className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wide">{t('investmentDetail.totalValue')}</p>
-            <p className="text-3xl font-black text-blue-700 dark:text-blue-300 mt-2">
+          <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-2xl p-6 border border-brand-ink/15 dark:border-brand-ink-light/30">
+            <p className="text-sm font-bold text-brand-ink dark:text-brand-champagne-dark uppercase tracking-wide">{t('investmentDetail.totalValue')}</p>
+            <p className="text-3xl font-black text-brand-ink dark:text-brand-champagne mt-2">
               ₺{calculatedStats.totalValue.toLocaleString()}
             </p>
           </div>
-          <div className="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-6 border border-amber-200/50 dark:border-amber-700/30">
-            <p className="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">{t('investmentDetail.principal')}</p>
-            <p className="text-3xl font-black text-amber-700 dark:text-amber-300 mt-2">
+          <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-2xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15">
+            <p className="text-sm font-bold text-brand-ink dark:text-brand-champagne-dark uppercase tracking-wide">{t('investmentDetail.principal')}</p>
+            <p className="text-3xl font-black text-brand-ink dark:text-brand-champagne mt-2">
               ₺{calculatedStats.totalCost.toLocaleString()}
             </p>
-            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">{t('investmentDetail.principalHint')}</p>
+            <p className="text-xs text-brand-ink dark:text-brand-champagne-dark mt-1">{t('investmentDetail.principalHint')}</p>
           </div>
-          <div className="bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-2xl p-6 border border-emerald-200/50 dark:border-emerald-700/30">
+          <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-2xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15">
             <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">{t('investmentDetail.avgCost')}</p>
             <p className="text-3xl font-black text-emerald-700 dark:text-emerald-300 mt-2">
               ₺{calculatedStats.averagePrice.toLocaleString()}
             </p>
           </div>
-          <div className="bg-gradient-to-br from-violet-50 to-purple-100 dark:from-violet-900/20 dark:to-purple-900/20 rounded-2xl p-6 border border-violet-200/50 dark:border-violet-700/30">
-            <p className="text-sm font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wide">{t('investmentDetail.currentPrice')}</p>
-            <p className="text-3xl font-black text-violet-700 dark:text-violet-300 mt-2">
+          <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-2xl p-6 border border-brand-ink/15 dark:border-brand-ink-light/30">
+            <p className="text-sm font-bold text-brand-ink dark:text-brand-champagne-dark uppercase tracking-wide">{t('investmentDetail.currentPrice')}</p>
+            <p className="text-3xl font-black text-brand-ink dark:text-brand-champagne mt-2">
               ₺{calculatedStats.currentPrice.toLocaleString()}
             </p>
           </div>
           <div className={`rounded-2xl p-6 border ${
             calculatedStats.profitLoss >= 0 
-              ? 'bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200/50 dark:border-emerald-700/30'
-              : 'bg-gradient-to-br from-rose-50 to-red-100 dark:from-rose-900/20 dark:to-red-900/20 border-rose-200/50 dark:border-rose-700/30'
+              ? 'bg-brand-surface dark:bg-brand-surface-dark border-brand-ink/10 dark:border-brand-champagne/15'
+              : 'bg-brand-surface dark:bg-brand-surface-dark border-brand-ink/10 dark:border-brand-champagne/15'
           }`}>
             <p className={`text-sm font-bold uppercase tracking-wide ${
               calculatedStats.profitLoss >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
@@ -181,7 +181,7 @@ const InvestmentDetailModal: React.FC<InvestmentDetailModalProps> = ({
         </div>
 
         {/* Transaction History */}
-        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl p-6">
+        <div className="bg-brand-surface-muted dark:bg-brand-surface-dark-muted rounded-2xl p-6">
           <h4 className="text-2xl font-black text-slate-900 dark:text-white mb-6 flex items-center">
             <History className="w-6 h-6 mr-3" />
             {t('investmentDetail.historyTitle')}
@@ -266,7 +266,7 @@ const InvestmentDetailModal: React.FC<InvestmentDetailModalProps> = ({
                           {onUpdateTransaction && (
                             <button
                               onClick={() => setEditingTransaction(transaction)}
-                              className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                              className="p-2 text-brand-ink hover:text-brand-ink hover:bg-brand-champagne/60 dark:hover:bg-brand-surface-dark-muted rounded-lg transition-colors"
                               title={t('table.tooltipEdit')}
                             >
                               <Edit className="w-4 h-4" />

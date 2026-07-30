@@ -48,7 +48,7 @@ const EventModal: React.FC<EventModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md">
+      <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 w-full max-w-md">
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
           {editingEvent ? t('modal.editTitle') : t('modal.newTitle')}
         </h3>
@@ -118,7 +118,7 @@ const EventModal: React.FC<EventModalProps> = ({
               id="isRecurring"
               checked={newEvent.isRecurring}
               onChange={(e) => setNewEvent({ ...newEvent, isRecurring: e.target.checked })}
-              className="w-4 h-4 text-blue-600 rounded"
+              className="w-4 h-4 text-brand-ink rounded"
             />
             <label htmlFor="isRecurring" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('modal.recurringCheckbox')}
@@ -177,7 +177,7 @@ const EventModal: React.FC<EventModalProps> = ({
           <button
             onClick={onSave}
             disabled={isSavingSeries}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="px-4 py-2 bg-brand-ink text-white rounded-lg hover:bg-brand-ink-light transition-colors disabled:opacity-50"
           >
             {isSavingSeries ? t('modal.saving') : editingEvent ? t('modal.update') : t('modal.save')}
           </button>

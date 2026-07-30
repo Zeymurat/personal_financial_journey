@@ -1398,5 +1398,202 @@ class FirestoreService:
             logger.error(f"Aylık özet bildirimi kontrolü yapılırken hata: {e}", exc_info=True)
             # Hata olsa bile devam et
 
+    # --- Preferences (selected / followed / quickConvert) ---
+    # Koleksiyon adları client path ile aynı kalır (BFF).
+
+    PREFERENCE_RESOURCES = {
+        'selected-currencies': {
+            'collection': 'selectedCurrency',
+            'id_field': 'code',
+            'fields': ('code', 'order'),
+        },
+        'selected-hisse': {
+            'collection': 'selectedHisse',
+            'id_field': 'code',
+            'fields': ('code', 'order'),
+        },
+        'selected-funds': {
+            'collection': 'selectedFund',
+            'id_field': 'key',
+            'fields': ('key', 'order'),
+        },
+        'followed-currencies': {
+            'collection': 'followedCurrency',
+            'id_field': 'code',
+            'fields': ('code', 'order'),
+        },
+        'followed-hisse': {
+            'collection': 'followedHisse',
+            'id_field': 'code',
+            'fields': ('code', 'order'),
+        },
+        'followed-funds': {
+            'collection': 'followedFund',
+            'id_field': 'key',
+            'fields': ('key', 'order'),
+        },
+        'quick-converts': {
+            'collection': 'quickConvert',
+            'id_field': None,  # derived: from_to_amount
+            'fields': ('from', 'to', 'amount', 'order'),
+        },
+    }
+
+    def get_user_preference_ref(self, user_id: str, collection_name: str):
+        if not self.db:
+            raise Exception("Firestore veritabanı bağlantısı bulunamadı")
+        if not user_id or not isinstance(user_id, str):
+            raise ValueError('Geçersiz user_id')
+        return self.db.collection('users').document(user_id).collection(collection_name)
+
+    @staticmethod
+    def _preference_doc_id(resource_key: str, item: Dict[str, Any], id_field: Optional[str]) -> str:
+        if resource_key == 'quick-converts':
+            return f"{item.get('from')}_{item.get('to')}_{item.get('amount')}"
+        if not id_field:
+            raise ValueError('id_field gerekli')
+        doc_id = item.get(id_field)
+        if not doc_id:
+            raise ValueError(f'{id_field} zorunlu')
+        return str(doc_id)
+
+    async def list_preference_items(self, user_id: str, resource_key: str) -> List[Dict]:
+        cfg = self.PREFERENCE_RESOURCES.get(resource_key)
+        if not cfg:
+            raise ValueError(f'Bilinmeyen preference resource: {resource_key}')
+
+        ref = self.get_user_preference_ref(user_id, cfg['collection'])
+        try:
+            docs = list(ref.order_by('order').stream())
+        except Exception:
+            docs = list(ref.stream())
+
+        id_field = cfg['id_field']
+        fields = cfg['fields']
+        items: List[Dict] = []
+        for doc in docs:
+            data = doc.to_dict() or {}
+            item = {}
+            for f in fields:
+                if f == id_field:
+                    item[f] = data.get(f, doc.id)
+                elif f == 'order':
+                    item[f] = data.get('order', 0)
+                elif f == 'amount':
+                    item[f] = data.get('amount', 100)
+                else:
+                    item[f] = data.get(f, '')
+            items.append(item)
+
+        items.sort(key=lambda x: x.get('order', 0))
+        return items
+
+    async def replace_preference_items(
+        self, user_id: str, resource_key: str, items: List[Dict[str, Any]]
+    ) -> List[Dict]:
+        cfg = self.PREFERENCE_RESOURCES.get(resource_key)
+        if not cfg:
+            raise ValueError(f'Bilinmeyen preference resource: {resource_key}')
+        if not isinstance(items, list):
+            raise ValueError('items bir liste olmalı')
+
+        ref = self.get_user_preference_ref(user_id, cfg['collection'])
+        id_field = cfg['id_field']
+        fields = cfg['fields']
+
+        # Mevcut dokümanları sil + yeniden yaz (client save* ile aynı semantik)
+        existing = list(ref.stream())
+        batch = self.db.batch()
+        op_count = 0
+
+        def commit_if_needed(force=False):
+            nonlocal batch, op_count
+            if op_count >= 400 or (force and op_count > 0):
+                batch.commit()
+                batch = self.db.batch()
+                op_count = 0
+
+        for doc in existing:
+            batch.delete(doc.reference)
+            op_count += 1
+            commit_if_needed()
+
+        normalized: List[Dict] = []
+        for index, raw in enumerate(items):
+            if not isinstance(raw, dict):
+                raise ValueError('Her item bir obje olmalı')
+            item = {}
+            for f in fields:
+                if f == 'order':
+                    item[f] = int(raw.get('order', index))
+                elif f == 'amount':
+                    item[f] = float(raw.get('amount', 100))
+                else:
+                    val = raw.get(f)
+                    if val is None or val == '':
+                        raise ValueError(f'{f} zorunlu')
+                    item[f] = val
+            doc_id = self._preference_doc_id(resource_key, item, id_field)
+            batch.set(ref.document(doc_id), item)
+            op_count += 1
+            commit_if_needed()
+            normalized.append(item)
+
+        commit_if_needed(force=True)
+        normalized.sort(key=lambda x: x.get('order', 0))
+        return normalized
+
+    async def build_ai_user_context(self, user_id: str) -> Dict[str, Any]:
+        """AI asistan için özet context (YTD; tavsiye değil)."""
+        investments = await self.get_user_investments(user_id)
+        transactions = await self.get_user_transactions(user_id)
+        settings = await self.get_user_settings(user_id) or {}
+
+        inv_summary = []
+        for inv in investments[:50]:
+            inv_summary.append({
+                'symbol': inv.get('symbol'),
+                'name': inv.get('name'),
+                'type': inv.get('type'),
+                'quantity': inv.get('quantity'),
+                'averagePrice': inv.get('averagePrice'),
+                'currentPrice': inv.get('currentPrice'),
+                'totalValue': inv.get('totalValue'),
+                'profitLoss': inv.get('profitLoss'),
+                'profitLossPercentage': inv.get('profitLossPercentage'),
+            })
+
+        tx_summary = []
+        for t in transactions[:30]:
+            tx_summary.append({
+                'type': t.get('type'),
+                'amount': t.get('amount'),
+                'category': t.get('category'),
+                'description': t.get('description'),
+                'date': str(t.get('date', '')),
+                'currency': t.get('currency'),
+                'amountInTRY': t.get('amountInTRY'),
+            })
+
+        prefs = {}
+        for key in self.PREFERENCE_RESOURCES.keys():
+            try:
+                prefs[key] = await self.list_preference_items(user_id, key)
+            except Exception:
+                prefs[key] = []
+
+        targets = settings.get('targets') if isinstance(settings, dict) else None
+        return {
+            'investments': inv_summary,
+            'recent_transactions': tx_summary,
+            'targets': targets or {},
+            'settings': {
+                'currency': settings.get('currency', 'TRY') if settings else 'TRY',
+                'language': settings.get('language', 'tr') if settings else 'tr',
+            },
+            'preferences': prefs,
+        }
+
+
 # Global Firestore service instance
 firestore_service = FirestoreService() 

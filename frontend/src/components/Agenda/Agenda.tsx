@@ -7,10 +7,12 @@ import { eventsAPI } from '../../services/apiService';
 import toast from 'react-hot-toast';
 import EventModal, { EventDraft } from './modals/EventModal';
 import DeleteEventDialog, { DeleteDialogData } from './modals/DeleteEventDialog';
+import PageHeader from '../common/PageHeader';
 
 const Agenda: React.FC = () => {
   useTokenValidation();
   const { t, i18n } = useTranslation('agenda');
+  const { t: ts } = useTranslation('sidebar');
 
   const monthNames = useMemo(
     () => t('calendar.months', { returnObjects: true }) as string[],
@@ -545,9 +547,13 @@ const Agenda: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col h-full">
+      <div className="px-8 pt-6 pb-2">
+        <PageHeader title={ts('nav.agenda')} />
+      </div>
+      <div className="flex flex-1 min-h-0">
       {/* Sol Panel - Takvim */}
-      <div className="flex-1 bg-white dark:bg-gray-800 p-8 overflow-auto">
+      <div className="flex-1 bg-brand-surface dark:bg-brand-surface-dark p-8 overflow-auto">
         <div className="flex flex-row justify-between">
         {/* Takvim Başlığı */}
         <div className="flex items-center justify-between mb-6">
@@ -573,7 +579,7 @@ const Agenda: React.FC = () => {
           <div className="mb-4 flex justify-center">
             <button
               onClick={goToToday}
-              className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors font-medium"
+              className="flex items-center gap-2 px-4 py-2 text-sm bg-brand-champagne/60 dark:bg-brand-surface-dark-muted text-brand-ink dark:text-brand-champagne-dark rounded-lg hover:bg-brand-champagne dark:hover:bg-brand-surface-dark-muted transition-colors font-medium"
             >
               <RotateCcw className="w-4 h-4" />
               {t('ui.backToToday')}
@@ -611,18 +617,18 @@ const Agenda: React.FC = () => {
                 className={`
                   aspect-square flex flex-col items-center justify-center rounded-xl transition-all max-h-[115px]
                   ${isSelectedDate
-                    ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-xl font-bold scale-105'
+                    ? 'bg-gradient-to-br from-brand-ink to-brand-ink-deep text-white shadow-brand font-bold scale-105'
                     : isTodayDate
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold border-2 border-blue-400 dark:border-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/50 shadow-sm'
+                    ? 'bg-brand-champagne/60 dark:bg-brand-surface-dark-muted text-brand-ink dark:text-brand-champagne-dark font-bold border-2 border-brand-ink-light dark:border-brand-ink hover:bg-brand-champagne dark:hover:bg-brand-surface-dark-muted shadow-sm'
                     : isDifferentMonthDate
-                    ? 'text-gray-300 dark:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                    ? 'text-gray-300 dark:text-gray-600 hover:bg-brand-surface-muted dark:hover:bg-brand-surface-dark-muted'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:shadow-md'
                   }
                 `}
               >
                 <span className="text-base font-semibold">{date.getDate()}</span>
                 {hasEvents && !isDifferentMonthDate && (
-                  <span className={`w-1.5 h-1.5 rounded-full mt-1 ${isSelectedDate ? 'bg-white' : 'bg-blue-600 dark:bg-blue-400'}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full mt-1 ${isSelectedDate ? 'bg-brand-surface' : 'bg-brand-ink dark:bg-brand-champagne-dark'}`} />
                 )}
               </button>
             );
@@ -631,7 +637,7 @@ const Agenda: React.FC = () => {
       </div>
 
       {/* Sağ Panel - Etkinlikler */}
-      <div className="w-96 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 p-6 flex flex-col relative overflow-hidden">
+      <div className="w-96 bg-brand-surface dark:bg-brand-surface-dark border-l border-brand-ink/10 dark:border-brand-champagne/12 p-6 flex flex-col relative overflow-hidden">
         {/* İçerik */}
         <div className="relative z-10 flex flex-col h-full">
           {/* Tarih Başlığı */}
@@ -660,7 +666,7 @@ const Agenda: React.FC = () => {
                 {selectedDateEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-200 dark:border-gray-700 relative group"
+                    className="bg-brand-surface dark:bg-brand-surface-dark rounded-lg p-3 shadow-sm border border-brand-ink/10 dark:border-brand-champagne/15 relative group"
                   >
                     <button
                       onClick={() => handleDeleteEvent(event.id)}
@@ -671,7 +677,7 @@ const Agenda: React.FC = () => {
                     </button>
                     <button
                       onClick={() => openEditEvent(event)}
-                      className="absolute top-2 right-9 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                      className="absolute top-2 right-9 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-brand-ink-light hover:text-brand-ink dark:text-brand-champagne-dark dark:hover:text-brand-champagne"
                       title={t('ui.editEventTitle')}
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -690,7 +696,7 @@ const Agenda: React.FC = () => {
                       </p>
                     )}
                     {event.isRecurring && (
-                      <p className="text-xs text-blue-500 dark:text-blue-400 mt-1">
+                      <p className="text-xs text-brand-ink-light dark:text-brand-champagne-dark mt-1">
                         🔁 {recurrenceLabel(event.recurrenceType)}
                       </p>
                     )}
@@ -703,11 +709,12 @@ const Agenda: React.FC = () => {
           {/* Etkinlik Ekle Butonu */}
           <button
             onClick={handleAddEvent}
-            className="mt-4 w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
+            className="mt-4 w-12 h-12 bg-brand-ink hover:bg-brand-ink-light text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
           >
             <Plus className="w-5 h-5" />
           </button>
         </div>
+      </div>
       </div>
 
       <EventModal

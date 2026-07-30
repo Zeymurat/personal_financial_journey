@@ -21,7 +21,7 @@ const CalculatorSection3: React.FC<CalculatorSection3Props> = ({
   const { t } = useTranslation('calculator');
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300">
+    <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-2xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-lg hover:shadow-brand transition-all duration-300">
       <div className="flex items-center space-x-3 mb-6">
         <div className="p-2 bg-gradient-to-r from-green-500 to-green-600 rounded-lg">
           <TrendingUp className="w-5 h-5 text-white" />

@@ -446,7 +446,7 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
       onClick={onClose}
     >
       <div 
-        className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl border border-slate-200/50 dark:border-slate-700/50 max-h-[90vh] overflow-y-auto quick-actions-scroll"
+        className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 w-full max-w-md mx-4 shadow-brand-lg border border-brand-ink/10 dark:border-brand-champagne/15 max-h-[90vh] overflow-y-auto quick-actions-scroll"
         style={{
           scrollBehavior: 'smooth'
         }}
@@ -527,17 +527,17 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
                 }}
                 className={`p-3 rounded-xl border-2 transition-all duration-200 text-sm ${
                   formData.type === 'currency'
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                    ? 'border-brand-ink bg-brand-champagne/60 dark:bg-brand-ink/30 text-brand-ink dark:text-brand-champagne'
                     : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
                 }`}
               >
                 <DollarSign className={`w-5 h-5 mx-auto mb-1 ${
                   formData.type === 'currency'
-                    ? 'text-blue-700 dark:text-blue-300'
+                    ? 'text-brand-ink dark:text-brand-champagne'
                     : 'text-slate-200 dark:text-slate-600 hover:text-slate-300 dark:hover:text-slate-500'
                 }`} />
                 <span className={`font-semibold ${formData.type === 'currency'
-                    ? 'text-blue-700 dark:text-blue-300'
+                    ? 'text-brand-ink dark:text-brand-champagne'
                     : 'text-slate-200 dark:text-slate-600 hover:text-slate-300 dark:hover:text-slate-500'
                 }`}>{t('types.currency')}</span>
               </button>
@@ -569,17 +569,17 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
                 }}
                 className={`p-3 rounded-xl border-2 transition-all duration-200 text-sm ${
                   formData.type === 'preciousMetal'
-                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
+                    ? 'border-brand-ink bg-brand-champagne/60 dark:bg-brand-surface-dark/20 text-brand-ink dark:text-brand-champagne'
                     : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
                 }`}
               >
                 <Gem className={`w-5 h-5 mx-auto mb-1 ${
                   formData.type === 'preciousMetal'
-                    ? 'text-purple-700 dark:text-purple-300'
+                    ? 'text-brand-ink dark:text-brand-champagne'
                     : 'text-slate-200 dark:text-slate-600 hover:text-slate-300 dark:hover:text-slate-500'
                 }`} />
                 <span className={`font-semibold ${formData.type === 'preciousMetal'
-                    ? 'text-purple-700 dark:text-purple-300'
+                    ? 'text-brand-ink dark:text-brand-champagne'
                     : 'text-slate-200 dark:text-slate-600 hover:text-slate-300 dark:hover:text-slate-500'
                 }`}>{t('types.preciousMetal')}</span>
               </button>
@@ -590,17 +590,17 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
                 }}
                 className={`p-3 rounded-xl border-2 transition-all duration-200 text-sm ${
                   formData.type === 'fund'
-                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                    ? 'border-brand-ink bg-brand-champagne/60 dark:bg-brand-surface-dark/20 text-brand-ink dark:text-brand-champagne'
                     : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
                 }`}
               >
                 <BarChart3 className={`w-5 h-5 mx-auto mb-1 ${
                   formData.type === 'fund'
-                    ? 'text-indigo-700 dark:text-indigo-300'
+                    ? 'text-brand-ink dark:text-brand-champagne'
                     : 'text-slate-200 dark:text-slate-600 hover:text-slate-300 dark:hover:text-slate-500'
                 }`} />
                 <span className={`font-semibold ${formData.type === 'fund'
-                    ? 'text-indigo-700 dark:text-indigo-300'
+                    ? 'text-brand-ink dark:text-brand-champagne'
                     : 'text-slate-200 dark:text-slate-600 hover:text-slate-300 dark:hover:text-slate-500'
                 }`}>{t('types.fund')}</span>
               </button>
@@ -611,17 +611,17 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
                 }}
                 className={`p-3 rounded-xl border-2 transition-all duration-200 text-sm ${
                   formData.type === 'stock'
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                    ? 'border-brand-ink bg-brand-champagne/60 dark:bg-brand-ink/30 text-brand-ink dark:text-brand-champagne'
                     : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
                 }`}
               >
                 <BarChart3 className={`w-5 h-5 mx-auto mb-1 ${
                   formData.type === 'stock'
-                    ? 'text-blue-700 dark:text-blue-300'
+                    ? 'text-brand-ink dark:text-brand-champagne'
                     : 'text-slate-200 dark:text-slate-600 hover:text-slate-300 dark:hover:text-slate-500'
                 }`} />
                 <span className={`font-semibold ${formData.type === 'stock'
-                    ? 'text-blue-700 dark:text-blue-300'
+                    ? 'text-brand-ink dark:text-brand-champagne'
                     : 'text-slate-200 dark:text-slate-600 hover:text-slate-300 dark:hover:text-slate-500'
                 }`}>{t('types.stock')}</span>
               </button>
@@ -662,17 +662,17 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
                 onChange={(e) => handleSearchChange(e.target.value)}
                 onFocus={() => setShowDropdown(true)}
                 placeholder={t('form.searchPlaceholder', { type: labelForAssetType(formData.type) })}
-                className="w-full pl-10 pr-4 py-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+                className="w-full pl-10 pr-4 py-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
                 required
               />
               {showDropdown && availableOptions.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute z-50 w-full mt-1 bg-brand-surface dark:bg-brand-surface-dark border border-slate-300 dark:border-slate-600 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                   {availableOptions.map((option) => (
                     <button
                       key={option.code}
                       type="button"
                       onClick={() => handleValueSelect(option.code, option.name)}
-                      className="w-full text-left px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border-b border-slate-200 dark:border-slate-700 last:border-b-0"
+                      className="w-full text-left px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border-b border-brand-ink/10 dark:border-brand-champagne/15 last:border-b-0"
                     >
                       <div className="font-semibold text-slate-900 dark:text-white">{option.code}</div>
                       <div className="text-sm text-slate-500 dark:text-slate-400">{option.name}</div>
@@ -681,7 +681,7 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
                 </div>
               )}
               {showDropdown && availableOptions.length === 0 && searchQuery.trim() && (
-                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl shadow-lg p-4">
+                <div className="absolute z-50 w-full mt-1 bg-brand-surface dark:bg-brand-surface-dark border border-slate-300 dark:border-slate-600 rounded-xl shadow-lg p-4">
                   <p className="text-sm text-slate-500 dark:text-slate-400">{t('form.noResults')}</p>
                 </div>
               )}
@@ -725,7 +725,7 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
                     quantity: formatTrMoneyInput(e.target.value, INV_AMOUNT_FRAC)
                   })
                 }
-                className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+                className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
                 placeholder="10"
                 required
               />
@@ -747,7 +747,7 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
                       price: formatTrMoneyInput(e.target.value, INV_AMOUNT_FRAC)
                     })
                   }
-                  className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+                  className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
                   placeholder="0,00"
                   required
                 />
@@ -820,7 +820,7 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({...formData, date: e.target.value})}
-              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
               required
             />
           </div>
@@ -836,7 +836,7 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
             <button
               type="submit"
               disabled={!formData.symbol || !formData.name}
-              className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="flex-1 px-6 py-4 bg-gradient-to-r from-brand-ink to-brand-ink-light text-white rounded-xl hover:shadow-brand hover:scale-105 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               {formData.transactionType === 'buy' ? t('addModal.submitBuy') : t('addModal.submitSell')}
             </button>

@@ -55,8 +55,8 @@ const InvestmentsTransactionsTable: React.FC<InvestmentsTransactionsTableProps> 
   const dateLocale = i18n.language || undefined;
 
   return (
-    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl border border-slate-200/50 dark:border-slate-700/50 overflow-hidden shadow-2xl">
-      <div className="px-8 py-6 border-b border-slate-200 dark:border-slate-700">
+    <div className="bg-brand-surface/95 dark:bg-brand-surface-dark backdrop-blur-sm rounded-3xl border border-brand-ink/10 dark:border-brand-champagne/15 overflow-hidden shadow-brand-lg">
+      <div className="px-8 py-6 border-b border-brand-ink/10 dark:border-brand-champagne/15">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-black text-slate-900 dark:text-white">{t('table.title')}</h2>
@@ -102,7 +102,7 @@ const InvestmentsTransactionsTable: React.FC<InvestmentsTransactionsTableProps> 
             {loadingTableTransactions ? (
               <>
                 {[...Array(itemsPerPage)].map((_, index) => (
-                  <tr key={`shimmer-${index}`} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                  <tr key={`shimmer-${index}`} className="hover:bg-brand-surface-muted dark:hover:bg-brand-surface-dark-muted">
                     <td className="px-8 py-6">
                       <div className="space-y-2">
                         <div className="h-5 shimmer rounded w-24" />
@@ -147,7 +147,7 @@ const InvestmentsTransactionsTable: React.FC<InvestmentsTransactionsTableProps> 
                 const typeLabel = investmentTableTypeLabel(t, displayType);
                 let typeClass = 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
                 if (displayType === 'stock' || displayType === 'fund') {
-                  typeClass = 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+                  typeClass = 'bg-brand-champagne text-brand-ink dark:bg-brand-surface-dark dark:text-brand-champagne';
                 } else if (displayType === 'crypto') {
                   typeClass = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
                 } else if (displayType === 'gold') {
@@ -155,11 +155,11 @@ const InvestmentsTransactionsTable: React.FC<InvestmentsTransactionsTableProps> 
                 } else if (displayType === 'currency' || displayType === 'forex') {
                   typeClass = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
                 } else if (displayType === 'preciousMetal') {
-                  typeClass = 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+                  typeClass = 'bg-brand-champagne text-brand-ink dark:bg-brand-surface-dark dark:text-brand-champagne';
                 }
 
                 return (
-                  <tr key={`${investment.id}-${transaction.id}`} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                  <tr key={`${investment.id}-${transaction.id}`} className="hover:bg-brand-surface-muted dark:hover:bg-brand-surface-dark-muted transition-colors">
                     <td className="px-8 py-6 whitespace-nowrap">
                       <div>
                         <p className="text-lg font-black text-slate-900 dark:text-white">{investment.symbol}</p>
@@ -208,7 +208,7 @@ const InvestmentsTransactionsTable: React.FC<InvestmentsTransactionsTableProps> 
                             const inv = allInvestmentsForLookup.find((i) => i.id === investment.id);
                             if (inv) onViewInvestment(inv);
                           }}
-                          className="text-blue-600 hover:text-blue-800 transition-colors p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl"
+                          className="text-brand-ink hover:text-brand-ink transition-colors p-2 hover:bg-brand-champagne/60 dark:hover:bg-brand-surface-dark-muted rounded-xl"
                           title={t('table.tooltipView')}
                         >
                           <Eye className="w-5 h-5" />
@@ -252,7 +252,7 @@ const InvestmentsTransactionsTable: React.FC<InvestmentsTransactionsTableProps> 
       </div>
 
       {totalRowCount > 0 && (
-        <div className="px-8 py-6 border-t border-slate-200 dark:border-slate-700">
+        <div className="px-8 py-6 border-t border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <span className="text-sm text-slate-600 dark:text-slate-400">
@@ -264,7 +264,7 @@ const InvestmentsTransactionsTable: React.FC<InvestmentsTransactionsTableProps> 
                   onItemsPerPageChange(Number(e.target.value));
                   onPageChange(1);
                 }}
-                className="px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-brand-surface dark:bg-brand-surface-dark text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-ink"
               >
                 <option value={10}>{t('table.perPage', { count: 10 })}</option>
                 <option value={25}>{t('table.perPage', { count: 25 })}</option>
@@ -307,7 +307,7 @@ const InvestmentsTransactionsTable: React.FC<InvestmentsTransactionsTableProps> 
                       onClick={() => onPageChange(pageNum)}
                       className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                         currentPage === pageNum
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-brand-ink text-white'
                           : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                     >

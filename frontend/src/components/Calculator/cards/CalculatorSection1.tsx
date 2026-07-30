@@ -21,9 +21,9 @@ const CalculatorSection1: React.FC<CalculatorSection1Props> = ({
   const { t } = useTranslation('calculator');
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300">
+    <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-2xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-lg hover:shadow-brand transition-all duration-300">
       <div className="flex items-center space-x-3 mb-6">
-        <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg">
+        <div className="p-2 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-lg">
           <Percent className="w-5 h-5 text-white" />
         </div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('s1.title')}</h2>
@@ -41,7 +41,7 @@ const CalculatorSection1: React.FC<CalculatorSection1Props> = ({
               value={number}
               onChange={(e) => onNumberChange(formatTrMoneyInput(e.target.value))}
               placeholder="0"
-              className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all"
+              className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-brand-ink dark:bg-gray-700 dark:text-white transition-all"
             />
           </div>
           <div className="pt-8">
@@ -61,7 +61,7 @@ const CalculatorSection1: React.FC<CalculatorSection1Props> = ({
                 value={percentage}
                 onChange={(e) => onPercentageChange(formatTrPercentageInput(e.target.value))}
                 placeholder="0"
-                className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all"
+                className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-brand-ink dark:bg-gray-700 dark:text-white transition-all"
               />
               <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 font-semibold">
                 %
@@ -81,7 +81,7 @@ const CalculatorSection1: React.FC<CalculatorSection1Props> = ({
             value={result ? formatTrFixedTwoFromEnDecimal(result) : ''}
             readOnly
             placeholder={t('common.resultPlaceholder')}
-            className="w-full p-3 border-2 border-blue-200 dark:border-blue-800 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 dark:text-white font-bold text-lg"
+            className="w-full p-3 border-2 border-brand-champagne-dark dark:border-brand-ink-light rounded-xl bg-gradient-to-r from-brand-surface to-brand-surface-muted dark:from-brand-surface-dark dark:to-brand-surface-dark-muted dark:text-white font-bold text-lg"
           />
         </div>
       </div>

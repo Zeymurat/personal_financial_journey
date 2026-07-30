@@ -4,6 +4,7 @@ import { ArrowUpDown, Plus } from 'lucide-react';
 import { useFinance } from '../../contexts/FinanceContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTokenValidation } from '../../hooks/useTokenValidation';
+import PageHeader from '../common/PageHeader';
 import {
   getSelectedCurrencies,
   saveSelectedCurrencies,
@@ -366,15 +367,15 @@ const CurrencyConverter: React.FC = () => {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('meta.title')}</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">{t('meta.subtitle')}</p>
-          <p className="text-sm text-slate-600 dark:text-slate-400 font-100">{t('meta.disclaimer')}</p>
-        </div>
+      <div className="mb-6">
+        <PageHeader
+          title={t('meta.title')}
+          subtitle={t('meta.subtitle')}
+          disclaimer={t('meta.disclaimer')}
+        />
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 mb-6">
+      <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15 mb-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
           <div className="space-y-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -387,13 +388,13 @@ const CurrencyConverter: React.FC = () => {
                 autoComplete="off"
                 value={amount}
                 onChange={(e) => setAmount(formatTrMoneyInput(e.target.value, CONV_AMOUNT_FRAC))}
-                className="w-full p-4 text-2xl font-bold border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full p-4 text-2xl font-bold border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink dark:bg-gray-700 dark:text-white"
                 placeholder={t('form.amountPlaceholder')}
               />
               <select
                 value={fromCurrency}
                 onChange={(e) => setFromCurrency(e.target.value)}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink dark:bg-gray-700 dark:text-white"
               >
                 {allCurrencies.map((currency) => (
                   <option key={currency.code} value={currency.code}>
@@ -418,7 +419,7 @@ const CurrencyConverter: React.FC = () => {
               {t('form.convertedAmount')}
             </label>
             <div className="space-y-3">
-              <div className="w-full p-4 text-2xl font-bold bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
+              <div className="w-full p-4 text-2xl font-bold bg-brand-surface-muted dark:bg-brand-surface-dark-muted border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
                 {(() => {
                   const { min, max } = displayDecimalsForCode(toCurrency, allCurrencies);
                   return convertedAmount.toLocaleString('tr-TR', {
@@ -430,7 +431,7 @@ const CurrencyConverter: React.FC = () => {
               <select
                 value={toCurrency}
                 onChange={(e) => setToCurrency(e.target.value)}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink dark:bg-gray-700 dark:text-white"
               >
                 {allCurrencies.map((currency) => (
                   <option key={currency.code} value={currency.code}>
@@ -442,8 +443,8 @@ const CurrencyConverter: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <p className="text-sm text-blue-800 dark:text-blue-200">
+        <div className="mt-6 p-4 bg-brand-champagne/60 dark:bg-brand-ink/30 rounded-lg">
+          <p className="text-sm text-brand-ink dark:text-brand-champagne">
             {(() => {
               const fromRate = allCurrencies.find((c) => c.code === fromCurrency)?.rate || 1;
               const toRate = allCurrencies.find((c) => c.code === toCurrency)?.rate || 1;
@@ -459,12 +460,12 @@ const CurrencyConverter: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 mb-6">
+      <div className="mt-6 bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15 mb-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('quick.title')}</h3>
           <button
             onClick={() => setIsManagingConversions(true)}
-            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-all duration-200 text-sm"
+            className="flex items-center space-x-2 bg-brand-ink hover:bg-brand-ink-light text-white px-3 py-1.5 rounded-lg transition-all duration-200 text-sm"
             title={t('quick.manageTitle')}
           >
             <Plus className="w-4 h-4" />

@@ -47,7 +47,7 @@ const DeleteInvestmentTransactionModal: React.FC<DeleteInvestmentTransactionModa
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl border border-slate-200/50 dark:border-slate-700/50"
+        className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 w-full max-w-md mx-4 shadow-brand-lg border border-brand-ink/10 dark:border-brand-champagne/15"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -77,7 +77,7 @@ const DeleteInvestmentTransactionModal: React.FC<DeleteInvestmentTransactionModa
           </div>
         </div>
 
-        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 mb-6">
+        <div className="bg-brand-surface-muted dark:bg-brand-surface-dark-muted rounded-xl p-4 mb-6">
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{t('deleteTransactionModal.typeLabel')}</span>
@@ -122,7 +122,7 @@ const DeleteInvestmentTransactionModal: React.FC<DeleteInvestmentTransactionModa
           <button
             type="button"
             onClick={handleDelete}
-            className="flex-1 px-6 py-4 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-6 py-4 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl hover:shadow-brand hover:scale-105 transition-all duration-200 font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isDeleting}
           >
             <Trash2 className="w-5 h-5" />

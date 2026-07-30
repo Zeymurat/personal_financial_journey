@@ -27,9 +27,9 @@ const CalculatorSection4: React.FC<CalculatorSection4Props> = ({
   const { t } = useTranslation('calculator');
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300">
+    <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-2xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-lg hover:shadow-brand transition-all duration-300">
       <div className="flex items-center space-x-3 mb-6">
-        <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg">
+        <div className="p-2 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-lg">
           {operation === 'increase' ? (
             <Plus className="w-5 h-5 text-white" />
           ) : (
@@ -103,7 +103,7 @@ const CalculatorSection4: React.FC<CalculatorSection4Props> = ({
             value={result ? formatTrFixedTwoFromEnDecimal(result) : ''}
             readOnly
             placeholder={t('common.resultPlaceholder')}
-            className="w-full p-3 border-2 border-orange-200 dark:border-orange-800 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 dark:text-white font-bold text-lg"
+            className="w-full p-3 border-2 border-brand-ink/15 dark:border-brand-champagne/15 rounded-xl bg-gradient-to-r from-brand-surface to-brand-surface-muted dark:from-brand-surface-dark dark:to-brand-surface-dark-muted dark:text-white font-bold text-lg"
           />
         </div>
       </div>

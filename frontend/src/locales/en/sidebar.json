@@ -13,7 +13,10 @@
     "calculator": "Calculator",
     "notifications": "Notifications",
     "agenda": "Agenda",
-    "settings": "Settings"
+    "settings": "Settings",
+    "assistant": "Tracking Assistant",
+    "beta": "Beta",
+    "assistantComingSoon": "Coming soon — in development"
   },
   "logout": "Log out",
   "userFallback": "User"

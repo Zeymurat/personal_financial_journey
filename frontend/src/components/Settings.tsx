@@ -9,6 +9,7 @@ import { UserSettings } from '../types';
 import i18n from '../i18n';
 import { APP_LANGUAGE_CODES, isAppLanguageCode } from '../locales/languages';
 import ChangePasswordModal from './ChangePasswordModal';
+import PageHeader from './common/PageHeader';
 
 const Settings: React.FC = () => {
   const { currentUser, hasPasswordProvider } = useAuth();
@@ -145,28 +146,30 @@ const Settings: React.FC = () => {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('meta.title')}</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">{t('meta.subtitle')}</p>
-        </div>
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving || loading}
-          className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Save className="w-5 h-5" />
-          <span>{saving ? tc('actions.saving') : tc('actions.save')}</span>
-        </button>
+      <div className="mb-6">
+        <PageHeader
+          title={t('meta.title')}
+          subtitle={t('meta.subtitle')}
+          actions={
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving || loading}
+              className="flex items-center space-x-2 bg-brand-gradient text-brand-champagne px-4 py-2 rounded-xl hover:shadow-gold ring-1 ring-gold/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+            >
+              <Save className="w-5 h-5" />
+              <span>{saving ? tc('actions.saving') : tc('actions.save')}</span>
+            </button>
+          }
+        />
       </div>
 
       <div className="space-y-6">
         {/* Appearance Settings */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-              <Palette className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <div className="p-2 bg-brand-champagne dark:bg-brand-surface-dark rounded-lg">
+              <Palette className="w-6 h-6 text-brand-ink dark:text-brand-champagne-dark" />
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('appearance.title')}</h2>
@@ -190,11 +193,11 @@ const Settings: React.FC = () => {
               <button
                 onClick={() => setDarkMode(!darkMode)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  darkMode ? 'bg-blue-600' : 'bg-gray-200'
+                  darkMode ? 'bg-brand-ink' : 'bg-gray-200'
                 }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  className={`inline-block h-4 w-4 transform rounded-full bg-brand-surface transition-transform ${
                     darkMode ? 'translate-x-6' : 'translate-x-1'
                   }`}
                 />
@@ -204,10 +207,10 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Notification Settings */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-              <Bell className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="p-2 bg-brand-champagne dark:bg-brand-surface-dark rounded-lg">
+              <Bell className="w-6 h-6 text-brand-ink dark:text-brand-champagne-dark" />
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('notifications.title')}</h2>
@@ -237,11 +240,11 @@ const Settings: React.FC = () => {
                 type="button"
                 onClick={() => setBudgetAlerts(!budgetAlerts)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  budgetAlerts ? 'bg-blue-600' : 'bg-gray-200'
+                  budgetAlerts ? 'bg-brand-ink' : 'bg-gray-200'
                 }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  className={`inline-block h-4 w-4 transform rounded-full bg-brand-surface transition-transform ${
                     budgetAlerts ? 'translate-x-6' : 'translate-x-1'
                   }`}
                 />
@@ -251,7 +254,7 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Language & Region */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="flex items-center space-x-3 mb-6">
             <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
               <Globe className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -274,7 +277,7 @@ const Settings: React.FC = () => {
                   setLanguage(code);
                   void i18n.changeLanguage(code);
                 }}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink dark:bg-gray-700 dark:text-white"
               >
                 {APP_LANGUAGE_CODES.map((code) => (
                   <option key={code} value={code}>
@@ -291,7 +294,7 @@ const Settings: React.FC = () => {
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink dark:bg-gray-700 dark:text-white"
               >
                 <option value="TRY">₺ Türk Lirası</option>
                 <option value="USD">$ Amerikan Doları</option>
@@ -303,7 +306,7 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Security Settings */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="flex items-center space-x-3 mb-6">
             <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
               <Shield className="w-6 h-6 text-red-600 dark:text-red-400" />
@@ -319,7 +322,7 @@ const Settings: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setChangePasswordOpen(true)}
-                className="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="w-full md:w-auto px-4 py-2 bg-brand-ink text-white rounded-lg hover:bg-brand-ink-light transition-colors"
               >
                 {t('security.changePassword')}
               </button>
@@ -337,7 +340,7 @@ const Settings: React.FC = () => {
         <ChangePasswordModal isOpen={changePasswordOpen} onClose={() => setChangePasswordOpen(false)} />
 
         {/* Profile Settings */}
-        {/* <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+        {/* <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="flex items-center space-x-3 mb-6">
             <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
               <User className="w-6 h-6 text-gray-600 dark:text-gray-400" />
@@ -356,7 +359,7 @@ const Settings: React.FC = () => {
               <input
                 type="text"
                 defaultValue="Ahmet Yılmaz"
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink dark:bg-gray-700 dark:text-white"
               />
             </div>
 
@@ -367,14 +370,14 @@ const Settings: React.FC = () => {
               <input
                 type="email"
                 defaultValue="ahmet@example.com"
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
         </div> */}
 
         {/* Data & Privacy */}
-        {/* <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+        {/* <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="flex items-center space-x-3 mb-6">
             <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
               <Shield className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
@@ -386,7 +389,7 @@ const Settings: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            <button type="button" className="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button type="button" className="w-full md:w-auto px-4 py-2 bg-brand-ink text-white rounded-lg hover:bg-brand-ink-light transition-colors">
               {t('data.export')}
             </button>
             <button type="button" className="w-full md:w-auto px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors ml-0 md:ml-3">

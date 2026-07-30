@@ -16,8 +16,13 @@ import {
 } from 'firebase/auth';
 // Firestore için gerekli metodlar: doc, setDoc, getDoc
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase'; // Firestore instance'ı (db) buradan gelmeli
+import { auth, db } from '../firebase';
 import { authAPI } from '../services/apiService';
+import {
+  clearStoredAuthTokens,
+  getStoredAccessToken,
+  setStoredAccessToken,
+} from '../services/authTokenStore';
 
 
 
@@ -55,19 +60,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true);
   const [authenticating, setAuthenticating] = useState(false);
 
+  /**
+   * Firebase ID token'ı al, store'a yaz, gerekirse backend'e doğrulat.
+   * getIdToken(false): süresi dolmamışsa cache (O(1)); dolmuşsa Firebase refresh.
+   */
   const processUserAuthentication = async (user: FirebaseUser) => {
-    // Not: authenticating state'i çağıran yerlerde yönetiliyor
-    // (onAuthStateChanged ve login fonksiyonlarında)
     try {
-      const idToken = await user.getIdToken();
-      const backendResponse = await authAPI.firebaseLogin(idToken);
-      
-      return backendResponse;
+      const hadToken = Boolean(getStoredAccessToken());
+      const idToken = await user.getIdToken(false);
+      setStoredAccessToken(idToken);
 
+      // İlk oturum / store boşsa backend verify; sonraki yüklemelerde apiRequest zaten taze token kullanır
+      if (!hadToken) {
+        return await authAPI.firebaseLogin(idToken);
+      }
+      return { access: idToken };
     } catch (error) {
-      // Hata durumunda, kullanıcının API istekleri yapmasını engellemek için
-      // localStorage'daki token'ları temizlemek iyi bir pratik olabilir.
-      authAPI.logout();
+      await authAPI.logout();
       throw error;
     }
   };
@@ -131,28 +140,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // Firestore permission hatası olsa bile login'i engelleme
         }
         
-        // Sayfa yenilendiğinde veya oturum devam ederken backend'e authenticate et
+        // Her auth state'te token'ı Firebase ile senkronize et (süresi dolmuşsa sessiz yenilenir)
+        setAuthenticating(true);
         try {
-          const token = localStorage.getItem('access_token');
-          if (!token) {
-            setAuthenticating(true);
-            try {
-              await processUserAuthentication(firebaseUser);
-              console.log('✅ Giriş başarılı');
-            } finally {
-              setAuthenticating(false);
-            }
-          }
-        } catch (error) {
+          await processUserAuthentication(firebaseUser);
+        } catch {
+          // Token alınamazsa apiRequest / useTokenValidation oturumu kapatır
+        } finally {
           setAuthenticating(false);
         }
       } else {
         setCurrentUser(null);
         setHasPasswordProvider(false);
         setAuthenticating(false);
-        // Logout durumunda token'ları temizle
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refreshToken');
+        clearStoredAuthTokens();
       }
       setLoading(false);
     });
@@ -203,8 +204,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Çıkış yap
   const logout = async (): Promise<void> => {
+    await authAPI.logout();
     await signOut(auth);
   };
 

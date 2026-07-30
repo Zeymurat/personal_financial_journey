@@ -23,44 +23,44 @@ const PortfolioSummaryCards: React.FC<PortfolioSummaryCardsProps> = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-      <div className="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/20 backdrop-blur-sm rounded-3xl pl-8 pr-4 py-8 border border-amber-200/50 dark:border-amber-700/30 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl pl-8 pr-4 py-8 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-brand hover:shadow-brand-lg transition-all duration-300">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">{t('portfolio.totalCost')}</p>
-            <p className="text-2xl font-black mt-2 text-amber-700 dark:text-amber-300 leading-tight">₺{totalInvested.toLocaleString()}</p>
-            <p className="text-sm font-bold text-amber-600 dark:text-amber-400 mt-1">{t('portfolio.totalPrincipal')}</p>
+            <p className="text-sm font-bold text-brand-ink dark:text-brand-champagne-dark uppercase tracking-wide">{t('portfolio.totalCost')}</p>
+            <p className="text-2xl font-black mt-2 text-brand-ink dark:text-brand-champagne leading-tight">₺{totalInvested.toLocaleString()}</p>
+            <p className="text-sm font-bold text-brand-ink dark:text-brand-champagne-dark mt-1">{t('portfolio.totalPrincipal')}</p>
           </div>
-          <div className="p-2 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl shadow-lg flex-shrink-0">
+          <div className="p-2 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-xl shadow-lg flex-shrink-0">
             <DollarSign className="w-4 h-4 text-white" />
           </div>
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 backdrop-blur-sm rounded-3xl pl-8 pr-4 py-8 border border-blue-200/50 dark:border-blue-700/30 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl pl-8 pr-4 py-8 border border-brand-ink/15 dark:border-brand-ink-light/30 shadow-brand hover:shadow-brand-lg transition-all duration-300">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wide">{t('portfolio.totalValue')}</p>
-            <p className="text-2xl font-black text-blue-700 dark:text-blue-300 mt-2 leading-tight">₺{totalValue.toLocaleString()}</p>
-            <p className="text-sm font-bold text-blue-600 dark:text-blue-400 mt-1">{t('portfolio.currentMarketValue')}</p>
+            <p className="text-sm font-bold text-brand-ink dark:text-brand-champagne-dark uppercase tracking-wide">{t('portfolio.totalValue')}</p>
+            <p className="text-2xl font-black text-brand-ink dark:text-brand-champagne mt-2 leading-tight">₺{totalValue.toLocaleString()}</p>
+            <p className="text-sm font-bold text-brand-ink dark:text-brand-champagne-dark mt-1">{t('portfolio.currentMarketValue')}</p>
           </div>
-          <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg flex-shrink-0">
+          <div className="p-2 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-xl shadow-lg flex-shrink-0">
             <DollarSign className="w-4 h-4 text-white" />
           </div>
         </div>
       </div>
 
       <div
-        className={`backdrop-blur-sm rounded-3xl pl-8 pr-2 py-8 border shadow-xl hover:shadow-2xl transition-all duration-300 ${
+        className={`backdrop-blur-sm rounded-3xl pl-8 pr-2 py-8 border shadow-brand hover:shadow-brand-lg transition-all duration-300 ${
           totalGain >= 0
-            ? 'bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200/50 dark:border-emerald-700/30'
-            : 'bg-gradient-to-br from-rose-50 to-red-100 dark:from-rose-900/20 dark:to-red-900/20 border-rose-200/50 dark:border-rose-700/30'
+            ? 'bg-brand-surface dark:bg-brand-surface-dark border-brand-ink/10 dark:border-brand-champagne/15'
+            : 'bg-brand-surface dark:bg-brand-surface-dark border-brand-ink/10 dark:border-brand-champagne/15'
         }`}
       >
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <p
               className={`text-sm font-bold uppercase tracking-wide ${
-                totalGain >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                totalGain >= 0 ? 'text-brand-ink dark:text-brand-champagne-dark' : 'text-rose-600 dark:text-rose-400'
               }`}
             >
               {t('portfolio.totalGainLoss')}
@@ -74,7 +74,7 @@ const PortfolioSummaryCards: React.FC<PortfolioSummaryCardsProps> = ({
             </p>
             <p
               className={`text-sm font-bold mt-1 ${
-                totalGain >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                totalGain >= 0 ? 'text-brand-ink dark:text-brand-champagne-dark' : 'text-rose-600 dark:text-rose-400'
               }`}
             >
               {totalGainPercentage >= 0 ? '+' : ''}
@@ -87,7 +87,7 @@ const PortfolioSummaryCards: React.FC<PortfolioSummaryCardsProps> = ({
             }`}
           >
             {totalGain >= 0 ? (
-              <TrendingUp className="w-4 h-4  text-emerald-600 dark:text-emerald-400" />
+              <TrendingUp className="w-4 h-4  text-brand-ink dark:text-brand-champagne-dark" />
             ) : (
               <TrendingDown className="w-4 h-4 text-rose-600 dark:text-rose-400" />
             )}
@@ -95,30 +95,30 @@ const PortfolioSummaryCards: React.FC<PortfolioSummaryCardsProps> = ({
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-violet-50 to-purple-100 dark:from-violet-900/20 dark:to-purple-900/20 backdrop-blur-sm rounded-3xl pl-8 pr-4 py-8 border border-violet-200/50 dark:border-violet-700/30 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl pl-8 pr-4 py-8 border border-brand-ink/15 dark:border-brand-ink-light/30 shadow-brand hover:shadow-brand-lg transition-all duration-300">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wide">{t('portfolio.totalPositions')}</p>
-            <p className="text-2xl font-black text-violet-700 dark:text-violet-300 mt-2 leading-tight">{activePositionCount}</p>
-            <p className="text-sm font-bold text-violet-600 dark:text-violet-400 mt-1">{t('portfolio.activePositionsHint')}</p>
+            <p className="text-sm font-bold text-brand-ink dark:text-brand-champagne-dark uppercase tracking-wide">{t('portfolio.totalPositions')}</p>
+            <p className="text-2xl font-black text-brand-ink dark:text-brand-champagne mt-2 leading-tight">{activePositionCount}</p>
+            <p className="text-sm font-bold text-brand-ink dark:text-brand-champagne-dark mt-1">{t('portfolio.activePositionsHint')}</p>
           </div>
-          <div className="p-2 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl shadow-lg flex-shrink-0">
+          <div className="p-2 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-xl shadow-lg flex-shrink-0">
             <PieChart className="w-4 h-4 text-white" />
           </div>
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/20 backdrop-blur-sm rounded-3xl pl-8 pr-4 py-8 border border-amber-200/50 dark:border-amber-700/30 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl pl-8 pr-4 py-8 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-brand hover:shadow-brand-lg transition-all duration-300">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">{t('portfolio.roi')}</p>
-            <p className={`text-2xl font-black mt-2 leading-tight ${roi >= 0 ? 'text-amber-700 dark:text-amber-300' : 'text-red-600 dark:text-red-400'}`}>
+            <p className="text-sm font-bold text-brand-ink dark:text-brand-champagne-dark uppercase tracking-wide">{t('portfolio.roi')}</p>
+            <p className={`text-2xl font-black mt-2 leading-tight ${roi >= 0 ? 'text-brand-ink dark:text-brand-champagne' : 'text-red-600 dark:text-red-400'}`}>
               {roi >= 0 ? '+' : ''}
               {roi.toFixed(2)}%
             </p>
-            <p className="text-sm font-bold text-amber-600 dark:text-amber-400 mt-1">{t('portfolio.roiHint')}</p>
+            <p className="text-sm font-bold text-brand-ink dark:text-brand-champagne-dark mt-1">{t('portfolio.roiHint')}</p>
           </div>
-          <div className="p-2 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl shadow-lg flex-shrink-0">
+          <div className="p-2 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-xl shadow-lg flex-shrink-0">
             <Target className="w-4 h-4 text-white" />
           </div>
         </div>

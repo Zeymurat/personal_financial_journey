@@ -12,6 +12,7 @@ import trTrackCompare from '../locales/tr/trackCompare.json';
 import trTransactions from '../locales/tr/transactions.json';
 import trInvestments from '../locales/tr/investments.json';
 import trShared from '../locales/tr/shared.json';
+import trAssistant from '../locales/tr/assistant.json';
 
 import enCommon from '../locales/en/common.json';
 import enSettings from '../locales/en/settings.json';
@@ -27,6 +28,7 @@ import enTrackCompare from '../locales/en/trackCompare.json';
 import enTransactions from '../locales/en/transactions.json';
 import enInvestments from '../locales/en/investments.json';
 import enShared from '../locales/en/shared.json';
+import enAssistant from '../locales/en/assistant.json';
 
 import deCommon from '../locales/de/common.json';
 import deSettings from '../locales/de/settings.json';
@@ -42,6 +44,7 @@ import deTrackCompare from '../locales/de/trackCompare.json';
 import deTransactions from '../locales/de/transactions.json';
 import deInvestments from '../locales/de/investments.json';
 import deShared from '../locales/de/shared.json';
+import deAssistant from '../locales/de/assistant.json';
 
 import frCommon from '../locales/fr/common.json';
 import frSettings from '../locales/fr/settings.json';
@@ -57,6 +60,7 @@ import frTrackCompare from '../locales/fr/trackCompare.json';
 import frTransactions from '../locales/fr/transactions.json';
 import frInvestments from '../locales/fr/investments.json';
 import frShared from '../locales/fr/shared.json';
+import frAssistant from '../locales/fr/assistant.json';
 
 import esCommon from '../locales/es/common.json';
 import esSettings from '../locales/es/settings.json';
@@ -72,6 +76,7 @@ import esTrackCompare from '../locales/es/trackCompare.json';
 import esTransactions from '../locales/es/transactions.json';
 import esInvestments from '../locales/es/investments.json';
 import esShared from '../locales/es/shared.json';
+import esAssistant from '../locales/es/assistant.json';
 
 export const resources = {
   tr: {
@@ -88,7 +93,8 @@ export const resources = {
     trackCompare: trTrackCompare,
     transactions: trTransactions,
     investments: trInvestments,
-    shared: trShared
+    shared: trShared,
+    assistant: trAssistant
   },
   en: {
     common: enCommon,
@@ -104,7 +110,8 @@ export const resources = {
     trackCompare: enTrackCompare,
     transactions: enTransactions,
     investments: enInvestments,
-    shared: enShared
+    shared: enShared,
+    assistant: enAssistant
   },
   de: {
     common: deCommon,
@@ -120,7 +127,8 @@ export const resources = {
     trackCompare: deTrackCompare,
     transactions: deTransactions,
     investments: deInvestments,
-    shared: deShared
+    shared: deShared,
+    assistant: deAssistant
   },
   fr: {
     common: frCommon,
@@ -136,7 +144,8 @@ export const resources = {
     trackCompare: frTrackCompare,
     transactions: frTransactions,
     investments: frInvestments,
-    shared: frShared
+    shared: frShared,
+    assistant: frAssistant
   },
   es: {
     common: esCommon,
@@ -152,6 +161,7 @@ export const resources = {
     trackCompare: esTrackCompare,
     transactions: esTransactions,
     investments: esInvestments,
-    shared: esShared
+    shared: esShared,
+    assistant: esAssistant
   }
 } as const;

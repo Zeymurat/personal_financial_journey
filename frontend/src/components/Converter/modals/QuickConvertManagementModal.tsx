@@ -108,7 +108,7 @@ const QuickConvertManagementModal: React.FC<QuickConvertManagementModalProps> = 
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl"
+        className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-brand-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
@@ -125,7 +125,7 @@ const QuickConvertManagementModal: React.FC<QuickConvertManagementModalProps> = 
         </div>
 
         {/* Yeni Çevirim Ekleme Formu */}
-        <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <div className="mb-6 p-4 bg-brand-surface-muted dark:bg-brand-surface-dark-muted/50 rounded-lg">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             {t('modalQuick.addSectionTitle')}
           </h3>
@@ -136,7 +136,7 @@ const QuickConvertManagementModal: React.FC<QuickConvertManagementModalProps> = 
               </label>
               <select
                 id="newConvertFrom"
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink dark:bg-gray-700 dark:text-white"
               >
                 {allCurrencies.map(currency => (
                   <option key={currency.code} value={currency.code}>
@@ -151,7 +151,7 @@ const QuickConvertManagementModal: React.FC<QuickConvertManagementModalProps> = 
               </label>
               <select
                 id="newConvertTo"
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink dark:bg-gray-700 dark:text-white"
               >
                 {allCurrencies.map(currency => (
                   <option key={currency.code} value={currency.code}>
@@ -171,13 +171,13 @@ const QuickConvertManagementModal: React.FC<QuickConvertManagementModalProps> = 
                 id="newConvertAmount"
                 value={newAmount}
                 onChange={(e) => setNewAmount(formatTrMoneyInput(e.target.value, CONV_AMOUNT_FRAC))}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
           <button
             onClick={handleAddConvert}
-            className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            className="mt-4 w-full bg-brand-ink hover:bg-brand-ink-light text-white px-4 py-2 rounded-lg transition-colors"
           >
             {t('modalQuick.addButton')}
           </button>
@@ -193,7 +193,7 @@ const QuickConvertManagementModal: React.FC<QuickConvertManagementModalProps> = 
               {quickConverts.map((convert) => (
                 <div
                   key={`${convert.from}_${convert.to}_${convert.amount}`}
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-brand-surface-muted dark:bg-brand-surface-dark-muted/50 rounded-lg"
                 >
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -216,10 +216,10 @@ const QuickConvertManagementModal: React.FC<QuickConvertManagementModalProps> = 
           )}
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-end pt-4 border-t border-brand-ink/10 dark:border-brand-champagne/15">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            className="px-4 py-2 bg-brand-ink hover:bg-brand-ink-light text-white rounded-lg transition-colors"
           >
             {t('modalQuick.close')}
           </button>

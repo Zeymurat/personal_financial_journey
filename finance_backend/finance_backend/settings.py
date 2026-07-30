@@ -38,6 +38,7 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'x-finance-client',
 ]
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -129,7 +130,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],
-    # Tüm APIView uçları: dakikada 120 istek (IP veya Firebase UID başına)
+    # Anonim / bilinmeyen istemci: 100/dk.
+    # Trusted first-party (Origin allowlist veya X-Finance-Client + auth) muaf —
+    # bkz. finance_backend.throttling.is_trusted_first_party
     'DEFAULT_THROTTLE_CLASSES': [
         'finance_backend.throttling.GlobalRateThrottle',
     ],

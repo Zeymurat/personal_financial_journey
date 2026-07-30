@@ -13,7 +13,10 @@
     "calculator": "Hesaplayıcı",
     "notifications": "Bildirimler",
     "agenda": "Ajanda",
-    "settings": "Ayarlar"
+    "settings": "Ayarlar",
+    "assistant": "Takip Asistanı",
+    "beta": "Beta",
+    "assistantComingSoon": "Yakında — geliştirme aşamasında"
   },
   "logout": "Çıkış Yap",
   "userFallback": "Kullanıcı"

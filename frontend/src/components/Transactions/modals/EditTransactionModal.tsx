@@ -154,7 +154,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       onClick={onClose}
     >
       <div 
-        className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl border border-slate-200/50 dark:border-slate-700/50"
+        className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 w-full max-w-md mx-4 shadow-brand-lg border border-brand-ink/10 dark:border-brand-champagne/15"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-8">
@@ -182,7 +182,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                 className={`p-4 rounded-xl border-2 transition-all duration-200 ${
                   formData.type === 'income'
                     ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
-                    : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50'
+                    : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 text-slate-700 dark:text-slate-300 bg-brand-surface-muted dark:bg-brand-surface-dark-muted'
                 }`}
               >
                 <ArrowUpRight className="w-6 h-6 mx-auto mb-2" />
@@ -194,7 +194,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                 className={`p-4 rounded-xl border-2 transition-all duration-200 ${
                   formData.type === 'expense'
                     ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300'
-                    : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50'
+                    : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 text-slate-700 dark:text-slate-300 bg-brand-surface-muted dark:bg-brand-surface-dark-muted'
                 }`}
               >
                 <ArrowDownRight className="w-6 h-6 mx-auto mb-2" />
@@ -216,7 +216,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                   onChange={(e) =>
                     setFormData({ ...formData, amount: formatTrMoneyInput(e.target.value) })
                   }
-                  className="w-full p-4 text-xl font-bold border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+                  className="w-full p-4 text-xl font-bold border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
                   placeholder="0,00"
                   required
                 />
@@ -228,7 +228,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                 <select
                   value={formData.currency}
                   onChange={(e) => setFormData({...formData, currency: e.target.value})}
-                  className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+                  className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
                   required
                 >
                   {TRANSACTION_CURRENCIES.map((currency) => (
@@ -247,7 +247,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             <select
               value={formData.category}
               onChange={(e) => setFormData({...formData, category: e.target.value})}
-              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
               required
             >
               <option value="">{t('form.selectCategory')}</option>
@@ -265,7 +265,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
               type="text"
               value={formData.description}
               onChange={(e) => setFormData({...formData, description: e.target.value})}
-              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
               placeholder={t('form.descriptionPlaceholder')}
               required
             />
@@ -279,7 +279,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({...formData, date: e.target.value})}
-              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
               required
             />
           </div>
@@ -294,7 +294,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold"
+              className="flex-1 px-6 py-4 bg-gradient-to-r from-brand-ink to-brand-ink-light text-white rounded-xl hover:shadow-brand hover:scale-105 transition-all duration-200 font-semibold"
             >
               {t('form.updateButton')}
             </button>

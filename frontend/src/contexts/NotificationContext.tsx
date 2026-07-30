@@ -100,11 +100,11 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   const getCategoryColor = (category: Notification['category']) => {
     switch (category) {
       case 'target':
-        return 'text-blue-600';
+        return 'text-brand-ink';
       case 'investment':
         return 'text-green-600';
       case 'transaction':
-        return 'text-purple-600';
+        return 'text-brand-ink';
       case 'reminder':
         return 'text-orange-600';
       default:

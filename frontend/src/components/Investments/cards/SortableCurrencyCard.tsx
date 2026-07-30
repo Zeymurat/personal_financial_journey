@@ -30,7 +30,7 @@ const SortableCurrencyCard: React.FC<SortableCurrencyCardProps> = ({ currency, o
     <div
       ref={setNodeRef}
       style={style}
-      className="relative p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-white dark:bg-gray-800 group"
+      className="relative p-4 border border-brand-ink/10 dark:border-brand-champagne/15 rounded-lg hover:shadow-md transition-shadow bg-brand-surface dark:bg-brand-surface-dark group"
     >
       {onRemove && (
         <button
@@ -95,7 +95,7 @@ const SortableCurrencyCard: React.FC<SortableCurrencyCardProps> = ({ currency, o
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between pt-2 border-t border-brand-ink/10 dark:border-brand-champagne/15">
         <span className="text-xs text-gray-500 dark:text-gray-400">Değişim:</span>
         <span className={`text-sm font-medium ${currency.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
           {currency.change >= 0 ? '+' : ''}

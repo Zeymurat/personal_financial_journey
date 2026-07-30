@@ -1,0 +1,12 @@
+{
+  "title": "Tracking Assistant",
+  "subtitle": "Informational help about your portfolio and transactions",
+  "disclaimer": "This assistant does not provide investment advice. Answers are informational and based only on your account data.",
+  "emptyHint": "E.g. How close am I to my monthly targets? What are my largest holdings?",
+  "placeholder": "Type your question…",
+  "send": "Send",
+  "thinking": "Thinking…",
+  "errors": {
+    "generic": "Could not get a reply. Please try again."
+  }
+}

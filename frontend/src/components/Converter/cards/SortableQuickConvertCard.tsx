@@ -67,9 +67,9 @@ const SortableQuickConvertCard: React.FC<SortableQuickConvertCardProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className="relative p-5 border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 group overflow-hidden"
+      className="relative p-5 border border-brand-ink/10 dark:border-brand-champagne/15 rounded-xl hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 group overflow-hidden"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/5 group-hover:to-purple-500/5 transition-all duration-300 rounded-xl" />
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-ink/0 to-brand-ink-light/0 group-hover:from-brand-ink/5 group-hover:to-brand-ink-light/5 transition-all duration-300 rounded-xl" />
 
       {onRemove && (
         <button
@@ -130,7 +130,7 @@ const SortableQuickConvertCard: React.FC<SortableQuickConvertCardProps> = ({
               ({convert.to})
             </p>
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+          <p className="text-2xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-brand-ink to-brand-ink-light dark:from-brand-champagne dark:to-brand-champagne-dark bg-clip-text text-transparent">
             {result.toLocaleString('tr-TR', {
               minimumFractionDigits: toDecimals,
               maximumFractionDigits: toDecimals
@@ -139,7 +139,7 @@ const SortableQuickConvertCard: React.FC<SortableQuickConvertCardProps> = ({
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-ink via-brand-ink-light to-brand-ink opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </div>
   );
 };

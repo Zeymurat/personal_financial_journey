@@ -6,6 +6,7 @@ import { useTokenValidation } from '../hooks/useTokenValidation';
 import { notificationsAPI } from '../services/apiService';
 import { coerceFlexibleDate } from '../utils/firestoreUtils';
 import { Notification } from '../types';
+import PageHeader from './common/PageHeader';
 import { 
   Bell, 
   Target, 
@@ -167,11 +168,11 @@ const Notifications: React.FC = () => {
   const getCategoryColor = (category: Notification['category']) => {
     switch (category) {
       case 'target':
-        return 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400';
+        return 'bg-brand-champagne dark:bg-brand-surface-dark text-brand-ink dark:text-brand-champagne-dark';
       case 'investment':
         return 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400';
       case 'transaction':
-        return 'bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400';
+        return 'bg-brand-champagne dark:bg-brand-surface-dark text-brand-ink dark:text-brand-champagne-dark';
       case 'reminder':
         return 'bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-400';
       default:
@@ -251,45 +252,42 @@ const Notifications: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="p-6 min-h-screen">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg">
-              <Bell className="w-8 h-8 text-white" />
+      <div className="mb-6 space-y-4">
+        <PageHeader
+          title={t('header.title')}
+          subtitle={
+            unreadCount > 0
+              ? t('header.unreadCount', { count: unreadCount })
+              : t('header.allRead')
+          }
+          actions={
+            <div className="flex items-center space-x-2">
+              {unreadCount > 0 && (
+                <button
+                  onClick={handleMarkAllAsRead}
+                  className="flex items-center space-x-2 px-4 py-2 bg-brand-gradient text-brand-champagne rounded-xl hover:shadow-gold ring-1 ring-gold/30 transition-colors font-semibold"
+                >
+                  <CheckCheck className="w-4 h-4" />
+                  <span>{t('actions.markAllRead')}</span>
+                </button>
+              )}
+              {notifications.filter((n) => n.read).length > 0 && (
+                <button
+                  onClick={handleDeleteAllRead}
+                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-semibold"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>{t('actions.deleteRead')}</span>
+                </button>
+              )}
             </div>
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white">{t('header.title')}</h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1 text-lg">
-                {unreadCount > 0 ? t('header.unreadCount', { count: unreadCount }) : t('header.allRead')}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            {unreadCount > 0 && (
-              <button
-                onClick={handleMarkAllAsRead}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <CheckCheck className="w-4 h-4" />
-                <span>{t('actions.markAllRead')}</span>
-              </button>
-            )}
-            {notifications.filter(n => n.read).length > 0 && (
-              <button
-                onClick={handleDeleteAllRead}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>{t('actions.deleteRead')}</span>
-              </button>
-            )}
-          </div>
-        </div>
+          }
+        />
 
         {/* Filtreler */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-4 border border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
@@ -303,7 +301,7 @@ const Notifications: React.FC = () => {
                     onClick={() => setSelectedCategory(cat.value)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                       selectedCategory === cat.value
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                        ? 'bg-gradient-to-r from-brand-ink to-brand-ink-light text-white shadow-lg'
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                     }`}
                   >
@@ -316,7 +314,7 @@ const Notifications: React.FC = () => {
               onClick={() => setShowOnlyUnread(!showOnlyUnread)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 showOnlyUnread
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-brand-ink text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
@@ -329,10 +327,10 @@ const Notifications: React.FC = () => {
       {/* Bildirimler Listesi */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-ink"></div>
         </div>
       ) : filteredNotifications.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-12 border border-gray-200 dark:border-gray-700 text-center">
+        <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-12 border border-brand-ink/10 dark:border-brand-champagne/15 text-center">
           <Bell className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             {t('empty.title')}
@@ -350,10 +348,10 @@ const Notifications: React.FC = () => {
           {filteredNotifications.map(notification => (
             <div
               key={notification.id}
-              className={`bg-white dark:bg-gray-800 rounded-xl p-6 border-2 transition-all ${
+              className={`bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 border-2 transition-all ${
                 notification.read
-                  ? 'border-gray-200 dark:border-gray-700 opacity-75'
-                  : 'border-blue-200 dark:border-blue-800 shadow-lg'
+                  ? 'border-brand-ink/10 dark:border-brand-champagne/15 opacity-75'
+                  : 'border-brand-champagne-dark dark:border-brand-ink-light shadow-lg'
               }`}
             >
               <div className="flex items-start justify-between">
@@ -374,7 +372,7 @@ const Notifications: React.FC = () => {
                         {notification.title}
                       </h3>
                       {!notification.read && (
-                        <span className="px-2 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
+                        <span className="px-2 py-1 bg-brand-ink text-white text-xs font-semibold rounded-full">
                           {t('badge.new')}
                         </span>
                       )}
@@ -397,7 +395,7 @@ const Notifications: React.FC = () => {
                   {!notification.read && (
                     <button
                       onClick={() => handleMarkAsRead(notification.id)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                      className="p-2 text-brand-ink hover:bg-brand-champagne/60 dark:hover:bg-brand-surface-dark-muted rounded-lg transition-colors"
                       title={t('actions.markReadTooltip')}
                     >
                       <Check className="w-5 h-5" />

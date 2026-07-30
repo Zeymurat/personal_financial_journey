@@ -29,15 +29,15 @@ const DashboardQuickActions: React.FC<DashboardQuickActionsProps> = ({ onAction 
         {
           title: t('quickActions.addInvestment'),
           icon: TrendingUp,
-          color: 'from-blue-500 to-cyan-600',
-          bgColor: 'hover:bg-blue-50 dark:hover:bg-blue-900/20',
+          color: 'from-brand-ink to-brand-ink-light',
+          bgColor: 'hover:bg-brand-champagne/60 dark:hover:bg-brand-surface-dark-muted',
           action: 'investment' as const
         },
         {
           title: t('quickActions.viewReports'),
           icon: PieChart,
-          color: 'from-violet-500 to-purple-600',
-          bgColor: 'hover:bg-violet-50 dark:hover:bg-violet-900/20',
+          color: 'from-brand-ink to-brand-ink-light',
+          bgColor: 'hover:bg-brand-champagne/60 dark:hover:bg-brand-surface-dark-muted',
           action: 'reports' as const
         }
       ],
@@ -45,7 +45,7 @@ const DashboardQuickActions: React.FC<DashboardQuickActionsProps> = ({ onAction 
   );
 
   return (
-    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl p-8 border border-slate-200/50 dark:border-slate-700/50 shadow-2xl">
+    <div className="bg-brand-surface/95 dark:bg-brand-surface-dark backdrop-blur-sm rounded-3xl p-8 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-brand-lg">
       <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-8">{t('quickActions.title')}</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {ACTIONS.map((action, index) => {
@@ -55,7 +55,7 @@ const DashboardQuickActions: React.FC<DashboardQuickActionsProps> = ({ onAction 
               key={index}
               type="button"
               onClick={() => onAction(action.action)}
-              className={`flex flex-col items-center p-8 bg-slate-50 dark:bg-slate-700/50 rounded-2xl ${action.bgColor} transition-all duration-300 hover:scale-105 group border border-slate-200/50 dark:border-slate-600/50 hover:border-slate-300 dark:hover:border-slate-500`}
+              className={`flex flex-col items-center p-8 bg-brand-surface-muted dark:bg-brand-surface-dark-muted rounded-2xl ${action.bgColor} transition-all duration-300 hover:scale-105 group border border-slate-200/50 dark:border-slate-600/50 hover:border-slate-300 dark:hover:border-slate-500`}
             >
               <div
                 className={`p-5 rounded-2xl bg-gradient-to-r ${action.color} mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}

@@ -5,7 +5,7 @@ Borsa verileri için API View'ları (CollectAPI)
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from django.utils import timezone
 from firebase_admin import firestore
@@ -17,10 +17,20 @@ from pathlib import Path
 import requests
 import threading
 
+from users.authentication import FirebaseAuthentication
 from .tcmb_service import get_tcmb_service
 from .borsa_service import get_borsa_service
 
 logger = logging.getLogger(__name__)
+
+
+class AuthenticatedCurrencyView(APIView):
+    """
+    Market endpoint tabanı (DRY + Template Method).
+    Auth zorunlu → ücretli API kotası anonim abuse'e kapanır.
+    """
+    authentication_classes = [FirebaseAuthentication]
+    permission_classes = [IsAuthenticated]
 
 
 def _local_today_str() -> str:
@@ -829,13 +839,12 @@ def should_fetch_fund_detail_from_api(fund_code: str, target_date: str = None) -
     return True, cached_data  # API'den çek
 
 
-class GetMainDataView(APIView):
+class GetMainDataView(AuthenticatedCurrencyView):
     """
     Finans API (finans.truncgil.com) JSON API'sinden 
     döviz kurlarını döndürür.
     Akıllı zaman kontrolü yapar: Firestore'daki fetch_time'ı kontrol eder
     """
-    permission_classes = [AllowAny]
     
     def get(self, request):
         """
@@ -1096,11 +1105,10 @@ class GetMainDataView(APIView):
             return Response(response_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class ExchangeRatesView(APIView):
+class ExchangeRatesView(AuthenticatedCurrencyView):
     """
     Sadece döviz kurlarını döndüren view (TCMB)
     """
-    permission_classes = [AllowAny]
     
     def get(self, request):
         """Sadece döviz kurlarını döndürür"""
@@ -1132,11 +1140,10 @@ class ExchangeRatesView(APIView):
             )
 
 
-class GoldPricesView(APIView):
+class GoldPricesView(AuthenticatedCurrencyView):
     """
     Finans API altın fiyatlarını döndüren view
     """
-    permission_classes = [AllowAny]
     
     def get(self, request):
         """Finans API'den altın fiyatlarını döndürür"""
@@ -1173,12 +1180,11 @@ class GoldPricesView(APIView):
             )
 
 
-class BorsaDataView(APIView):
+class BorsaDataView(AuthenticatedCurrencyView):
     """
     CollectAPI'den borsa verilerini çekip Firestore'a kaydeden view
     Akıllı zaman kontrolü yapar: Firestore'daki fetch_time'ı kontrol eder
     """
-    permission_classes = [AllowAny]
     
     def get(self, request):
         """
@@ -1358,12 +1364,11 @@ class BorsaDataView(APIView):
             )
 
 
-class BorsaDataListView(APIView):
+class BorsaDataListView(AuthenticatedCurrencyView):
     """
     Borsa verilerini getiren view (akıllı kontrol ile)
     Bugün için veri isteniyorsa, otomatik olarak yeni veri çekilip çekilmeyeceğini kontrol eder
     """
-    permission_classes = [AllowAny]
     
     def get(self, request):
         """
@@ -1597,13 +1602,12 @@ class BorsaDataListView(APIView):
             )
 
 
-class FundsListView(APIView):
+class FundsListView(AuthenticatedCurrencyView):
     """
     Funds verilerini JSON dosyasından getiren view
     Tüm kullanıcılar için global funds havuzu
     Quota kısıtlaması nedeniyle Firestore yerine JSON dosyasından okunuyor
     """
-    permission_classes = [AllowAny]
     
     def get(self, request):
         """
@@ -1699,7 +1703,7 @@ class FundsListView(APIView):
             )
 
 
-class FundDetailView(APIView):
+class FundDetailView(AuthenticatedCurrencyView):
     """
     Fon detay bilgilerini RapidAPI'den çeken view.
     Akıllı cache mantığı kullanır:
@@ -1707,7 +1711,6 @@ class FundDetailView(APIView):
     - Geçmiş tarih için: lineValues içinde tarih varsa → Cache'den oku
     - Günlük 10 istek limiti kontrolü yapar
     """
-    permission_classes = [AllowAny]
     
     def get(self, request):
         """
@@ -1874,12 +1877,11 @@ class FundDetailView(APIView):
             )
 
 
-class FundPriceCheckView(APIView):
+class FundPriceCheckView(AuthenticatedCurrencyView):
     """
     Fon fiyat kontrolü için view.
     Cache'den fiyat bilgisini kontrol eder, API isteği atmaz.
     """
-    permission_classes = [AllowAny]
     
     def get(self, request):
         """
@@ -2149,12 +2151,11 @@ class FundPriceCheckView(APIView):
             )
 
 
-class FundQuotaView(APIView):
+class FundQuotaView(AuthenticatedCurrencyView):
     """
     Fon API quota bilgisini döndüren view.
     Sadece cache'den okur, API'ye istek atmaz.
     """
-    permission_classes = [AllowAny]
     
     def get(self, request):
         """

@@ -15,7 +15,7 @@ const DashboardStatsGrid: React.FC<DashboardStatsGridProps> = ({ stats }) => {
       return (
         <div
           key={index}
-          className={`bg-gradient-to-br ${stat.bgColor} backdrop-blur-sm rounded-3xl pl-8 pr-8 py-6 border border-white/20 dark:border-slate-700/30 shadow-xl hover:shadow-2xl transition-all duration-300`}
+          className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl pl-8 pr-8 py-6 border border-brand-ink/10 dark:border-brand-champagne/12 shadow-brand hover:shadow-brand-lg transition-all duration-300"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">

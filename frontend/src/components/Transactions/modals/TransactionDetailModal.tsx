@@ -31,7 +31,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-lg shadow-2xl border border-slate-200/50 dark:border-slate-700/50"
+        className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 w-full max-w-lg shadow-brand-lg border border-brand-ink/10 dark:border-brand-champagne/15"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-start mb-8">
@@ -48,7 +48,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
         </div>
         
         <div className="space-y-6">
-          <div className="flex items-center space-x-4 px-6 py-3 bg-slate-50 dark:bg-slate-700/50 rounded-2xl">
+          <div className="flex items-center space-x-4 px-6 py-3 bg-brand-surface-muted dark:bg-brand-surface-dark-muted rounded-2xl">
             <div className={`p-4 rounded-2xl shadow-lg ${
               transaction.type === 'income' 
                 ? 'bg-gradient-to-r from-emerald-500 to-green-600' 
@@ -71,7 +71,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl px-6 py-3">
+            <div className="bg-brand-surface-muted dark:bg-brand-surface-dark-muted rounded-2xl px-6 py-3">
               <p className="text-sm font-bold text-slate-500 dark:text-slate-400 tracking-wide mb-2">{t('detail.amount')}</p>
                 <p className={`text-xl font-black ${
                   transaction.type === 'income' ? 'text-emerald-600' : 'text-rose-600'
@@ -82,7 +82,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                 </p>
             </div>
             
-            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl px-6 py-3">
+            <div className="bg-brand-surface-muted dark:bg-brand-surface-dark-muted rounded-2xl px-6 py-3">
               <p className="text-sm font-bold text-slate-500 dark:text-slate-400  tracking-wide mb-2">{t('detail.category')}</p>
               <p className="text-sm font-black text-slate-900 dark:text-white">
                 {transaction.category}
@@ -90,7 +90,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
             </div>
           </div>
 
-          <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl px-6 py-3">
+          <div className="bg-brand-surface-muted dark:bg-brand-surface-dark-muted rounded-2xl px-6 py-3">
             <p className="text-sm font-bold text-slate-500 dark:text-slate-400 tracking-wide mb-2">{t('detail.date')}</p>
             <p className="text-sm font-black text-slate-900 dark:text-white">
               {new Date(transaction.date).toLocaleDateString(locale, {
@@ -102,7 +102,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
             </p>
           </div>
 
-          <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl px-6 py-3">
+          <div className="bg-brand-surface-muted dark:bg-brand-surface-dark-muted rounded-2xl px-6 py-3">
             <p className="text-sm font-bold text-slate-500 dark:text-slate-400 tracking-wide mb-2">{t('detail.currency')}</p>
             <p className="text-sm font-black text-slate-900 dark:text-white">
               {transaction.currency} - {currencyLong}
@@ -115,7 +115,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                 onEdit(transaction);
                 onClose();
               }}
-              className="flex-1 px-6 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 hover:scale-105 transition-all duration-200 font-semibold flex items-center justify-center space-x-2"
+              className="flex-1 px-6 py-4 bg-brand-ink text-white rounded-xl hover:bg-brand-ink-light hover:scale-105 transition-all duration-200 font-semibold flex items-center justify-center space-x-2"
             >
               <Edit className="w-5 h-5" />
               <span>{t('detail.edit')}</span>

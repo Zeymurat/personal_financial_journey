@@ -43,8 +43,8 @@ const BorsaStocksPanel: React.FC<BorsaStocksPanelProps> = ({
   );
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl border border-brand-ink/10 dark:border-brand-champagne/15 overflow-hidden mb-8">
+      <div className="px-6 py-4 border-b border-brand-ink/10 dark:border-brand-champagne/15">
         <div className="flex justify-between items-center">
           <div className="flex-1">
             <div className="flex items-center space-x-3">
@@ -59,7 +59,7 @@ const BorsaStocksPanel: React.FC<BorsaStocksPanelProps> = ({
             <button
               type="button"
               onClick={onOpenSelect}
-              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-all duration-200 text-sm"
+              className="flex items-center space-x-2 bg-brand-ink hover:bg-brand-ink-light text-white px-3 py-1.5 rounded-lg transition-all duration-200 text-sm"
               title={t('panels.selectStocksTitle')}
             >
               <Plus className="w-4 h-4" />
@@ -84,7 +84,7 @@ const BorsaStocksPanel: React.FC<BorsaStocksPanelProps> = ({
               <button
                 type="button"
                 onClick={onOpenSelect}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                className="bg-brand-ink hover:bg-brand-ink-light text-white px-6 py-2 rounded-lg transition-colors"
               >
                 {t('panels.borsaCta')}
               </button>

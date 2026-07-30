@@ -16,7 +16,9 @@ from users.firestore_views import (
     FirestoreNotificationReadAllView,
     FirestoreNotificationDeleteReadView,
     FirestoreEventView,
-    FirestoreEventDetailView
+    FirestoreEventDetailView,
+    FirestorePreferenceView,
+    AIChatView,
 )
 
 urlpatterns = [
@@ -55,6 +57,16 @@ urlpatterns = [
     
     # Ayarlar (GET/PUT) için: Tam URL: /api/auth/settings/
     path('settings/', FirestoreSettingsView.as_view(), name='firestore_settings'),
+
+    # Preferences (GET/PUT): /api/auth/preferences/<resource>/
+    path(
+        'preferences/<str:resource>/',
+        FirestorePreferenceView.as_view(),
+        name='firestore_preferences',
+    ),
+
+    # AI asistan (YTD değil)
+    path('ai/chat/', AIChatView.as_view(), name='ai_chat'),
     
     # Bildirimler (GET/POST) için: Tam URL: /api/auth/notifications/
     path('notifications/', FirestoreNotificationView.as_view(), name='firestore_notifications'),

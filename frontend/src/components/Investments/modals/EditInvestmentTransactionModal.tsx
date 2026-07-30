@@ -94,7 +94,7 @@ const EditInvestmentTransactionModal: React.FC<EditInvestmentTransactionModalPro
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl border border-slate-200/50 dark:border-slate-700/50"
+        className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 w-full max-w-md mx-4 shadow-brand-lg border border-brand-ink/10 dark:border-brand-champagne/15"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -173,7 +173,7 @@ const EditInvestmentTransactionModal: React.FC<EditInvestmentTransactionModalPro
                     quantity: formatTrMoneyInput(e.target.value, INV_AMOUNT_FRAC)
                   })
                 }
-                className="w-full px-4 py-3 border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-brand-surface dark:bg-slate-700 text-slate-900 dark:text-white focus:border-brand-ink dark:focus:border-brand-champagne-dark focus:outline-none transition-colors"
                 placeholder="10"
                 required
               />
@@ -194,7 +194,7 @@ const EditInvestmentTransactionModal: React.FC<EditInvestmentTransactionModalPro
                     price: formatTrMoneyInput(e.target.value, INV_AMOUNT_FRAC)
                   })
                 }
-                className="w-full px-4 py-3 border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-brand-surface dark:bg-slate-700 text-slate-900 dark:text-white focus:border-brand-ink dark:focus:border-brand-champagne-dark focus:outline-none transition-colors"
                 placeholder="0,00"
                 required
               />
@@ -210,7 +210,7 @@ const EditInvestmentTransactionModal: React.FC<EditInvestmentTransactionModalPro
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({...formData, date: e.target.value})}
-                className="w-full px-4 py-3 border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-brand-surface dark:bg-slate-700 text-slate-900 dark:text-white focus:border-brand-ink dark:focus:border-brand-champagne-dark focus:outline-none transition-colors"
                 required
               />
             </div>
@@ -230,7 +230,7 @@ const EditInvestmentTransactionModal: React.FC<EditInvestmentTransactionModalPro
                     fees: formatTrMoneyInput(e.target.value, INV_AMOUNT_FRAC)
                   })
                 }
-                className="w-full px-4 py-3 border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-brand-surface dark:bg-slate-700 text-slate-900 dark:text-white focus:border-brand-ink dark:focus:border-brand-champagne-dark focus:outline-none transition-colors"
                 placeholder="0"
               />
             </div>
@@ -247,7 +247,7 @@ const EditInvestmentTransactionModal: React.FC<EditInvestmentTransactionModalPro
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-4 bg-gradient-to-r from-brand-ink to-brand-ink-light text-white rounded-xl hover:shadow-brand hover:scale-105 transition-all duration-200 font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isUpdating}
             >
               <Save className="w-5 h-5" />

@@ -2,4 +2,14 @@ node_modules
 .env
 .zip
 *.pyc
+__pycache__/
+
+# Virtualenvs (kök + backend)
+venv/
+.venv/
 finance_backend/venv/
+finance_backend/.venv/
+
+# macOS AppleDouble metadata (harici disk / exFAT)
+._*
+.DS_Store

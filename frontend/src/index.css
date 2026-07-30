@@ -2,13 +2,112 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Quick Actions Scrollbar Styling - Modern & Minimal */
-.quick-actions-scroll {
-  scrollbar-width: thin !important;
-  scrollbar-color: rgba(139, 92, 246, 0.3) transparent !important; /* Purple with transparency */
+@layer base {
+  :root {
+    /* Cool pearl mist — cream değil; navy + gold ile elit */
+    --background: 210 18% 96%;
+    --foreground: 213 40% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 213 40% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 213 40% 14%;
+    --primary: 213 64% 16%;
+    --primary-foreground: 42 40% 96%;
+    --secondary: 210 14% 92%;
+    --secondary-foreground: 213 35% 18%;
+    --muted: 210 14% 94%;
+    --muted-foreground: 213 12% 42%;
+    --accent: 38 35% 61%;
+    --accent-foreground: 213 40% 12%;
+    --destructive: 4 62% 40%;
+    --destructive-foreground: 42 55% 97%;
+    --border: 214 16% 88%;
+    --input: 214 16% 90%;
+    --ring: 38 35% 61%;
+    --radius: 1rem;
+    --sidebar: 213 55% 9%;
+    --sidebar-foreground: 42 35% 94%;
+    --sidebar-muted: 210 12% 58%;
+    --gold: 38 35% 61%;
+  }
+
+  .dark {
+    --background: 213 38% 7%;
+    --foreground: 42 30% 92%;
+    --card: 213 34% 11%;
+    --card-foreground: 42 30% 92%;
+    --popover: 213 34% 11%;
+    --popover-foreground: 42 30% 92%;
+    --primary: 213 45% 38%;
+    --primary-foreground: 42 40% 96%;
+    --secondary: 213 22% 16%;
+    --secondary-foreground: 42 25% 88%;
+    --muted: 213 22% 14%;
+    --muted-foreground: 210 12% 62%;
+    --accent: 38 32% 55%;
+    --accent-foreground: 213 40% 10%;
+    --destructive: 4 62% 48%;
+    --destructive-foreground: 42 55% 97%;
+    --border: 213 20% 18%;
+    --input: 213 20% 20%;
+    --ring: 38 32% 55%;
+    --sidebar: 213 48% 6%;
+    --sidebar-foreground: 42 35% 94%;
+    --sidebar-muted: 210 12% 55%;
+    --gold: 38 32% 55%;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    background-image:
+      radial-gradient(ellipse 110% 70% at 100% -25%, hsl(213 64% 16% / 0.04), transparent 55%),
+      radial-gradient(ellipse 70% 50% at 0% 0%, hsl(38 35% 61% / 0.05), transparent 50%),
+      linear-gradient(180deg, hsl(210 18% 97%) 0%, hsl(210 16% 95%) 100%);
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(ellipse 90% 60% at 100% -15%, hsl(38 32% 55% / 0.06), transparent 50%),
+      radial-gradient(ellipse 80% 50% at 0% 100%, hsl(213 45% 30% / 0.12), transparent 45%),
+      linear-gradient(180deg, hsl(213 38% 7%) 0%, hsl(213 40% 5%) 100%);
+  }
 }
 
-/* Varsayılan olarak scrollbar gizli, hover'da görünür */
+@layer components {
+  .brand-card {
+    @apply rounded-2xl border border-white/70 bg-card/95 shadow-warm backdrop-blur-sm
+      dark:border-white/8 dark:bg-card/90;
+  }
+  .brand-card-muted {
+    @apply rounded-xl border border-border/60 bg-muted/60 dark:bg-muted/40;
+  }
+  .glass-surface {
+    @apply rounded-2xl border border-white/60 bg-card/85 shadow-warm backdrop-blur-md dark:border-white/8;
+  }
+  .elite-panel {
+    @apply relative overflow-hidden rounded-2xl border border-white/70 bg-card/95 shadow-warm
+      dark:border-white/10 dark:shadow-elite;
+  }
+  .elite-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(38 35% 61% / 0.45),
+      transparent
+    );
+    pointer-events: none;
+  }
+}
+
+.quick-actions-scroll {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(15, 39, 68, 0.35) transparent !important;
+}
+
 .quick-actions-scroll::-webkit-scrollbar {
   height: 6px !important;
   width: 6px !important;
@@ -27,59 +126,47 @@
 }
 
 .quick-actions-scroll::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(139, 92, 246, 0.4), rgba(236, 72, 153, 0.4)) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 39, 68, 0.45),
+    rgba(196, 165, 116, 0.4)
+  ) !important;
   border-radius: 10px !important;
   min-height: 40px;
   min-width: 40px;
-  transition: background 0.3s ease !important;
 }
 
-.quick-actions-scroll::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(139, 92, 246, 0.6), rgba(236, 72, 153, 0.6)) !important;
-}
-
-/* Dark mode */
 .dark .quick-actions-scroll {
-  scrollbar-color: rgba(167, 139, 250, 0.3) transparent !important;
-}
-
-.dark .quick-actions-scroll::-webkit-scrollbar-track {
-  background: transparent !important;
+  scrollbar-color: rgba(196, 165, 116, 0.4) transparent !important;
 }
 
 .dark .quick-actions-scroll::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(167, 139, 250, 0.4), rgba(251, 113, 133, 0.4)) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(196, 165, 116, 0.45),
+    rgba(234, 224, 200, 0.25)
+  ) !important;
 }
 
-.dark .quick-actions-scroll::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(167, 139, 250, 0.6), rgba(251, 113, 133, 0.6)) !important;
-}
-
-/* Toast Notifications - Modern & Beautiful */
 .toast-container {
   top: 20px !important;
   z-index: 9999;
   pointer-events: none;
 }
 
-.toast-container > div {
-  /* Toast görsel olarak görünsün ama tıklamaları engellemesin. */
-  pointer-events: none;
-}
-
-/* React-hot-toast içindeki tüm alt elemanlar da tıklamayı engellemesin. */
+.toast-container > div,
 .toast-container * {
   pointer-events: none !important;
 }
 
 .toast-notification {
   font-family: inherit !important;
-  background: white !important;
-  color: #1f2937 !important;
+  background: #eae0c8 !important;
+  color: #0f2744 !important;
   border-radius: 16px !important;
   padding: 18px 24px 18px 56px !important;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 10px 40px rgba(15, 39, 68, 0.12), 0 4px 12px rgba(196, 165, 116, 0.12) !important;
+  border: 1px solid rgba(196, 165, 116, 0.35) !important;
   backdrop-filter: blur(10px) !important;
   font-weight: 500 !important;
   font-size: 14px !important;
@@ -102,60 +189,37 @@
   }
 }
 
-/* Success Toast */
 .toast-success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-  color: white !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3), 0 4px 12px rgba(16, 185, 129, 0.2) !important;
+  background: linear-gradient(135deg, #0f2744 0%, #163a5f 100%) !important;
+  color: #eae0c8 !important;
+  border: 1px solid rgba(196, 165, 116, 0.4) !important;
+  box-shadow: 0 10px 40px rgba(15, 39, 68, 0.35) !important;
 }
 
-.toast-success svg {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)) !important;
-  flex-shrink: 0 !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-/* İkon için ekstra sol boşluk - react-hot-toast yapısı */
-.toast-success [data-icon],
-.toast-success > div:first-child {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-/* Error Toast */
-.toast-error {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-  color: white !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 10px 40px rgba(239, 68, 68, 0.3), 0 4px 12px rgba(239, 68, 68, 0.2) !important;
-}
-
+.toast-success svg,
 .toast-error svg {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)) !important;
   flex-shrink: 0 !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
 }
 
-/* İkon için ekstra sol boşluk - react-hot-toast yapısı */
+.toast-success [data-icon],
+.toast-success > div:first-child,
 .toast-error [data-icon],
-.toast-error > div:first-child {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-/* Toast içeriği için padding kontrolü */
-.toast-notification > div {
-  padding: 0 !important;
-}
-
-/* İkon wrapper'ı için özel stil */
+.toast-error > div:first-child,
 .toast-notification [data-icon],
 .toast-notification > div:first-child {
   margin-left: 0 !important;
   margin-right: 0 !important;
+}
+
+.toast-error {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.toast-notification > div {
+  padding: 0 !important;
 }
 
 .toast-notification span {
@@ -163,46 +227,25 @@
   padding: 0 !important;
 }
 
-/* Dark Mode Toast Styles */
 .dark .toast-notification {
-  background: #1f2937 !important;
-  color: #f9fafb !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  background: #132232 !important;
+  color: #eae0c8 !important;
+  border: 1px solid rgba(196, 165, 116, 0.25) !important;
 }
 
 .dark .toast-success {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 0 10px 40px rgba(5, 150, 105, 0.4), 0 4px 12px rgba(5, 150, 105, 0.3) !important;
+  background: linear-gradient(135deg, #0f2744 0%, #163a5f 100%) !important;
 }
 
-.dark .toast-error {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 0 10px 40px rgba(220, 38, 38, 0.4), 0 4px 12px rgba(220, 38, 38, 0.3) !important;
-}
-
-/* Toast Close Button */
 .toast-notification button[aria-label] {
   color: inherit !important;
   opacity: 0.7 !important;
-  transition: opacity 0.2s ease !important;
 }
 
 .toast-notification button[aria-label]:hover {
   opacity: 1 !important;
 }
 
-.dark .toast-notification button[aria-label] {
-  opacity: 0.8 !important;
-}
-
-.dark .toast-notification button[aria-label]:hover {
-  opacity: 1 !important;
-}
-
-/* Shimmer Effect - Blue to Purple Gradient */
 @keyframes shimmer {
   0% {
     background-position: -1000px 0;
@@ -215,12 +258,11 @@
 .shimmer {
   background: linear-gradient(
     to right,
-    #c7d2fe 0%,
-    #a5b4fc 15%,
-    #818cf8 30%,
-    #a5b4fc 45%,
-    #c7d2fe 60%,
-    #c7d2fe 100%
+    #eae0c8 0%,
+    #d4bc94 25%,
+    #c4a574 45%,
+    #d4bc94 65%,
+    #eae0c8 100%
   );
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
@@ -229,12 +271,11 @@
 .dark .shimmer {
   background: linear-gradient(
     to right,
-    #312e81 0%,
-    #4338ca 15%,
-    #6366f1 30%,
-    #4338ca 45%,
-    #312e81 60%,
-    #312e81 100%
+    #0b1520 0%,
+    #132232 25%,
+    #c4a574 45%,
+    #132232 65%,
+    #0b1520 100%
   );
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;

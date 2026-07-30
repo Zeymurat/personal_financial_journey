@@ -105,7 +105,7 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
       onClick={handleClose}
     >
       <div
-        className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-3xl w-full max-h-[85vh] overflow-y-auto shadow-2xl"
+        className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl p-6 max-w-3xl w-full max-h-[85vh] overflow-y-auto shadow-brand-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
@@ -127,21 +127,21 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
 
         {/* Seçili sayısı */}
         {selectedCurrencies.length > 0 && (
-          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
+          <div className="mb-4 p-3 bg-brand-champagne/60 dark:bg-brand-ink/30 border border-brand-champagne-dark dark:border-brand-ink-light rounded-lg">
+            <p className="text-sm text-brand-ink dark:text-brand-champagne">
               {t('converter:modalCurrency.selectedCount', { count: selectedCurrencies.length })}
             </p>
           </div>
         )}
 
         {/* Kategori Filtreleri - Modern Tasarım */}
-        <div className="mb-4 p-5 bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-800/50 dark:via-blue-900/20 dark:to-purple-900/20 rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg backdrop-blur-sm">
+        <div className="mb-4 p-5 bg-brand-surface-muted dark:bg-brand-surface-dark-muted rounded-xl border border-brand-ink/10 dark:border-brand-champagne/12 shadow-brand backdrop-blur-sm">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm font-bold text-gray-700 dark:text-gray-200 tracking-wide">
               {t('converter:modalCurrency.categoryFilter')}
             </p>
             <div className="flex items-center space-x-2">
-              <div className="h-1 w-1 rounded-full bg-blue-500 animate-pulse"></div>
+              <div className="h-1 w-1 rounded-full bg-brand-ink animate-pulse"></div>
               <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
                 {t('converter:modalCurrency.activeFilters', {
                   count:
@@ -166,8 +166,8 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
               }}
               className={`px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${
                 selectedCategories.all
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20'
-                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                  ? 'bg-gradient-to-r from-brand-ink to-brand-ink-light text-white shadow-lg shadow-brand-ink/30 dark:shadow-brand-ink/20'
+                  : 'bg-brand-surface dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-600 hover:border-brand-ink-light dark:hover:border-brand-ink hover:bg-brand-champagne/60 dark:hover:bg-brand-surface-dark-muted'
               }`}
             >
               {t('converter:modalCurrency.all')}
@@ -190,7 +190,7 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
               className={`px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${
                 selectedCategories.currency
                   ? 'bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30 dark:shadow-emerald-500/20'
-                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                  : 'bg-brand-surface dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
               }`}
             >
               {t('converter:modalCurrency.categoryCurrency')}
@@ -213,7 +213,7 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
               className={`px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${
                 selectedCategories.gold
                   ? 'bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30 dark:shadow-yellow-500/20'
-                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-600 hover:border-yellow-300 dark:hover:border-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+                  : 'bg-brand-surface dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-600 hover:border-yellow-300 dark:hover:border-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
               }`}
             >
               {t('converter:modalCurrency.categoryGold')}
@@ -235,8 +235,8 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
               }}
               className={`px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${
                 selectedCategories.crypto
-                  ? 'bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white shadow-lg shadow-purple-500/30 dark:shadow-purple-500/20'
-                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20'
+                  ? 'bg-gradient-to-r from-brand-ink via-brand-ink-light to-brand-ink-deep text-white shadow-lg shadow-brand-ink/30 dark:shadow-brand-ink/20'
+                  : 'bg-brand-surface dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-600 hover:border-brand-ink-light dark:hover:border-brand-ink hover:bg-brand-champagne/60 dark:hover:bg-brand-surface-dark-muted'
               }`}
             >
               {t('converter:modalCurrency.categoryCrypto')}
@@ -258,8 +258,8 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
               }}
               className={`px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${
                 selectedCategories.metal
-                  ? 'bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 text-white shadow-lg shadow-teal-500/30 dark:shadow-teal-500/20'
-                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-600 hover:border-teal-300 dark:hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-900/20'
+                  ? 'bg-gradient-to-r from-brand-ink via-brand-ink-light to-brand-ink-deep text-white shadow-lg shadow-brand-ink/30 dark:shadow-brand-ink/20'
+                  : 'bg-brand-surface dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-600 hover:border-teal-300 dark:hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-900/20'
               }`}
             >
               {t('converter:modalCurrency.categoryMetal')}
@@ -276,7 +276,7 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
               placeholder={t('converter:modalCurrency.searchPlaceholder')}
               value={searchCurrencyQuery}
               onChange={(e) => setSearchCurrencyQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-blue-900/20 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-brand-ink/30 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             />
             {searchCurrencyQuery && (
               <button
@@ -348,8 +348,8 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
                           key={currency.code}
                           className={`relative flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
                             isSelected
-                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-md'
-                              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 bg-white dark:bg-gray-700'
+                              ? 'border-brand-ink bg-brand-champagne/60 dark:bg-brand-surface-dark-muted shadow-md'
+                              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 bg-brand-surface dark:bg-gray-700'
                           }`}
                         >
                           <div className="flex items-start justify-between mb-2">
@@ -365,11 +365,11 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => toggleCurrencySelection(currency.code)}
-                              className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 mt-0.5 cursor-pointer"
+                              className="w-5 h-5 text-brand-ink rounded focus:ring-brand-ink mt-0.5 cursor-pointer"
                             />
                           </div>
                           {isSelected && (
-                            <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
+                            <div className="mt-2 pt-2 border-t border-brand-champagne-dark dark:border-brand-ink-light">
                               <div className="flex items-center justify-between text-xs">
                                 <span className="text-green-600 dark:text-green-400 font-medium">
                                   {t('converter:modalCurrency.buy')} ₺{currency.buy.toFixed(4)}
@@ -402,7 +402,7 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
                           className={`relative flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
                             isSelected
                               ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/30 shadow-md'
-                              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 bg-white dark:bg-gray-700'
+                              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 bg-brand-surface dark:bg-gray-700'
                           }`}
                         >
                           <div className="flex items-start justify-between mb-2">
@@ -454,8 +454,8 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
                           key={currency.code}
                           className={`relative flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
                             isSelected
-                              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 shadow-md'
-                              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 bg-white dark:bg-gray-700'
+                              ? 'border-brand-ink bg-brand-champagne/60 dark:bg-brand-surface-dark/30 shadow-md'
+                              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 bg-brand-surface dark:bg-gray-700'
                           }`}
                         >
                           <div className="flex items-start justify-between mb-2">
@@ -471,11 +471,11 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => toggleCurrencySelection(currency.code)}
-                              className="w-5 h-5 text-purple-600 rounded focus:ring-purple-500 mt-0.5 cursor-pointer"
+                              className="w-5 h-5 text-brand-ink rounded focus:ring-brand-ink mt-0.5 cursor-pointer"
                             />
                           </div>
                           {isSelected && (
-                            <div className="mt-2 pt-2 border-t border-purple-200 dark:border-purple-700">
+                            <div className="mt-2 pt-2 border-t border-brand-champagne-dark dark:border-brand-ink-light">
                               <div className="flex items-center justify-between text-xs">
                                 <span className="text-green-600 dark:text-green-400 font-medium">
                                   {t('converter:modalCurrency.price')} ₺{currency.buy.toFixed(2)}
@@ -510,7 +510,7 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
                           className={`relative flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
                             isSelected
                               ? 'border-gray-500 bg-gray-50 dark:bg-gray-900/30 shadow-md'
-                              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 bg-white dark:bg-gray-700'
+                              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 bg-brand-surface dark:bg-gray-700'
                           }`}
                         >
                           <div className="flex items-start justify-between mb-2">
@@ -530,7 +530,7 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
                             />
                           </div>
                           {isSelected && (
-                            <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                            <div className="mt-2 pt-2 border-t border-brand-ink/10 dark:border-brand-champagne/15">
                               <div className="flex items-center justify-between text-xs">
                                 <span className="text-green-600 dark:text-green-400 font-medium">
                                   {t('converter:modalCurrency.buy')} ₺{currency.buy.toFixed(2)}
@@ -551,12 +551,12 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
           );
         })()}
 
-        <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-between items-center pt-4 border-t border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="text-sm text-gray-600 dark:text-gray-400">
             {selectedCurrencies.length > 0 ? (
               <span>{t('converter:modalCurrency.footerSelected', { count: selectedCurrencies.length })}</span>
             ) : (
-              <span className="text-amber-600 dark:text-amber-400">
+              <span className="text-brand-ink dark:text-brand-champagne-dark">
                 {t('converter:modalCurrency.footerMinOne')}
               </span>
             )}
@@ -571,7 +571,7 @@ const CurrencySelectionModal: React.FC<CurrencySelectionModalProps> = ({
             <button
               onClick={handleClose}
               disabled={selectedCurrencies.length === 0}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-brand-ink hover:bg-brand-ink-light disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
             >
               {t('common:actions.save')}
             </button>

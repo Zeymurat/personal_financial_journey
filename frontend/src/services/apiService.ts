@@ -1,524 +1,448 @@
-import { Transaction, Investment, InvestmentTransaction, QuickTransaction, UserSettings, Notification, Event } from '../types';
+import {
+  Transaction,
+  Investment,
+  InvestmentTransaction,
+  QuickTransaction,
+  UserSettings,
+  Notification,
+  Event,
+} from '../types';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
+import {
+  clearStoredAuthTokens,
+  getStoredAccessToken,
+  setStoredAccessToken,
+} from './authTokenStore';
 
 const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ||
   'http://localhost:8000/api';
 
-// JWT token'ı localStorage'dan al
-const getAuthToken = (): string | null => {
-  return localStorage.getItem('access_token');
+type ApiRequestOptions = RequestInit & {
+  /** Login gibi auth gerektirmeyen uçlar */
+  skipAuth?: boolean;
 };
 
-// API headers'ı hazırla
-const getHeaders = (): HeadersInit => {
-  const token = getAuthToken();
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` }),
-  };
-};
-
-// API isteği yap
-const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const config: RequestInit = {
-    headers: getHeaders(),
-    ...options
-  };
-  
-  try {
-    const response = await fetch(url, config);
-    
-    if (!response.ok) {
-      // 401/403 durumunda kullanıcıyı login ekranına yönlendirmek için oturumu temizle
-      if (response.status === 401 || response.status === 403) {
-        try {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refreshToken');
-          await signOut(auth);
-        } catch (e) {
-          // Silent fail
-        }
-      }
-
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json();
-    
-  } catch (error) {
-    throw error;
+/**
+ * Firebase oturumundan taze ID token alıp store'a yazar.
+ * forceRefresh=true → Firebase'e zorla yenileme (süresi dolmuş token sonrası).
+ *
+ * Big-O: O(1) local iş + 1 network (Firebase) — istek başına en fazla 2 kez (retry).
+ */
+async function resolveAccessToken(forceRefresh = false): Promise<string | null> {
+  const user = auth.currentUser;
+  if (user) {
+    const token = await user.getIdToken(forceRefresh);
+    setStoredAccessToken(token);
+    return token;
   }
-};
+  return getStoredAccessToken();
+}
 
-// Transaction API'leri
+async function clearSessionAndSignOut(): Promise<void> {
+  clearStoredAuthTokens();
+  try {
+    await signOut(auth);
+  } catch {
+    // Zaten çıkışlı olabilir
+  }
+}
+
+function mergeHeaders(
+  base: Record<string, string>,
+  extra?: HeadersInit
+): Record<string, string> {
+  if (!extra) return base;
+  if (extra instanceof Headers) {
+    const out = { ...base };
+    extra.forEach((value, key) => {
+      out[key] = value;
+    });
+    return out;
+  }
+  if (Array.isArray(extra)) {
+    const out = { ...base };
+    for (const [key, value] of extra) out[key] = value;
+    return out;
+  }
+  return { ...base, ...extra };
+}
+
+/**
+ * Tek HTTP giriş noktası (DRY + Open/Closed: yeni endpoint apiRequest üzerine eklenir).
+ *
+ * Akış:
+ * 1) Taze token (varsa)
+ * 2) İstek
+ * 3) 401/403 → bir kez forceRefresh + retry
+ * 4) Hâlâ 401/403 → oturumu kapat
+ */
+async function apiRequest(
+  endpoint: string,
+  options: ApiRequestOptions = {},
+  retried = false
+): Promise<any> {
+  const { skipAuth = false, headers: optionHeaders, ...fetchOptions } = options;
+  const url = `${API_BASE_URL}${endpoint}`;
+
+  const headers: Record<string, string> = mergeHeaders(
+    {
+      'Content-Type': 'application/json',
+      // Backend trusted first-party muafiyeti (throttle)
+      'X-Finance-Client': 'web',
+    },
+    optionHeaders
+  );
+
+  if (!skipAuth) {
+    const token = await resolveAccessToken(false);
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, { ...fetchOptions, headers });
+
+  if (!response.ok) {
+    const isAuthError = response.status === 401 || response.status === 403;
+
+    if (isAuthError && !skipAuth && !retried && auth.currentUser) {
+      await resolveAccessToken(true);
+      return apiRequest(endpoint, options, true);
+    }
+
+    if (isAuthError && !skipAuth) {
+      await clearSessionAndSignOut();
+    }
+
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.error || errorData.message || `HTTP error! status: ${response.status}`
+    );
+  }
+
+  if (response.status === 204) return null;
+  return await response.json();
+}
+
+// --- Domain API'leri (Interface Segregation: her obje kendi alanı) ---
+
 export const transactionAPI = {
-  // Tüm işlemleri getir
   async getAll(filters?: { type?: 'income' | 'expense'; category?: string }) {
     const queryParams = new URLSearchParams();
     if (filters?.type) queryParams.append('type', filters.type);
     if (filters?.category) queryParams.append('category', filters.category);
-    
-    const endpoint = `/auth/transactions/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    return await apiRequest(endpoint);
+    const qs = queryParams.toString();
+    return await apiRequest(`/auth/transactions/${qs ? `?${qs}` : ''}`);
   },
 
-  // Yeni işlem oluştur
   async create(transaction: Omit<Transaction, 'id'>) {
     return await apiRequest('/auth/transactions/', {
       method: 'POST',
-      body: JSON.stringify(transaction)
+      body: JSON.stringify(transaction),
     });
   },
 
-  // İşlem güncelle
   async update(id: string, updates: Partial<Transaction>) {
     return await apiRequest(`/auth/transactions/${id}/`, {
       method: 'PUT',
-      body: JSON.stringify(updates)
+      body: JSON.stringify(updates),
     });
   },
 
-  // İşlem sil
   async delete(id: string) {
-    return await apiRequest(`/auth/transactions/${id}/`, {
-      method: 'DELETE'
-    });
-  }
+    return await apiRequest(`/auth/transactions/${id}/`, { method: 'DELETE' });
+  },
 };
 
-// Quick Transaction API'leri
 export const quickTransactionAPI = {
-  // Tüm hızlı işlemleri getir
   async getAll() {
     return await apiRequest('/auth/quick-transactions/');
   },
 
-  // Yeni hızlı işlem oluştur
-  async create(quickTransaction: Omit<QuickTransaction, 'id' | 'createdAt' | 'updatedAt'>) {
+  async create(
+    quickTransaction: Omit<QuickTransaction, 'id' | 'createdAt' | 'updatedAt'>
+  ) {
     return await apiRequest('/auth/quick-transactions/', {
       method: 'POST',
-      body: JSON.stringify(quickTransaction)
+      body: JSON.stringify(quickTransaction),
     });
   },
 
-  // Hızlı işlem güncelle
   async update(id: string, updates: Partial<QuickTransaction>) {
     return await apiRequest(`/auth/quick-transactions/${id}/`, {
       method: 'PUT',
-      body: JSON.stringify(updates)
+      body: JSON.stringify(updates),
     });
   },
 
-  // Hızlı işlem sil
   async delete(id: string) {
     return await apiRequest(`/auth/quick-transactions/${id}/`, {
-      method: 'DELETE'
+      method: 'DELETE',
     });
-  }
+  },
 };
 
-// Investment API'leri
 export const investmentAPI = {
-  // Tüm yatırımları getir
   async getAll() {
     return await apiRequest('/auth/investments/');
   },
 
-  // Yeni yatırım oluştur
   async create(investment: Omit<Investment, 'id' | 'transactions'>) {
     return await apiRequest('/auth/investments/', {
       method: 'POST',
-      body: JSON.stringify(investment)
+      body: JSON.stringify(investment),
     });
   },
 
-  // Yatırım güncelle
   async update(id: string, updates: Partial<Investment>) {
     return await apiRequest(`/auth/investments/${id}/`, {
       method: 'PUT',
-      body: JSON.stringify(updates)
+      body: JSON.stringify(updates),
     });
   },
 
-  // Yatırım sil
   async delete(id: string) {
-    return await apiRequest(`/auth/investments/${id}/`, {
-      method: 'DELETE'
-    });
-  }
+    return await apiRequest(`/auth/investments/${id}/`, { method: 'DELETE' });
+  },
 };
 
-// Investment Transaction API'leri
 export const investmentTransactionAPI = {
-  // Yatırım işlemlerini getir
   async getByInvestment(investmentId: string) {
     return await apiRequest(`/auth/investments/${investmentId}/transactions/`);
   },
 
-  // Yeni yatırım işlemi ekle
-  async create(investmentId: string, transaction: Omit<InvestmentTransaction, 'id'>) {
+  async create(
+    investmentId: string,
+    transaction: Omit<InvestmentTransaction, 'id'>
+  ) {
     return await apiRequest(`/auth/investments/${investmentId}/transactions/`, {
       method: 'POST',
-      body: JSON.stringify(transaction)
+      body: JSON.stringify(transaction),
     });
   },
 
-  // Yatırım işlemini güncelle
-  async update(investmentId: string, transactionId: string, updates: Partial<InvestmentTransaction>) {
-    return await apiRequest(`/auth/investments/${investmentId}/transactions/${transactionId}/`, {
-      method: 'PUT',
-      body: JSON.stringify(updates)
-    });
+  async update(
+    investmentId: string,
+    transactionId: string,
+    updates: Partial<InvestmentTransaction>
+  ) {
+    return await apiRequest(
+      `/auth/investments/${investmentId}/transactions/${transactionId}/`,
+      { method: 'PUT', body: JSON.stringify(updates) }
+    );
   },
 
-  // Yatırım işlemini sil
   async delete(investmentId: string, transactionId: string) {
-    return await apiRequest(`/auth/investments/${investmentId}/transactions/${transactionId}/`, {
-      method: 'DELETE'
-    });
-  }
+    return await apiRequest(
+      `/auth/investments/${investmentId}/transactions/${transactionId}/`,
+      { method: 'DELETE' }
+    );
+  },
 };
 
-// Auth API'leri
 export const authAPI = {
-  // Firebase login ile JWT token al
+  /**
+   * Backend'e ID token doğrulatır ve access token store'a yazar.
+   * skipAuth: henüz store'da token yok / circular bağımlılık olmasın.
+   */
   async firebaseLogin(idToken: string) {
-    const response = await apiRequest('/auth/firebase-login/', {
-      method: 'POST',
-      body: JSON.stringify({ id_token: idToken })
-    });
-    
-    // Token'ı localStorage'a kaydet
-    if (response.access) {
-      localStorage.setItem('access_token', response.access);
-      localStorage.setItem('refreshToken', response.refresh);
-    }
-    
-    return response;
-  },
-
-  // Token yenile
-  async refreshToken() {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) throw new Error('Refresh token bulunamadı');
-    
-    const response = await apiRequest('/auth/token/refresh/', {
-      method: 'POST',
-      body: JSON.stringify({ refresh: refreshToken })
-    });
-    
-    if (response.access) {
-      localStorage.setItem('access_token', response.access);
-    }
-    
-    return response;
-  },
-
-  // Çıkış yap
-  async logout() {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (refreshToken) {
-      try {
-        await apiRequest('/auth/logout/', {
-          method: 'POST',
-          body: JSON.stringify({ refresh_token: refreshToken })
-        });
-      } catch (error) {
-        // Silent fail
+    const response = await apiRequest(
+      '/auth/firebase-login/',
+      {
+        method: 'POST',
+        body: JSON.stringify({ id_token: idToken }),
+        skipAuth: true,
       }
+    );
+
+    if (response.access) {
+      setStoredAccessToken(response.access);
     }
-    
-    // Local storage'ı temizle
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refreshToken');
-  }
+
+    return response;
+  },
+
+  /**
+   * Yerel oturum temizliği. Backend'de ayrı logout route yok (stateless Firebase token).
+   * Dependency Inversion: UI AuthContext.logout → signOut; bu fonksiyon store temizler.
+   */
+  async logout() {
+    clearStoredAuthTokens();
+  },
+
+  /** Firebase'den token'ı zorla yenile (test / manuel sync). */
+  async syncAccessTokenFromFirebase(forceRefresh = false) {
+    return await resolveAccessToken(forceRefresh);
+  },
 };
 
-// API durumunu kontrol et
 export const checkAPIStatus = async () => {
   try {
-    await apiRequest('/auth/me/');
+    await apiRequest('/auth/settings/');
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };
 
-// Token durumunu kontrol et
 export const checkTokenStatus = () => {
-  const token = localStorage.getItem('access_token');
-  const refreshToken = localStorage.getItem('refreshToken');
-  
+  const token = getStoredAccessToken();
   return {
     hasAuthToken: !!token,
-    hasRefreshToken: !!refreshToken,
+    hasRefreshToken: false,
     authToken: token,
-    refreshToken: refreshToken
+    refreshToken: null as string | null,
   };
 };
 
-// Finans API Currency API'leri
 export const tcmbAPI = {
-    // Tüm verileri getir (döviz kurları)
   async getMain() {
-    const response = await fetch(`${API_BASE_URL}/currencies/getmain/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json();
+    return await apiRequest('/currencies/getmain/');
   },
 
-  // Sadece döviz kurları
   async getExchangeRates() {
-    const response = await fetch(`${API_BASE_URL}/currencies/exchange-rates/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json();
+    return await apiRequest('/currencies/exchange-rates/');
   },
 
-  // Sadece altın fiyatları
   async getGoldPrices() {
-    const response = await fetch(`${API_BASE_URL}/currencies/gold-prices/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json();
-  }
+    return await apiRequest('/currencies/gold-prices/');
+  },
 };
 
-// Borsa API'leri
 export const borsaAPI = {
-  // Borsa verilerini getir (akıllı kontrol ile)
   async getBorsaData(date?: string) {
-    const url = date 
-      ? `${API_BASE_URL}/currencies/borsa/list/?date=${date}`
-      : `${API_BASE_URL}/currencies/borsa/list/`;
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getHeaders()
-      }
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json();
-  }
+    const qs = date ? `?date=${encodeURIComponent(date)}` : '';
+    return await apiRequest(`/currencies/borsa/list/${qs}`);
+  },
 };
 
-// Settings API'leri
 export const settingsAPI = {
-  // Kullanıcı ayarlarını getir
   async get() {
     return await apiRequest('/auth/settings/');
   },
 
-  // Kullanıcı ayarlarını güncelle
   async update(settings: Partial<UserSettings>) {
     return await apiRequest('/auth/settings/', {
       method: 'PUT',
-      body: JSON.stringify(settings)
+      body: JSON.stringify(settings),
     });
-  }
+  },
 };
 
-// Funds API'leri
 export const fundsAPI = {
-  // Funds verilerini getir (global havuz)
   async getFunds() {
-    const response = await fetch(`${API_BASE_URL}/currencies/funds/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getHeaders()
-      }
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log('💰 Funds verileri yüklendi');
-    return data;
+    return await apiRequest('/currencies/funds/');
   },
 
-  // Quota bilgisini getir (cache'den okur, istek saymaz)
   async getFundQuota() {
-    const url = `${API_BASE_URL}/currencies/fund-quota/`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getHeaders()
-      }
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json();
+    return await apiRequest('/currencies/fund-quota/');
   },
 
-  // Fon detay bilgilerini getir (RapidAPI - akıllı cache ile)
   async getFundDetail(fundCode: string, date?: string) {
     const queryParams = new URLSearchParams();
     queryParams.append('fund_code', fundCode);
-    if (date) {
-      queryParams.append('date', date);
-    }
-    
-    const url = `${API_BASE_URL}/currencies/fund-detail/?${queryParams.toString()}`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getHeaders()
-      }
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || errorData.message || `HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json();
+    if (date) queryParams.append('date', date);
+    return await apiRequest(`/currencies/fund-detail/?${queryParams.toString()}`);
   },
 
-  // Fon fiyat kontrolü (cache'den okur, API'ye istek atmaz)
   async checkFundPrice(fundCode: string, date?: string) {
     const queryParams = new URLSearchParams();
     queryParams.append('fund_code', fundCode);
-    if (date) {
-      queryParams.append('date', date);
-    }
-    
-    const url = `${API_BASE_URL}/currencies/fund-price-check/?${queryParams.toString()}`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getHeaders()
-      }
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json();
-  }
+    if (date) queryParams.append('date', date);
+    return await apiRequest(
+      `/currencies/fund-price-check/?${queryParams.toString()}`
+    );
+  },
 };
 
-// Notifications API'leri
 export const notificationsAPI = {
-  // Tüm bildirimleri getir (son 30 gün)
   async getAll() {
     return await apiRequest('/auth/notifications/');
   },
 
-  // NOT: create metodu yok - Bildirimler sistem tarafından otomatik oluşturulur
-  // Kullanıcı sadece okuyup silebilir
-
-  // Bildirimi okundu olarak işaretle
   async markAsRead(id: string) {
     return await apiRequest(`/auth/notifications/${id}/read/`, {
-      method: 'PUT'
+      method: 'PUT',
     });
   },
 
-  // Tüm bildirimleri okundu olarak işaretle
   async markAllAsRead() {
     return await apiRequest('/auth/notifications/read-all/', {
-      method: 'PUT'
+      method: 'PUT',
     });
   },
 
-  // Bildirimi sil
   async delete(id: string) {
     return await apiRequest(`/auth/notifications/${id}/`, {
-      method: 'DELETE'
+      method: 'DELETE',
     });
   },
 
-  // Tüm okunmamış bildirimleri sil
   async deleteAllRead() {
     return await apiRequest('/auth/notifications/delete-read/', {
-      method: 'DELETE'
+      method: 'DELETE',
     });
-  }
+  },
 };
 
-// Events API'leri
 export const eventsAPI = {
-  // Tüm etkinlikleri getir
   async getAll(filters?: { startDate?: string; endDate?: string }) {
     const queryParams = new URLSearchParams();
     if (filters?.startDate) queryParams.append('startDate', filters.startDate);
     if (filters?.endDate) queryParams.append('endDate', filters.endDate);
-    
-    const endpoint = `/auth/events/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    return await apiRequest(endpoint);
+    const qs = queryParams.toString();
+    return await apiRequest(`/auth/events/${qs ? `?${qs}` : ''}`);
   },
 
-  // Yeni etkinlik oluştur
   async create(event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) {
     return await apiRequest('/auth/events/', {
       method: 'POST',
-      body: JSON.stringify(event)
+      body: JSON.stringify(event),
     });
   },
 
-  // Etkinlik güncelle
   async update(id: string, event: Partial<Event>) {
     return await apiRequest(`/auth/events/${id}/`, {
       method: 'PUT',
-      body: JSON.stringify(event)
+      body: JSON.stringify(event),
     });
   },
 
-  // Etkinlik sil
   async delete(id: string) {
-    return await apiRequest(`/auth/events/${id}/`, {
-      method: 'DELETE'
+    return await apiRequest(`/auth/events/${id}/`, { method: 'DELETE' });
+  },
+};
+
+export type PreferenceResource =
+  | 'selected-currencies'
+  | 'selected-hisse'
+  | 'selected-funds'
+  | 'followed-currencies'
+  | 'followed-hisse'
+  | 'followed-funds'
+  | 'quick-converts';
+
+export const preferencesAPI = {
+  async get(resource: PreferenceResource) {
+    return await apiRequest(`/auth/preferences/${resource}/`);
+  },
+
+  async put(resource: PreferenceResource, items: unknown[]) {
+    return await apiRequest(`/auth/preferences/${resource}/`, {
+      method: 'PUT',
+      body: JSON.stringify({ items }),
     });
-  }
+  },
+};
+
+export const aiAPI = {
+  async chat(
+    message: string,
+    history?: { role: 'user' | 'assistant'; content: string }[]
+  ) {
+    return await apiRequest('/auth/ai/chat/', {
+      method: 'POST',
+      body: JSON.stringify({ message, history: history ?? [] }),
+    });
+  },
 };

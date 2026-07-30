@@ -18,7 +18,8 @@ export const I18N_NAMESPACES = [
   'trackCompare',
   'transactions',
   'investments',
-  'shared'
+  'shared',
+  'assistant'
 ] as const;
 export type I18nNamespace = (typeof I18N_NAMESPACES)[number];
 

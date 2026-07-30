@@ -85,7 +85,7 @@ const QuickActionSetupModal: React.FC<QuickActionSetupModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-slate-800 rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl border border-slate-200/50 dark:border-slate-700/50"
+        className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 w-full max-w-md mx-4 shadow-brand-lg border border-brand-ink/10 dark:border-brand-champagne/15"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -115,7 +115,7 @@ const QuickActionSetupModal: React.FC<QuickActionSetupModalProps> = ({
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white"
               placeholder={t('quickActions.setup.namePlaceholder')}
               required
             />
@@ -129,7 +129,7 @@ const QuickActionSetupModal: React.FC<QuickActionSetupModalProps> = ({
               type="text"
               value={formData.description ?? ''}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white"
               placeholder={t('quickActions.setup.descriptionPlaceholder')}
               required
             />
@@ -148,7 +148,7 @@ const QuickActionSetupModal: React.FC<QuickActionSetupModalProps> = ({
                   category: ''
                 })
               }
-              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white"
               required
             >
               <option value="income">{t('labels.income')}</option>
@@ -169,7 +169,7 @@ const QuickActionSetupModal: React.FC<QuickActionSetupModalProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, amount: formatTrMoneyInput(e.target.value) })
                 }
-                className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+                className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white"
                 placeholder="0,00"
                 required
               />
@@ -181,7 +181,7 @@ const QuickActionSetupModal: React.FC<QuickActionSetupModalProps> = ({
               <select
                 value={formData.currency}
                 onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+                className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white"
                 required
               >
                 {TRANSACTION_CURRENCIES.map((currency) => (
@@ -200,7 +200,7 @@ const QuickActionSetupModal: React.FC<QuickActionSetupModalProps> = ({
             <select
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white"
               required
             >
               <option value="">{t('quickActions.setup.selectCategory')}</option>
@@ -222,7 +222,7 @@ const QuickActionSetupModal: React.FC<QuickActionSetupModalProps> = ({
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-brand-ink to-brand-ink-light text-white rounded-xl hover:shadow-brand hover:scale-105 transition-all duration-200 font-semibold"
             >
               {action ? t('quickActions.setup.update') : tCommon('actions.save')}
             </button>

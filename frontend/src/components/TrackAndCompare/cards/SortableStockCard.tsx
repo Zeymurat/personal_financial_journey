@@ -27,7 +27,7 @@ const SortableStockCard: React.FC<Props> = ({ stock, onRemove }) => {
     <div
       ref={setNodeRef}
       style={style}
-      className="relative p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-white dark:bg-gray-800 group"
+      className="relative p-4 border border-brand-ink/10 dark:border-brand-champagne/15 rounded-lg hover:shadow-md transition-shadow bg-brand-surface dark:bg-brand-surface-dark group"
     >
       {onRemove && (
         <button
@@ -81,7 +81,7 @@ const SortableStockCard: React.FC<Props> = ({ stock, onRemove }) => {
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between pt-2 border-t border-brand-ink/10 dark:border-brand-champagne/15">
         <span className="text-xs text-gray-500 dark:text-gray-400">{t('cards.change')}</span>
         <span className={`text-sm font-medium ${stock.rate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
           {stock.rate >= 0 ? '+' : ''}
@@ -89,7 +89,7 @@ const SortableStockCard: React.FC<Props> = ({ stock, onRemove }) => {
         </span>
       </div>
       {stock.volume > 0 && (
-        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+        <div className="mt-2 pt-2 border-t border-brand-ink/10 dark:border-brand-champagne/15">
           <span className="text-xs text-gray-500 dark:text-gray-400">{t('cards.volume')} </span>
           <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
             ₺{(stock.volume / 1000000).toFixed(2)}M

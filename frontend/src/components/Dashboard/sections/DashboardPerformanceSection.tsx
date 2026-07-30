@@ -52,15 +52,15 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-      <div className="bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 backdrop-blur-sm rounded-3xl p-8 border border-emerald-200/50 dark:border-emerald-700/30 shadow-xl">
+      <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-brand">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <div className="p-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl shadow-lg">
+            <div className="p-2 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-xl shadow-lg">
               <Target className="w-4 h-4 text-white" />
             </div>
             <div>
               <h3 className="text-xl font-black text-slate-900 dark:text-white">{t('performance.monthlyTarget')}</h3>
-              <p className="text-emerald-600 dark:text-emerald-400 font-semibold">
+              <p className="text-brand-ink dark:text-brand-champagne-dark font-semibold">
                 ₺{effectiveMonthlyTarget.toLocaleString(locale, { maximumFractionDigits: 0 })}
               </p>
             </div>
@@ -68,7 +68,7 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
           <button
             type="button"
             onClick={onEditMonthlyTarget}
-            className="text-xs text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 font-semibold px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-all"
+            className="text-xs text-brand-ink hover:text-brand-ink-light dark:text-brand-champagne-dark dark:hover:text-brand-champagne font-semibold px-3 py-1.5 rounded-lg bg-brand-champagne/60 dark:bg-brand-surface-dark-muted hover:bg-brand-champagne dark:hover:bg-brand-surface-dark-muted transition-all"
             title={t('performance.editTargetTitle')}
           >
             {t('performance.editTarget')}
@@ -78,7 +78,7 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{t('performance.netIncomeThisMonth')}</span>
-              <span className={`text-sm font-bold ${netIncome >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <span className={`text-sm font-bold ${netIncome >= 0 ? 'text-brand-ink' : 'text-rose-600'}`}>
                 {netIncome >= 0 ? '+' : ''}₺{netIncome.toLocaleString(locale, { maximumFractionDigits: 3 })}
               </span>
             </div>
@@ -86,7 +86,7 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
               <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{t('performance.remainingToTarget')}</span>
               <span
                 className={`text-sm font-bold ${
-                  remainingToTarget === 0 ? 'text-emerald-600' : 'text-slate-600 dark:text-slate-400'
+                  remainingToTarget === 0 ? 'text-brand-ink' : 'text-slate-600 dark:text-slate-400'
                 }`}
               >
                 {remainingToTarget === 0
@@ -98,13 +98,13 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{t('performance.progress')}</span>
-              <span className={`text-sm font-bold ${monthlyTargetProgress > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <span className={`text-sm font-bold ${monthlyTargetProgress > 0 ? 'text-brand-ink' : 'text-rose-600'}`}>
                 {monthlyTargetProgress.toFixed(1)}%
               </span>
             </div>
-            <div className="w-full bg-emerald-200 dark:bg-emerald-800 rounded-full h-3">
+            <div className="w-full bg-brand-champagne-dark dark:bg-brand-ink rounded-full h-3">
               <div
-                className="bg-gradient-to-r from-emerald-500 to-green-600 h-3 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-brand-ink to-brand-ink-light h-3 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(monthlyTargetProgress, 100)}%` }}
               />
             </div>
@@ -112,27 +112,27 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 backdrop-blur-sm rounded-3xl p-8 border border-blue-200/50 dark:border-blue-700/30 shadow-xl">
+      <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 border border-brand-ink/15 dark:border-brand-ink-light/30 shadow-brand">
         <div className="flex items-center space-x-4 mb-6">
-          <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+          <div className="p-2 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-xl shadow-lg">
             <Wallet className="w-4 h-4 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-black text-slate-900 dark:text-white">{t('performance.savingsRate')}</h3>
-            <p className="text-blue-600 dark:text-blue-400 font-semibold">{savingsRate.toFixed(1)}%</p>
+            <p className="text-brand-ink dark:text-brand-champagne-dark font-semibold">{savingsRate.toFixed(1)}%</p>
           </div>
         </div>
         <div className="space-y-4">
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{t('performance.incomeThisMonth')}</span>
-              <span className="text-sm font-bold text-blue-600">
+              <span className="text-sm font-bold text-brand-ink">
                 ₺{thisMonthIncome.toLocaleString(locale, { maximumFractionDigits: 3 })}
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{t('performance.netThisMonth')}</span>
-              <span className={`text-sm font-bold ${netIncome >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <span className={`text-sm font-bold ${netIncome >= 0 ? 'text-brand-ink' : 'text-rose-600'}`}>
                 {netIncome >= 0 ? '+' : ''}₺{netIncome.toLocaleString(locale, { maximumFractionDigits: 3 })}
               </span>
             </div>
@@ -140,14 +140,14 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{t('performance.vsLastMonthShort')}</span>
-              <span className={`text-sm font-bold ${savingsRateChange >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <span className={`text-sm font-bold ${savingsRateChange >= 0 ? 'text-brand-ink' : 'text-rose-600'}`}>
                 {savingsRateChange >= 0 ? '+' : ''}
                 {savingsRateChange.toFixed(1)}%
               </span>
             </div>
-            <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-3">
+            <div className="w-full bg-brand-champagne-dark dark:bg-brand-ink rounded-full h-3">
               <div
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-brand-ink to-brand-ink-light h-3 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(Math.max(savingsRate, 0), 100)}%` }}
               />
             </div>
@@ -155,16 +155,16 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-violet-50 to-purple-100 dark:from-violet-900/20 dark:to-purple-900/20 backdrop-blur-sm rounded-3xl p-8 border border-violet-200/50 dark:border-violet-700/30 shadow-xl">
+      <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 border border-brand-ink/15 dark:border-brand-ink-light/30 shadow-brand">
         <div className="flex items-center space-x-4 mb-6">
-          <div className="p-2 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl shadow-lg">
+          <div className="p-2 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-xl shadow-lg">
             <Activity className="w-4 h-4 text-white" />
           </div>
           <div>
             <h3 className="text-xl font-black text-slate-900 dark:text-white">{t('performance.investmentRoi')}</h3>
             <p
               className={`font-semibold ${
-                investmentROI >= 0 ? 'text-violet-600 dark:text-violet-400' : 'text-rose-600 dark:text-rose-400'
+                investmentROI >= 0 ? 'text-brand-ink dark:text-brand-champagne-dark' : 'text-rose-600 dark:text-rose-400'
               }`}
             >
               {investmentROI >= 0 ? '+' : ''}
@@ -176,13 +176,13 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{t('performance.totalValue')}</span>
-              <span className="text-sm font-bold text-violet-600">
+              <span className="text-sm font-bold text-brand-ink">
                 ₺{totalInvestmentValue.toLocaleString(locale, { maximumFractionDigits: 3 })}
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{t('performance.profitLoss')}</span>
-              <span className={`text-sm font-bold ${totalInvestmentGain >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <span className={`text-sm font-bold ${totalInvestmentGain >= 0 ? 'text-brand-ink' : 'text-rose-600'}`}>
                 {totalInvestmentGain >= 0 ? '+' : ''}₺
                 {totalInvestmentGain.toLocaleString(locale, { maximumFractionDigits: 3 })}
               </span>
@@ -193,17 +193,17 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
               <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{t('performance.performance')}</span>
               <span
                 className={`text-sm font-bold ${
-                  investmentROI >= 15 ? 'text-emerald-600' : investmentROI >= 0 ? 'text-violet-600' : 'text-rose-600'
+                  investmentROI >= 15 ? 'text-brand-ink' : investmentROI >= 0 ? 'text-brand-ink' : 'text-rose-600'
                 }`}
               >
                 {roiLabel}
               </span>
             </div>
-            <div className="w-full bg-violet-200 dark:bg-violet-800 rounded-full h-3">
+            <div className="w-full bg-brand-champagne-dark dark:bg-brand-ink rounded-full h-3">
               <div
                 className={`h-3 rounded-full transition-all duration-500 ${
                   investmentROI >= 0
-                    ? 'bg-gradient-to-r from-violet-500 to-purple-600'
+                    ? 'bg-gradient-to-r from-brand-ink to-brand-ink-light'
                     : 'bg-gradient-to-r from-rose-500 to-red-600'
                 }`}
                 style={{ width: `${Math.min(Math.max(Math.abs(investmentROI), 0), 100)}%` }}
@@ -214,15 +214,15 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
       </div>
 
       {totalSavingsTarget !== null && (
-        <div className="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/20 backdrop-blur-sm rounded-3xl p-8 border border-amber-200/50 dark:border-amber-700/30 shadow-xl">
+        <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-brand">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
-              <div className="p-2 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl shadow-lg">
+              <div className="p-2 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-xl shadow-lg">
                 <Target className="w-4 h-4 text-white" />
               </div>
               <div>
                 <h3 className="text-lg font-black text-slate-900 dark:text-white">{t('performance.savingsGoal')}</h3>
-                <p className="text-amber-600 dark:text-amber-400 font-semibold">
+                <p className="text-brand-ink dark:text-brand-champagne-dark font-semibold">
                   ₺{totalSavingsTarget.toLocaleString(locale, { maximumFractionDigits: 0 })}
                 </p>
               </div>
@@ -230,7 +230,7 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
             <button
               type="button"
               onClick={onEditSavingsTarget}
-              className="text-xs text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 font-semibold px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-all"
+              className="text-xs text-brand-ink hover:text-brand-ink-light dark:text-brand-champagne-dark dark:hover:text-brand-champagne font-semibold px-3 py-1.5 rounded-lg bg-brand-champagne/60 dark:bg-brand-surface-dark-muted hover:bg-brand-champagne dark:hover:bg-brand-surface-dark-muted transition-all"
               title={t('performance.editTargetTitle')}
             >
               {t('performance.editTarget')}
@@ -240,7 +240,7 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{t('performance.currentSavings')}</span>
-                <span className="text-sm font-bold text-amber-600">
+                <span className="text-sm font-bold text-brand-ink">
                   ₺{(totalNetWorth + totalInvestmentValue).toLocaleString(locale, { maximumFractionDigits: 3 })}
                 </span>
               </div>
@@ -249,7 +249,7 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
                 <span
                   className={`text-sm font-bold ${
                     remainingToTotalTarget !== null && remainingToTotalTarget === 0
-                      ? 'text-emerald-600'
+                      ? 'text-brand-ink'
                       : 'text-slate-600 dark:text-slate-400'
                   }`}
                 >
@@ -262,13 +262,13 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{t('performance.progress')}</span>
-                <span className="text-sm font-bold text-amber-600">
+                <span className="text-sm font-bold text-brand-ink">
                   {totalSavingsProgress !== null ? `${totalSavingsProgress.toFixed(1)}%` : '0%'}
                 </span>
               </div>
-              <div className="w-full bg-amber-200 dark:bg-amber-800 rounded-full h-3">
+              <div className="w-full bg-brand-champagne-dark dark:bg-brand-ink rounded-full h-3">
                 <div
-                  className="bg-gradient-to-r from-amber-500 to-orange-600 h-3 rounded-full transition-all duration-500"
+                  className="bg-gradient-to-r from-brand-ink to-brand-ink-light h-3 rounded-full transition-all duration-500"
                   style={{
                     width: `${totalSavingsProgress !== null ? Math.min(totalSavingsProgress, 100) : 0}%`
                   }}
@@ -280,14 +280,14 @@ const DashboardPerformanceSection: React.FC<DashboardPerformanceSectionProps> = 
       )}
 
       {totalSavingsTarget === null && (
-        <div className="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/20 backdrop-blur-sm rounded-3xl p-8 border border-amber-200/50 dark:border-amber-700/30 shadow-xl text-center">
-          <Target className="w-12 h-12 text-amber-600 dark:text-amber-400 mx-auto mb-4" />
+        <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-brand text-center">
+          <Target className="w-12 h-12 text-brand-ink dark:text-brand-champagne-dark mx-auto mb-4" />
           <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">{t('performance.setSavingsGoalTitle')}</h3>
           <p className="text-slate-600 dark:text-slate-400 mb-4">{t('performance.setSavingsGoalBody')}</p>
           <button
             type="button"
             onClick={onAddSavingsTarget}
-            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all duration-200 hover:scale-105 shadow-lg"
+            className="px-6 py-3 bg-gradient-to-r from-brand-ink to-brand-ink-light text-white font-bold rounded-xl hover:from-brand-ink-light hover:to-brand-ink transition-all duration-200 hover:scale-105 shadow-lg"
           >
             {t('performance.setGoalButton')}
           </button>

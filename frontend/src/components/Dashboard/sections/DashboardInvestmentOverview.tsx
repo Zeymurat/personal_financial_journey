@@ -49,26 +49,26 @@ const DashboardInvestmentOverview: React.FC<DashboardInvestmentOverviewProps> = 
     let typeClass = 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     let iconBgClass = 'bg-gradient-to-r from-gray-500 to-gray-600';
     if (d === 'stock' || d === 'fund') {
-      typeClass = 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      iconBgClass = 'bg-gradient-to-r from-blue-500 to-cyan-600';
+      typeClass = 'bg-brand-champagne text-brand-ink dark:bg-brand-surface-dark dark:text-brand-champagne';
+      iconBgClass = 'bg-gradient-to-r from-brand-ink to-brand-ink-light';
     } else if (d === 'crypto') {
       typeClass = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       iconBgClass = 'bg-gradient-to-r from-yellow-500 to-orange-600';
     } else if (d === 'gold') {
       typeClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200';
-      iconBgClass = 'bg-gradient-to-r from-amber-500 to-yellow-600';
+      iconBgClass = 'bg-gradient-to-r from-brand-ink to-brand-ink-light';
     } else if (d === 'currency' || d === 'forex') {
       typeClass = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      iconBgClass = 'bg-gradient-to-r from-green-500 to-emerald-600';
+      iconBgClass = 'bg-gradient-to-r from-brand-ink to-brand-ink-light';
     } else if (d === 'preciousMetal') {
-      typeClass = 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-      iconBgClass = 'bg-gradient-to-r from-purple-500 to-indigo-600';
+      typeClass = 'bg-brand-champagne text-brand-ink dark:bg-brand-surface-dark dark:text-brand-champagne';
+      iconBgClass = 'bg-gradient-to-r from-brand-ink to-brand-ink-light';
     }
     return { typeClass, iconBgClass };
   };
 
   return (
-    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl p-8 border border-slate-200/50 dark:border-slate-700/50 shadow-2xl">
+    <div className="bg-brand-surface/95 dark:bg-brand-surface-dark backdrop-blur-sm rounded-3xl p-8 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-brand-lg">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white">{t('investmentOverview.title')}</h2>
@@ -77,7 +77,7 @@ const DashboardInvestmentOverview: React.FC<DashboardInvestmentOverviewProps> = 
         <button
           type="button"
           onClick={() => window.dispatchEvent(new CustomEvent('navigateToTab', { detail: 'investments' }))}
-          className="text-blue-600 hover:text-blue-700 font-bold text-sm bg-blue-50 dark:bg-blue-900/30 px-4 py-2 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all duration-200 hover:scale-105"
+          className="text-brand-ink hover:text-brand-ink font-bold text-sm bg-brand-champagne/60 dark:bg-brand-surface-dark-muted px-4 py-2 rounded-xl hover:bg-brand-champagne dark:hover:bg-brand-surface-dark-muted transition-all duration-200 hover:scale-105"
         >
           {t('investmentOverview.details')}
         </button>
@@ -100,7 +100,7 @@ const DashboardInvestmentOverview: React.FC<DashboardInvestmentOverviewProps> = 
             return (
               <div
                 key={investment.id || investment._id}
-                className="flex items-center justify-between p-5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-2xl transition-all duration-300 hover:scale-102 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 group cursor-pointer"
+                className="flex items-center justify-between p-5 hover:bg-brand-surface-muted dark:hover:bg-brand-surface-dark-muted rounded-2xl transition-all duration-300 hover:scale-102 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 group cursor-pointer"
               >
                 <div className="flex items-center space-x-3">
                   <div

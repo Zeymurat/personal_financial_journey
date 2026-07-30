@@ -1,0 +1,12 @@
+{
+  "title": "Takip Asistanı",
+  "subtitle": "Portföy ve işlemlerinize dair bilgilendirme",
+  "disclaimer": "Bu asistan yatırım tavsiyesi vermez (YTD). Yanıtlar yalnızca hesabınızdaki verilere dayalı bilgilendirmedir.",
+  "emptyHint": "Örn: Bu ay hedeflerime ne kadar yakınım? Portföyümde en büyük kalemler neler?",
+  "placeholder": "Sorunuzu yazın…",
+  "send": "Gönder",
+  "thinking": "Düşünüyor…",
+  "errors": {
+    "generic": "Yanıt alınamadı. Lütfen tekrar deneyin."
+  }
+}

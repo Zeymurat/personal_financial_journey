@@ -21,9 +21,9 @@ const CalculatorSection5: React.FC<CalculatorSection5Props> = ({
   const { t } = useTranslation('calculator');
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 lg:col-span-2">
+    <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-2xl p-6 border border-brand-ink/10 dark:border-brand-champagne/15 shadow-lg hover:shadow-brand transition-all duration-300 lg:col-span-2">
       <div className="flex items-center space-x-3 mb-6">
-        <div className="p-2 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg">
+        <div className="p-2 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-lg">
           <Hash className="w-5 h-5 text-white" />
         </div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('s5.title')}</h2>
@@ -45,7 +45,7 @@ const CalculatorSection5: React.FC<CalculatorSection5Props> = ({
               value={percentage}
               onChange={(e) => onPercentageChange(formatTrPercentageInput(e.target.value))}
               placeholder="0"
-              className="w-full p-3 pl-8 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-all"
+              className="w-full p-3 pl-8 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-brand-ink dark:bg-gray-700 dark:text-white transition-all"
             />
           </div>
           <span className="text-sm text-gray-600 dark:text-gray-400 mt-1 block">{t('s5.percentSuffix')}</span>
@@ -62,7 +62,7 @@ const CalculatorSection5: React.FC<CalculatorSection5Props> = ({
             value={value}
             onChange={(e) => onValueChange(formatTrMoneyInput(e.target.value))}
             placeholder="0"
-            className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-all"
+            className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-brand-ink dark:bg-gray-700 dark:text-white transition-all"
           />
           <span className="text-sm text-gray-600 dark:text-gray-400 mt-1 block">{t('s5.valueHint')}</span>
         </div>
@@ -76,7 +76,7 @@ const CalculatorSection5: React.FC<CalculatorSection5Props> = ({
             value={result ? formatTrFixedTwoFromEnDecimal(result) : ''}
             readOnly
             placeholder={t('common.resultPlaceholder')}
-            className="w-full p-3 border-2 border-indigo-200 dark:border-indigo-800 rounded-xl bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 dark:text-white font-bold text-lg"
+            className="w-full p-3 border-2 border-brand-champagne-dark dark:border-brand-ink-light rounded-xl bg-gradient-to-r from-brand-surface to-brand-surface-muted dark:from-brand-surface-dark dark:to-brand-surface-dark-muted dark:text-white font-bold text-lg"
           />
         </div>
       </div>

@@ -13,7 +13,10 @@
     "calculator": "Rechner",
     "notifications": "Benachrichtigungen",
     "agenda": "Agenda",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "assistant": "Tracking-Assistent",
+    "beta": "Beta",
+    "assistantComingSoon": "Demnächst — in Entwicklung"
   },
   "logout": "Abmelden",
   "userFallback": "Benutzer"

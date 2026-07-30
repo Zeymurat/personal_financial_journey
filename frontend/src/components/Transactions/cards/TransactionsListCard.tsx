@@ -86,8 +86,8 @@ const TransactionsListCard: React.FC<TransactionsListCardProps> = ({
   const locale = i18n.language;
 
   return (
-    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl border border-slate-200/50 dark:border-slate-700/50 overflow-hidden shadow-2xl">
-      <div className="px-8 py-4 border-b border-slate-200 dark:border-slate-700">
+    <div className="bg-brand-surface/95 dark:bg-brand-surface-dark backdrop-blur-sm rounded-3xl border border-brand-ink/10 dark:border-brand-champagne/15 overflow-hidden shadow-brand-lg">
+      <div className="px-8 py-4 border-b border-brand-ink/10 dark:border-brand-champagne/15">
         <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="text-3xl font-black text-slate-900 dark:text-white">{t('list.title')}</h2>
@@ -105,7 +105,7 @@ const TransactionsListCard: React.FC<TransactionsListCardProps> = ({
                 placeholder={t('list.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => onSearchTermChange(e.target.value)}
-                className="pl-10 pr-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white w-48 transition-all duration-200"
+                className="pl-10 pr-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white w-48 transition-all duration-200"
               />
             </div>
 
@@ -114,7 +114,7 @@ const TransactionsListCard: React.FC<TransactionsListCardProps> = ({
               <select
                 value={filterType}
                 onChange={(e) => onFilterTypeChange(e.target.value as 'all' | 'income' | 'expense')}
-                className="text-sm border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+                className="text-sm border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
               >
                 <option value="all">{t('list.filterAll')}</option>
                 <option value="income">{t('labels.income')}</option>
@@ -132,7 +132,7 @@ const TransactionsListCard: React.FC<TransactionsListCardProps> = ({
                   onCustomDateEndChange('');
                 }
               }}
-              className="text-sm border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+              className="text-sm border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
             >
               <option value="all">{t('list.dateAll')}</option>
               <option value="today">{t('list.today')}</option>
@@ -148,14 +148,14 @@ const TransactionsListCard: React.FC<TransactionsListCardProps> = ({
                   type="date"
                   value={customDateStart}
                   onChange={(e) => onCustomDateStartChange(e.target.value)}
-                  className="text-sm border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+                  className="text-sm border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
                 />
                 <span className="text-slate-500 dark:text-slate-400">-</span>
                 <input
                   type="date"
                   value={customDateEnd}
                   onChange={(e) => onCustomDateEndChange(e.target.value)}
-                  className="text-sm border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+                  className="text-sm border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
                 />
               </div>
             )}
@@ -163,7 +163,7 @@ const TransactionsListCard: React.FC<TransactionsListCardProps> = ({
             <select
               value={categoryFilter}
               onChange={(e) => onCategoryFilterChange(e.target.value)}
-              className="text-sm border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+              className="text-sm border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
             >
               <option value="all">{t('list.allCategories')}</option>
               {allCategories.map((category) => (
@@ -236,7 +236,7 @@ const TransactionsListCard: React.FC<TransactionsListCardProps> = ({
               <tr>
                 <td colSpan={5} className="px-8 py-12 text-center">
                   <div className="flex items-center justify-center space-x-3">
-                    <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                    <Loader2 className="w-6 h-6 animate-spin text-brand-ink" />
                     <span className="text-lg font-semibold text-slate-600 dark:text-slate-400">{t('list.loading')}</span>
                   </div>
                 </td>
@@ -253,7 +253,7 @@ const TransactionsListCard: React.FC<TransactionsListCardProps> = ({
                     <button
                       type="button"
                       onClick={onShowAddModal}
-                      className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors"
+                      className="inline-flex items-center space-x-2 bg-brand-ink text-white px-6 py-3 rounded-xl hover:bg-brand-ink-light transition-colors"
                     >
                       <Plus className="w-5 h-5" />
                       <span>{t('list.firstAdd')}</span>
@@ -263,7 +263,7 @@ const TransactionsListCard: React.FC<TransactionsListCardProps> = ({
               </tr>
             ) : (
               paginatedTransactions.map((transaction) => (
-                <tr key={transaction.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200">
+                <tr key={transaction.id} className="hover:bg-brand-surface-muted dark:hover:bg-brand-surface-dark-muted transition-all duration-200">
                   <td className="px-8 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div
@@ -331,7 +331,7 @@ const TransactionsListCard: React.FC<TransactionsListCardProps> = ({
                       <button
                         type="button"
                         onClick={() => onView(transaction)}
-                        className="text-blue-600 hover:text-blue-800 transition-colors p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl"
+                        className="text-brand-ink hover:text-brand-ink transition-colors p-2 hover:bg-brand-champagne/60 dark:hover:bg-brand-surface-dark-muted rounded-xl"
                       >
                         <Eye className="w-5 h-5" />
                       </button>
@@ -359,7 +359,7 @@ const TransactionsListCard: React.FC<TransactionsListCardProps> = ({
       </div>
 
       {sortedTransactions.length > 0 && (
-        <div className="px-8 py-6 border-t border-slate-200 dark:border-slate-700">
+        <div className="px-8 py-6 border-t border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <span className="text-sm text-slate-600 dark:text-slate-400">
@@ -371,7 +371,7 @@ const TransactionsListCard: React.FC<TransactionsListCardProps> = ({
                   onItemsPerPageChange(Number(e.target.value));
                   onPageChange(1);
                 }}
-                className="px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-brand-surface dark:bg-brand-surface-dark text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-ink"
               >
                 {[10, 25, 50, 100].map((n) => (
                   <option key={n} value={n}>
@@ -415,7 +415,7 @@ const TransactionsListCard: React.FC<TransactionsListCardProps> = ({
                       onClick={() => onPageChange(pageNum)}
                       className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                         currentPage === pageNum
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-brand-ink text-white'
                           : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                     >

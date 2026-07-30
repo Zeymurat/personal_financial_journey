@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTokenValidation } from '../../hooks/useTokenValidation';
-import { Calculator as CalculatorIcon } from 'lucide-react';
+import PageHeader from '../common/PageHeader';
 import CalculatorSection1 from './cards/CalculatorSection1';
 import CalculatorSection2 from './cards/CalculatorSection2';
 import CalculatorSection3 from './cards/CalculatorSection3';
@@ -202,19 +202,8 @@ const Calculator: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center space-x-4 mb-4">
-          <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg">
-            <CalculatorIcon className="w-8 h-8 text-white" />
-          </div>
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white">{t('meta.title')}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1 text-lg">{t('meta.subtitle')}</p>
-          </div>
-        </div>
-      </div>
+    <div className="p-8 min-h-screen space-y-8">
+      <PageHeader title={t('meta.title')} subtitle={t('meta.subtitle')} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CalculatorSection1

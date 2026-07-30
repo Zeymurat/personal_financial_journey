@@ -28,10 +28,10 @@ const InvestmentSuggestionModal: React.FC<InvestmentSuggestionModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-md w-full mx-4 border border-slate-200 dark:border-slate-700">
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+      <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl shadow-brand-lg max-w-md w-full mx-4 border border-brand-ink/10 dark:border-brand-champagne/15">
+        <div className="flex items-center justify-between p-6 border-b border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-gradient-to-r from-amber-500 to-yellow-600 rounded-xl">
+            <div className="p-3 bg-gradient-to-r from-brand-ink to-brand-ink-light rounded-xl">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white">
@@ -54,7 +54,7 @@ const InvestmentSuggestionModal: React.FC<InvestmentSuggestionModalProps> = ({
           <div className="flex items-center space-x-3">
             <button
               onClick={handleNavigate}
-              className="flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white px-6 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold"
+              className="flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-brand-ink to-brand-ink-light text-white px-6 py-3 rounded-xl hover:shadow-brand hover:scale-105 transition-all duration-200 font-semibold"
             >
               <span>{t('investmentSuggestion.goToInvestments')}</span>
               <ArrowRight className="w-5 h-5" />

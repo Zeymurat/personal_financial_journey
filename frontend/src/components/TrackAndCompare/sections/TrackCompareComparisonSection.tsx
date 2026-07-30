@@ -70,8 +70,8 @@ const TrackCompareComparisonSection: React.FC<Props> = (props) => {
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-xl">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl border border-brand-ink/10 dark:border-brand-champagne/15 overflow-hidden shadow-brand">
+        <div className="px-6 py-4 border-b border-brand-ink/10 dark:border-brand-champagne/15">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('comparison.tableTitle')}</h2>
@@ -87,12 +87,12 @@ const TrackCompareComparisonSection: React.FC<Props> = (props) => {
                 placeholder={t('comparison.searchPlaceholder')}
                 value={comparisonSearchTerm}
                 onChange={(e) => setComparisonSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white w-full"
+                className="pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-gray-700 dark:text-white w-full"
               />
             </div>
             <button
               onClick={() => setShowAddToTableModal(true)}
-              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all duration-200 text-sm font-semibold"
+              className="flex items-center space-x-2 bg-brand-ink hover:bg-brand-ink-light text-white px-4 py-2 rounded-lg transition-all duration-200 text-sm font-semibold"
               type="button"
             >
               <Plus className="w-4 h-4" />
@@ -103,7 +103,7 @@ const TrackCompareComparisonSection: React.FC<Props> = (props) => {
               <select
                 value={comparisonTypeFilter}
                 onChange={(e) => setComparisonTypeFilter(e.target.value)}
-                className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-gray-700 dark:text-white"
               >
                 <option value="all">{t('comparison.filterAll')}</option>
                 <option value="currency">{t('comparison.currency')}</option>
@@ -119,7 +119,7 @@ const TrackCompareComparisonSection: React.FC<Props> = (props) => {
 
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+            <thead className="bg-brand-surface-muted dark:bg-brand-surface-dark-muted">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wider">
                   <button
@@ -218,7 +218,7 @@ const TrackCompareComparisonSection: React.FC<Props> = (props) => {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="bg-brand-surface dark:bg-brand-surface-dark divide-y divide-gray-200 dark:divide-gray-700">
               {filteredAndSortedItems.length === 0 ? (
                 <tr>
                   <td colSpan={10} className="px-6 py-12 text-center">
@@ -231,7 +231,7 @@ const TrackCompareComparisonSection: React.FC<Props> = (props) => {
                 </tr>
               ) : (
                 filteredAndSortedItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                  <tr key={item.id} className="hover:bg-brand-surface-muted dark:hover:bg-brand-surface-dark-muted transition-colors">
                     <td className="px-6 py-4">
                       <div
                         className="text-sm font-semibold text-gray-900 dark:text-white max-w-[200px] truncate"
@@ -353,7 +353,7 @@ const TrackCompareComparisonSection: React.FC<Props> = (props) => {
                                 }
                               }
                             }}
-                            className="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors font-semibold"
+                            className="px-3 py-1 text-xs bg-brand-champagne dark:bg-brand-surface-dark text-brand-ink dark:text-brand-champagne rounded-lg hover:bg-brand-champagne-dark dark:hover:bg-brand-ink transition-colors font-semibold"
                             title={t('comparison.addToWatchlistTitle')}
                           >
                             {t('comparison.follow')}
@@ -383,8 +383,8 @@ const TrackCompareComparisonSection: React.FC<Props> = (props) => {
 
       {filteredAndSortedItems.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-xl">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl border border-brand-ink/10 dark:border-brand-champagne/15 overflow-hidden shadow-brand">
+            <div className="px-6 py-4 border-b border-brand-ink/10 dark:border-brand-champagne/15">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('comparison.priceCompareTitle')}</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('comparison.priceCompareSubtitle')}</p>
             </div>
@@ -422,7 +422,7 @@ const TrackCompareComparisonSection: React.FC<Props> = (props) => {
                         </div>
                         <div className="relative h-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                           <div
-                            className="absolute top-0 h-full rounded-full bg-gradient-to-r from-blue-400 to-indigo-600 transition-all duration-500"
+                            className="absolute top-0 h-full rounded-full bg-gradient-to-r from-brand-ink-light to-brand-ink transition-all duration-500"
                             style={{ width: `${barWidth}%` }}
                           />
                         </div>
@@ -436,8 +436,8 @@ const TrackCompareComparisonSection: React.FC<Props> = (props) => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-xl">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="bg-brand-surface dark:bg-brand-surface-dark rounded-xl border border-brand-ink/10 dark:border-brand-champagne/15 overflow-hidden shadow-brand">
+            <div className="px-6 py-4 border-b border-brand-ink/10 dark:border-brand-champagne/15">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('comparison.changeCompareTitle')}</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('comparison.changeCompareSubtitle')}</p>
             </div>

@@ -1,0 +1,12 @@
+{
+  "title": "Tracking-Assistent",
+  "subtitle": "Informationen zu Portfolio und Transaktionen",
+  "disclaimer": "Dieser Assistent gibt keine Anlageberatung. Antworten dienen nur der Information auf Basis Ihrer Kontodaten.",
+  "emptyHint": "Z. B. Wie nah bin ich an meinen Monatszielen?",
+  "placeholder": "Frage eingeben…",
+  "send": "Senden",
+  "thinking": "Denkt nach…",
+  "errors": {
+    "generic": "Keine Antwort. Bitte erneut versuchen."
+  }
+}
