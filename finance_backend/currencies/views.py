@@ -42,6 +42,43 @@ def _local_today_str() -> str:
 _borsa_fetch_lock = threading.Lock()
 _borsa_fetching = False
 
+# Disk JSON → process memory (mtime ile invalidate)
+_json_file_cache = {}
+_json_cache_lock = threading.Lock()
+
+
+def load_json_file_cached(file_path: str):
+    """mtime değişmedikçe aynı JSON'u diskten tekrar parse etme."""
+    if not file_path or not os.path.exists(file_path):
+        return None
+    try:
+        mtime = os.path.getmtime(file_path)
+    except OSError:
+        return None
+
+    with _json_cache_lock:
+        hit = _json_file_cache.get(file_path)
+        if hit and hit[0] == mtime:
+            return hit[1]
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except Exception:
+        return None
+
+    with _json_cache_lock:
+        _json_file_cache[file_path] = (mtime, data)
+    return data
+
+
+def invalidate_json_file_cache(file_path: str = None):
+    with _json_cache_lock:
+        if file_path:
+            _json_file_cache.pop(file_path, None)
+        else:
+            _json_file_cache.clear()
+
 
 # ============================================================================
 # Local Dosya Helper Fonksiyonları
@@ -89,8 +126,9 @@ def get_currencies_metadata_from_file() -> dict:
         return None
     
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        data = load_json_file_cached(file_path)
+        if data is None:
+            return None
         
         # Eski format: direkt veri yapısı (metadata root level'da)
         if isinstance(data, dict) and 'metadata' in data:
@@ -136,8 +174,9 @@ def read_currencies_from_file(date: str = None) -> dict:
         return None
     
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        data = load_json_file_cached(file_path)
+        if data is None:
+            return None
         
         # Eski format kontrolü (direkt veri yapısı)
         if 'exchange_rates' in data or 'metadata' in data:
@@ -266,6 +305,7 @@ def write_currencies_to_file(data: dict, date: str = None) -> bool:
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, ensure_ascii=False, indent=2)
+        invalidate_json_file_cache(file_path)
         return True
     except Exception:
         return False
@@ -295,8 +335,9 @@ def read_borsa_from_file(date: str = None) -> dict:
         return None
     
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        data = load_json_file_cached(file_path)
+        if data is None:
+            return None
         
         # Eğer data bir dict ise ve 'data' key'i varsa, o tarih için veri ara
         if isinstance(data, dict):
@@ -392,6 +433,7 @@ def write_borsa_to_file(borsa_data: dict, date: str = None) -> bool:
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, ensure_ascii=False, indent=2)
+        invalidate_json_file_cache(file_path)
         
         return True
     except Exception:
@@ -411,8 +453,9 @@ def get_borsa_metadata_from_file() -> dict:
         return None
     
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        data = load_json_file_cached(file_path)
+        if data is None:
+            return None
         
         # Eğer data bir dict ise ve 'metadata' key'i varsa
         if isinstance(data, dict) and 'metadata' in data:
@@ -581,8 +624,9 @@ def read_fund_detail_from_cache(fund_code: str) -> dict:
         return None
     
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        data = load_json_file_cached(file_path)
+        if not isinstance(data, dict):
+            return None
         
         # Fon kodunu büyük harfe çevir (case-insensitive)
         fund_code_upper = fund_code.upper()
@@ -636,6 +680,7 @@ def write_fund_detail_to_cache(fund_code: str, api_response: dict) -> bool:
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, ensure_ascii=False, indent=2)
+        invalidate_json_file_cache(file_path)
         return True
     except Exception:
         return False
@@ -940,7 +985,7 @@ class GetMainDataView(AuthenticatedCurrencyView):
                         "message": "Mevcut veri kullanılıyor" if date == today else f"Bugünün verisi henüz yok, dünün verisi gösteriliyor ({date})",
                         "warning": None if date == today else f"Bugünün verisi henüz yok, dünün verisi gösteriliyor ({date})"
                     }
-                    print(f"💱 Döviz verileri (kaynak: cache)")
+                    logger.info("Döviz verileri (kaynak: cache)")
                     return Response(response_data, status=status.HTTP_200_OK)
                 except Exception:
                     pass
@@ -1009,7 +1054,7 @@ class GetMainDataView(AuthenticatedCurrencyView):
                                 }
                                 
                                 logger.warning(f"💱 Döviz: API hatası nedeniyle cache kullanılıyor (API hatası: {api_error}, Tarih: {date})")
-                                print(f"💱 Döviz verileri (kaynak: cache, tarih: {date})")
+                                logger.info("Döviz verileri (kaynak: cache, tarih: %s)", date)
                                 return Response(
                                     {
                                         "success": True,
@@ -1047,33 +1092,43 @@ class GetMainDataView(AuthenticatedCurrencyView):
                     status=status.HTTP_503_SERVICE_UNAVAILABLE
                 )
             
-            # Local dosyaya kaydet
+            # Local dosyaya kaydet — boş payload ile cache ezme
             try:
-                # Metadata'yı hazırla
-                metadata = {
-                    'date': data.get('date', today),
-                    'date_en': data.get('date_en', ''),
-                    'fetch_time': data.get('fetch_time', datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-                    'timestamp': data.get('timestamp', datetime.now().isoformat()),
-                    'source': 'Finans API',
-                    'last_updated': datetime.now().isoformat()
-                }
-                
-                # Dosyaya yazılacak veri yapısı
-                file_data = {
-                    'exchange_rates': data.get('exchange_rates', {}),
-                    'gold_prices': data.get('gold_prices', {}),
-                    'crypto_currencies': data.get('crypto_currencies', {}),
-                    'precious_metals': data.get('precious_metals', {}),
-                    'metadata': metadata
-                }
-                
-                currency_count = len(data.get('exchange_rates', {}))
-                gold_count = len(data.get('gold_prices', {}))
-                crypto_count = len(data.get('crypto_currencies', {}))
-                metal_count = len(data.get('precious_metals', {}))
-                
-                write_currencies_to_file(file_data, today)
+                exchange_rates = data.get('exchange_rates', {}) or {}
+                gold_prices = data.get('gold_prices', {}) or {}
+                crypto_currencies = data.get('crypto_currencies', {}) or {}
+                precious_metals = data.get('precious_metals', {}) or {}
+                non_try_fx = [k for k in exchange_rates.keys() if k != 'TRY']
+                has_meaningful = (
+                    len(non_try_fx) > 0
+                    or (isinstance(gold_prices, dict) and len(gold_prices) > 0)
+                    or (isinstance(crypto_currencies, dict) and len(crypto_currencies) > 0)
+                    or (isinstance(precious_metals, dict) and len(precious_metals) > 0)
+                )
+
+                if has_meaningful:
+                    metadata = {
+                        'date': data.get('date', today),
+                        'date_en': data.get('date_en', ''),
+                        'fetch_time': data.get(
+                            'fetch_time', datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        ),
+                        'timestamp': data.get('timestamp', datetime.now().isoformat()),
+                        'source': data.get('source', 'Finans API'),
+                        'last_updated': datetime.now().isoformat(),
+                    }
+                    file_data = {
+                        'exchange_rates': exchange_rates,
+                        'gold_prices': gold_prices,
+                        'crypto_currencies': crypto_currencies,
+                        'precious_metals': precious_metals,
+                        'metadata': metadata,
+                    }
+                    write_currencies_to_file(file_data, today)
+                else:
+                    logger.warning(
+                        "💱 Döviz: API cevabı anlamsız/boş — currencies.json yazılmadı (eski cache korunur)"
+                    )
             except Exception as file_error:
                 logger.error(f"Local dosyaya kaydetme hatası: {file_error}", exc_info=True)
             
@@ -1093,7 +1148,7 @@ class GetMainDataView(AuthenticatedCurrencyView):
                 "source": "api",
                 "cached": False
             }
-            print(f"💱 Döviz verileri (kaynak: api)")
+            logger.info("Döviz verileri (kaynak: api)")
             return Response(response_data, status=status.HTTP_200_OK)
             
         except Exception as e:
@@ -1236,7 +1291,7 @@ class BorsaDataView(AuthenticatedCurrencyView):
                     try:
                         borsa_data = read_borsa_from_file(today)
                         if borsa_data:
-                            print(f"📈 Hisse verileri (kaynak: cache)")
+                            logger.info("Hisse verileri (kaynak: cache)")
                             return Response(
                                 {
                                     "success": True,
@@ -1258,7 +1313,7 @@ class BorsaDataView(AuthenticatedCurrencyView):
                     try:
                         borsa_data = read_borsa_from_file(yesterday)
                         if borsa_data:
-                            print(f"📈 Hisse verileri (kaynak: cache)")
+                            logger.info("Hisse verileri (kaynak: cache)")
                             return Response(
                                 {
                                     "success": True,
@@ -1324,7 +1379,10 @@ class BorsaDataView(AuthenticatedCurrencyView):
                 }
                 
                 write_borsa_to_file(stock_data, today)
-                print(f"📈 Hisse verileri (kaynak: api, adet: {len(borsa_data.get('stocks', []))})")
+                logger.info(
+                    "Hisse verileri (kaynak: api, adet: %s)",
+                    len(borsa_data.get('stocks', [])),
+                )
                 
                 return Response(
                     {
@@ -1339,7 +1397,10 @@ class BorsaDataView(AuthenticatedCurrencyView):
                 
             except Exception as file_error:
                 logger.error(f"Local dosyaya kaydetme hatası: {file_error}")
-                print(f"📈 Hisse verileri (kaynak: api, adet: {len(borsa_data.get('stocks', []))})")
+                logger.info(
+                    "Hisse verileri (kaynak: api, adet: %s)",
+                    len(borsa_data.get('stocks', [])),
+                )
                 
                 # Dosya hatası olsa bile API'den gelen veriyi döndür
                 return Response(
@@ -1638,10 +1699,17 @@ class FundsListView(AuthenticatedCurrencyView):
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
             
-            # JSON dosyasını oku
+            # JSON dosyasını oku (mtime cache)
             try:
-                with open(funds_json_path, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
+                data = load_json_file_cached(funds_json_path)
+                if data is None:
+                    return Response(
+                        {
+                            "success": False,
+                            "error": "Funds JSON dosyası okunamadı"
+                        },
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
                 
                 # data.data array'ini al
                 if isinstance(data, dict) and 'data' in data:
@@ -1669,15 +1737,6 @@ class FundsListView(AuthenticatedCurrencyView):
                 # Key'e göre sırala
                 funds_list.sort(key=lambda x: x.get('key', ''))
                 
-            except json.JSONDecodeError as e:
-                return Response(
-                    {
-                        "success": False,
-                        "error": "JSON dosyası parse edilemedi",
-                        "message": str(e)
-                    },
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
             except Exception as e:
                 raise  # Hataları yukarı fırlat
             
@@ -1759,7 +1818,7 @@ class FundDetailView(AuthenticatedCurrencyView):
                 if not can_request:
                     # Quota yok, cache'deki eski veriyi döndür (varsa)
                     if cached_data:
-                        print(f"💰 Funds verileri (kaynak: cache)")
+                        logger.info("Funds verileri (kaynak: cache)")
                         return Response(
                             {
                                 "success": True,
@@ -1811,7 +1870,7 @@ class FundDetailView(AuthenticatedCurrencyView):
                     # Quota'yı artır
                     updated_quota = increment_fund_api_quota()
                     
-                    print(f"💰 Funds verileri (kaynak: api)")
+                    logger.info("Funds verileri (kaynak: api)")
                     
                     return Response(
                         {
@@ -1829,7 +1888,7 @@ class FundDetailView(AuthenticatedCurrencyView):
                 except requests.exceptions.RequestException:
                     # Hata durumunda cache'deki veriyi döndür (varsa)
                     if cached_data:
-                        print(f"💰 Funds verileri (kaynak: cache)")
+                        logger.info("Funds verileri (kaynak: cache)")
                         return Response(
                             {
                                 "success": True,
@@ -1852,7 +1911,7 @@ class FundDetailView(AuthenticatedCurrencyView):
                         )
             else:
                 # Cache'den oku
-                print(f"💰 Funds verileri (kaynak: cache)")
+                logger.info("Funds verileri (kaynak: cache)")
                 
                 return Response(
                     {

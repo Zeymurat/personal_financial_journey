@@ -8,15 +8,26 @@ import json
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
 
-# Load environment variables
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Kök repo .env (finance/.env) — manage.py finance_backend/ içinden çalışsa da yüklensin
+load_dotenv(BASE_DIR.parent / '.env')
+load_dotenv(BASE_DIR / '.env')  # varsa backend override
 
 # --- GÜVENLİK AYARLARI ---
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-default-key')
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+_secret = os.getenv('DJANGO_SECRET_KEY', '').strip()
+if _secret:
+    SECRET_KEY = _secret
+elif DEBUG:
+    SECRET_KEY = 'django-insecure-dev-only-not-for-production'
+else:
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured(
+        'DJANGO_SECRET_KEY must be set in the environment when DEBUG=False.'
+    )
+
 ALLOWED_HOSTS = [
     h.strip()
     for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
@@ -24,8 +35,34 @@ ALLOWED_HOSTS = [
 ]
 APPEND_SLASH = False
 
-# --- CORS AYARLARI ---
-CORS_ALLOW_ALL_ORIGINS = True
+# --- CORS / CSRF trusted frontends (mobil native Origin göndermez; CORS tarayıcı içindir) ---
+_DEFAULT_FRONTEND_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:4173',
+    'http://127.0.0.1:4173',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'https://zeynelcmurat.com',
+    'https://www.zeynelcmurat.com',
+    'https://finance.zeynelcmurat.com',
+    'https://www.finance.zeynelcmurat.com',
+    'https://personal-financial-journey.onrender.com',
+    'https://personal-financial-journey-1.onrender.com',
+]
+_cors_extra = os.getenv('CORS_ALLOWED_ORIGINS_EXTRA', '') or os.getenv(
+    'CSRF_TRUSTED_ORIGINS_EXTRA', ''
+)
+_FRONTEND_ORIGINS = list(_DEFAULT_FRONTEND_ORIGINS)
+if _cors_extra.strip():
+    _FRONTEND_ORIGINS.extend(
+        [o.strip() for o in _cors_extra.split(',') if o.strip()]
+    )
+
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = _FRONTEND_ORIGINS
 CORS_ALLOW_CREDENTIALS = True
 CORS_PREFLIGHT_MAX_AGE = 86400
 CORS_ALLOW_HEADERS = [
@@ -50,26 +87,7 @@ CORS_ALLOW_METHODS = [
 ]
 
 # --- CSRF AYARLARI ---
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-    'https://zeynelcmurat.com',
-    'https://www.zeynelcmurat.com',
-    'https://finance.zeynelcmurat.com',
-    'https://www.finance.zeynelcmurat.com',
-    'https://personal-financial-journey.onrender.com',
-    'https://personal-financial-journey-1.onrender.com',
-]
-# Render / Vercel önizleme URL'leri gibi ek kökler: virgülle ayırın, https:// ile başlasın
-_csrf_extra = os.getenv('CSRF_TRUSTED_ORIGINS_EXTRA', '')
-if _csrf_extra.strip():
-    CSRF_TRUSTED_ORIGINS.extend(
-        [o.strip() for o in _csrf_extra.split(',') if o.strip()]
-    )
+CSRF_TRUSTED_ORIGINS = list(_FRONTEND_ORIGINS)
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = False
 CSRF_USE_SESSIONS = False
@@ -141,7 +159,50 @@ REST_FRAMEWORK = {
     },
 }
 
+# --- LOGGING (Render / local stdout) ---
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[{levelname}] {asctime} {name}: {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'currencies': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'users': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
 # --- FIREBASE AYARLARI VE BAŞLATMA ---
+import logging as _logging
+
+_settings_logger = _logging.getLogger(__name__)
+
 FIREBASE_CONFIG = {
     "apiKey": os.getenv("FIREBASE_API_KEY", ""),
     "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN", ""),
@@ -164,14 +225,16 @@ if not FIREBASE_CREDENTIALS_MISSING and not firebase_admin._apps:
     try:
         cred = credentials.Certificate(FIREBASE_CREDENTIALS)
         firebase_admin.initialize_app(cred)
-        print("✅ Firebase Admin SDK başarıyla başlatıldı")
+        _settings_logger.info("Firebase Admin SDK başarıyla başlatıldı")
         FIRESTORE_DB = firestore.client()
     except Exception as e:
-        print(f"❌ Firebase Admin SDK başlatılamadı: {e}")
+        _settings_logger.error("Firebase Admin SDK başlatılamadı: %s", e)
         FIRESTORE_DB = None
 else:
     if FIREBASE_CREDENTIALS_MISSING:
-        print("⚠️  Firebase kimlik bilgileri eksik. Lütfen .env dosyanızı kontrol edin.")
+        _settings_logger.warning(
+            "Firebase kimlik bilgileri eksik. Lütfen .env dosyanızı kontrol edin."
+        )
     FIRESTORE_DB = None
 
 # --- ÜRETİM ORTAMI GÜVENLİK AYARLARI ---

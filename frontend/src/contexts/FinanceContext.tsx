@@ -62,12 +62,14 @@ interface FinanceContextType {
   cryptoCurrencies: Record<string, Currency>;
   preciousMetals: Record<string, Currency>;
   loadingRates: boolean;
+  ratesUpdatedAt: string | null;
   convertCurrency: (amount: number, fromCurrency: string, toCurrency: string) => Promise<number>;
   refreshRates: () => Promise<void>;
   
   // Borsa (Stock Market)
   borsaData: StockData[];
   loadingBorsa: boolean;
+  borsaFetchTime: string | null;
   refreshBorsa: () => Promise<void>;
   
   // Error handling
@@ -93,6 +95,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [loadingInvestments, setLoadingInvestments] = useState(false);
   const [loadingRates, setLoadingRates] = useState(false);
   const [loadingBorsa, setLoadingBorsa] = useState(false);
+  const [ratesUpdatedAt, setRatesUpdatedAt] = useState<string | null>(null);
+  const [borsaFetchTime, setBorsaFetchTime] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   
   // Verilerin yüklenip yüklenmediğini takip et
@@ -348,6 +352,9 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setGoldPrices(formattedGold);
           setCryptoCurrencies(formattedCrypto);
           setPreciousMetals(formattedMetals);
+          if (tcmbData.data.last_updated) {
+            setRatesUpdatedAt(String(tcmbData.data.last_updated));
+          }
           
           const source = tcmbData.source || 'api';
           const date = tcmbData.date || 'bilinmiyor';
@@ -400,6 +407,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
           }));
           
           setBorsaData(stocks);
+          const ft =
+            response.data?.fetch_time ||
+            response.fetch_time ||
+            null;
+          if (ft) setBorsaFetchTime(String(ft));
           const source = response.source || 'api';
           const date = response.date || 'bilinmiyor';
           console.log(`📈 Hisse verileri yüklendi (kaynak: ${source}, tarih: ${date}, adet: ${stocks.length})`);
@@ -436,6 +448,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setCryptoCurrencies({});
       setPreciousMetals({});
       setBorsaData([]);
+      setRatesUpdatedAt(null);
+      setBorsaFetchTime(null);
       return;
     }
     
@@ -490,12 +504,14 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     cryptoCurrencies,
     preciousMetals,
     loadingRates,
+    ratesUpdatedAt,
     convertCurrency: convertCurrencyAmount,
     refreshRates: loadExchangeRates,
     
     // Borsa
     borsaData,
     loadingBorsa,
+    borsaFetchTime,
     refreshBorsa: loadBorsaData,
     
     // Error handling

@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTokenValidation } from '../../hooks/useTokenValidation';
 import { useFinance } from '../../contexts/FinanceContext';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Wallet, DollarSign } from 'lucide-react';
-import { transactionAPI, investmentAPI, fundsAPI, settingsAPI } from '../../services/apiService';
+import { fundsAPI, settingsAPI, investmentAPI } from '../../services/apiService';
 import { hasStoredAccessToken } from '../../services/authTokenStore';
 import type { Currency, Transaction } from '../../types';
 import AddTransactionModal from '../Transactions/modals/AddTransactionModal';
@@ -14,7 +14,6 @@ import { buildAllCurrencies } from '../Investments/utils/buildAllCurrencies';
 import { TRANSACTION_CATEGORIES } from './constants';
 import { getLastMonthBounds, getThisMonthBounds, isDateInRange } from './utils/dateRange';
 import { calculatePercentageChange } from './utils/metrics';
-import { mapTransactionFromApi } from './utils/mapTransactionFromApi';
 import { computeUpdatedInvestments } from './utils/updatedInvestments';
 import type { DashboardStatItem } from './types';
 import DashboardHeader from './sections/DashboardHeader';
@@ -36,14 +35,16 @@ const Dashboard: React.FC = () => {
     preciousMetals,
     borsaData,
     investments: financeInvestments,
+    transactions,
+    loadingTransactions,
+    refreshTransactions,
     addInvestmentTransaction,
     refreshInvestments
   } = useFinance();
 
   useTokenValidation();
 
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
+  const loading = loadingTransactions;
   const [exchangeRates, setExchangeRates] = useState<Record<string, { rate: number }>>({});
   const [showAddTransactionModal, setShowAddTransactionModal] = useState(false);
   const [defaultTransactionType, setDefaultTransactionType] = useState<'income' | 'expense'>('expense');
@@ -69,44 +70,24 @@ const Dashboard: React.FC = () => {
     }
   }, [contextExchangeRates]);
 
+  // İşlemler FinanceContext’ten; ekstra getAll yok
   const loadData = useCallback(async () => {
     if (authLoading || authenticating) return;
     if (!currentUser?.id) return;
-
-    if (!hasStoredAccessToken()) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const transactionsResponse = await transactionAPI.getAll();
-      if (transactionsResponse?.success && Array.isArray(transactionsResponse.data)) {
-        const transactionsData = transactionsResponse.data.map(mapTransactionFromApi);
-        setTransactions(transactionsData);
-      }
-    } catch (error) {
-      console.error('Dashboard verileri yüklenirken hata:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentUser, authLoading, authenticating]);
+    if (!hasStoredAccessToken()) return;
+    await refreshTransactions();
+  }, [currentUser, authLoading, authenticating, refreshTransactions]);
 
   useEffect(() => {
-    const run = async () => {
-      if (authLoading || authenticating) return;
-      if (!currentUser?.id) return;
-
-      if (!hasStoredAccessToken()) {
-        const retryTimeout = setTimeout(() => {
-          void run();
-        }, 500);
-        return () => clearTimeout(retryTimeout);
-      }
-
-      await loadData();
-    };
-
-    void run();
+    // Token geç gelirse context zaten yükler; burada yalnızca auth hazır değilse bekle
+    if (authLoading || authenticating) return;
+    if (!currentUser?.id) return;
+    if (!hasStoredAccessToken()) {
+      const retryTimeout = setTimeout(() => {
+        void loadData();
+      }, 500);
+      return () => clearTimeout(retryTimeout);
+    }
   }, [currentUser, authLoading, authenticating, loadData]);
 
   const convertToTRY = useMemo(() => {
@@ -365,10 +346,9 @@ const Dashboard: React.FC = () => {
       .slice(0, 5);
   }, [transactions]);
 
-  const handleTransactionAdded = (newTransaction: Transaction) => {
-    setTransactions([newTransaction, ...transactions]);
+  const handleTransactionAdded = (_newTransaction: Transaction) => {
     setShowAddTransactionModal(false);
-    void loadData();
+    void refreshTransactions();
   };
 
   const handleQuickAction = (action: string) => {
@@ -455,7 +435,7 @@ const Dashboard: React.FC = () => {
 
       await addInvestmentTransaction(investmentId, transaction);
       await refreshInvestments();
-      await loadData();
+      await refreshTransactions();
 
       setShowAddInvestmentModal(false);
     } catch (error: unknown) {

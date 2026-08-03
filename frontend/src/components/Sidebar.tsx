@@ -60,7 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
     { id: 'notifications', labelKey: 'nav.notifications', icon: Bell },
     { id: 'agenda', labelKey: 'nav.agenda', icon: Calendar },
     { id: 'settings', labelKey: 'nav.settings', icon: Settings },
-    // En altta — AI henüz prod’da açık değil
+    // En altta — AI prod’da kapalı (paket/entitlement sonrası açılır)
     {
       id: 'assistant',
       labelKey: 'nav.assistant',
@@ -154,16 +154,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
       <div className="p-4 border-t border-white/8 relative">
         <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
         <div className="flex items-center space-x-3 p-3 rounded-xl bg-white/5 mb-3 ring-1 ring-white/5 min-w-0">
-          <div className="flex h-10 w-10 min-w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gold/20 text-sm font-semibold text-gold-soft ring-1 ring-gold/35">
-            {user?.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.name}
-                className="h-10 w-10 max-w-none shrink-0 aspect-square rounded-full object-cover"
-              />
-            ) : (
-              <User className="h-5 w-5 shrink-0" />
-            )}
+          <div
+            className="flex h-10 w-10 min-w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gold/20 bg-cover bg-center text-sm font-semibold text-gold-soft ring-1 ring-gold/35"
+            style={user?.avatar ? { backgroundImage: `url(${user.avatar})` } : undefined}
+            role={user?.avatar ? 'img' : undefined}
+            aria-label={user?.avatar ? user.name : undefined}
+          >
+            {!user?.avatar && <User className="h-5 w-5 shrink-0" />}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-sidebar-foreground truncate">

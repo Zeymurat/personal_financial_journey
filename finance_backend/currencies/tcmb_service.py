@@ -1,17 +1,21 @@
 """
 Finans API (finans.truncgil.com) Döviz Kurları Servisi
-https://finans.truncgil.com/v4/today.json
+Birincil: https://finans.truncgil.com/v4/today.json
+Yedek:    https://finans.truncgil.com/v3/today.json  (v4 boş/hatalıysa)
 """
 import logging
 from typing import Dict, Any, Optional
 import requests
 from datetime import datetime, time
 import json
+import re
 
 logger = logging.getLogger(__name__)
 
-# Finans API Endpoint
-FINANS_API_URL = "https://finans.truncgil.com/v4/today.json"
+FINANS_API_URL_V4 = "https://finans.truncgil.com/v4/today.json"
+FINANS_API_URL_V3 = "https://finans.truncgil.com/v3/today.json"
+# Geriye dönük alias
+FINANS_API_URL = FINANS_API_URL_V4
 
 # Zamanlama kontrolü için saatler (Döviz kurları güncelleme saatleri)
 # Borsa ile aynı saatler: 10:00, 13:30, 17:00
@@ -20,6 +24,54 @@ FETCH_TIMES = [
     time(13, 30),  # 13:30 - Öğle arası sonrası
     time(17, 0),   # 17:00 - İkinci seans sonu
 ]
+
+
+def parse_tr_number(value: Any) -> float:
+    """
+    Truncgil v3 string ("47,5248", "%0,03", "$4.055,91") ve v4 sayılarını float'a çevirir.
+    """
+    if value is None:
+        return 0.0
+    if isinstance(value, bool):
+        return 0.0
+    if isinstance(value, (int, float)):
+        return float(value)
+
+    s = str(value).strip()
+    if not s:
+        return 0.0
+
+    s = s.replace('%', '').replace('$', '').replace('₺', '').replace(' ', '')
+    s = re.sub(r'[^\d,.\-]', '', s)
+    if not s or s in ('-', '.', ','):
+        return 0.0
+
+    # TR: 6.197,61 → binlik nokta, ondalık virgül
+    if ',' in s and '.' in s:
+        s = s.replace('.', '').replace(',', '.')
+    elif ',' in s:
+        s = s.replace(',', '.')
+
+    try:
+        return float(s)
+    except ValueError:
+        return 0.0
+
+
+def _raw_payload_has_rates(data: dict) -> bool:
+    """Sadece Update_Date olan boş v4 cevabını reddet."""
+    if not isinstance(data, dict):
+        return False
+    for key, val in data.items():
+        if key == 'Update_Date':
+            continue
+        if isinstance(val, dict) and (
+            val.get('Type')
+            or val.get('Buying') is not None
+            or val.get('Selling') is not None
+        ):
+            return True
+    return False
 
 
 class TCMBService:
@@ -160,237 +212,251 @@ class TCMBService:
         now = datetime.now()
         return now.weekday() < 5  # 0=Monday, 4=Friday
     
-    def get_exchange_rates(self) -> Optional[Dict[str, Any]]:
-        """
-        Finans API'den güncel döviz kurlarını, altın fiyatlarını ve kripto paraları alır.
-        
-        Returns:
-            Dict containing currency rates, gold prices, and crypto currencies
-            None if error occurs
-        """
+    def _fetch_raw_json(self, url: str) -> Optional[dict]:
+        """Tek Truncgil endpoint'inden JSON alır."""
         try:
-            # Finans API'yi çağır
             response = self.session.get(
-                FINANS_API_URL,
+                url,
                 timeout=60,
                 headers={
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                     'Accept': 'application/json',
-                    'Connection': 'keep-alive'
+                    'Connection': 'keep-alive',
                 },
-                stream=False
+                stream=False,
             )
-            
             if response.status_code != 200:
-                logger.error(f"Finans API HTTP Hatası: {response.status_code}")
+                logger.error("Finans API HTTP %s | url=%s", response.status_code, url)
                 return None
-            
-            # Response'un tam olup olmadığını kontrol et
+
             content_length = response.headers.get('Content-Length')
             actual_length = len(response.content)
-            response_text = response.text
-            
-            # JSON'un kesilmiş olup olmadığını kontrol et
-            is_truncated = False
-            if response_text:
-                # JSON'un sonunda } olmalı, eğer yoksa kesilmiş olabilir
-                response_text_stripped = response_text.strip()
-                if not response_text_stripped.endswith('}'):
-                    is_truncated = True
-                # Veya Content-Length kontrolü
-                if content_length and int(content_length) > actual_length:
-                    is_truncated = True
-            
-            # JSON'u parse et
+            response_text = (response.text or '').strip()
+            is_truncated = bool(response_text) and not response_text.endswith('}')
+            if content_length and int(content_length) > actual_length:
+                is_truncated = True
+
             try:
                 data = response.json()
-            except (json.JSONDecodeError, ValueError) as json_error:
-                # Response kesilmişse, cache'den veri okunacak
+            except (json.JSONDecodeError, ValueError):
                 if is_truncated:
                     logger.warning(
-                        f"💱 Finans API response kesilmiş (uzunluk: {actual_length} bytes). "
-                        f"Cache'den veri okunacak."
+                        "Finans API response kesilmiş (len=%s) | url=%s",
+                        actual_length,
+                        url,
                     )
                     return None
-                else:
-                    # Alternatif: response.content ile dene
-                    try:
-                        import codecs
-                        decoded_content = codecs.decode(response.content, 'utf-8', errors='ignore')
-                        data = json.loads(decoded_content)
-                    except Exception:
-                        logger.warning(
-                            f"💱 Finans API JSON parse hatası. "
-                            f"Cache'den veri okunacak."
-                        )
-                        return None
-            except Exception as parse_error:
-                logger.warning(
-                    f"💱 Finans API parse hatası. "
-                    f"Cache'den veri okunacak."
-                )
+                try:
+                    data = json.loads(response.content.decode('utf-8', errors='ignore'))
+                except Exception:
+                    logger.warning("Finans API JSON parse hatası | url=%s", url)
+                    return None
+
+            if not isinstance(data, dict):
                 return None
-            
-            # Update_Date'i al
-            update_date = data.get('Update_Date', '')
-            
-            result = {
-                'currencies': {},
-                'gold_prices': {},
-                'crypto_currencies': {},
-                'precious_metals': {},  # Platinum, Palladium
-                'timestamp': datetime.now().isoformat(),
-                'fetch_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'source': 'Finans API',
-                'update_date': update_date
-            }
-            
-            currency_count = 0
-            gold_count = 0
-            crypto_count = 0
-            metal_count = 0
-            
-            # Her item'ı işle
-            for code, item_data in data.items():
-                # Update_Date'i atla
-                if code == 'Update_Date':
-                    continue
-                
-                # Dict değilse atla
-                if not isinstance(item_data, dict):
-                    continue
-                
-                item_type = item_data.get('Type', '')
-                name = item_data.get('Name', code)
-                change = item_data.get('Change', 0)
-                
-                # Currency (Döviz Kurları)
-                if item_type == 'Currency':
-                    buying = item_data.get('Buying', 0)
-                    selling = item_data.get('Selling', 0)
-                    
-                    # Ortalama kur (buying ve selling ortalaması)
-                    avg_rate = (buying + selling) / 2 if (buying > 0 and selling > 0) else (buying if buying > 0 else selling)
-                    
-                    result['currencies'][code] = {
-                        'code': code,
-                        'name': name,  # API'den gelen Türkçe isim
-                        'name_tr': name,
-                        'rate': avg_rate,
-                        'buy': float(buying) if buying else 0,
-                        'sell': float(selling) if selling else 0,
-                        'change': float(change) if change else 0,
-                        'type': 'currency'
-                    }
-                    currency_count += 1
-                
-                # Gold (Altın Fiyatları)
-                elif item_type == 'Gold':
-                    buying = item_data.get('Buying', 0)
-                    selling = item_data.get('Selling', 0)
-                    
-                    # Eğer sadece Selling varsa, Buying = Selling (örn: XU100, ONS, BRENT)
-                    if buying == 0 and selling > 0:
-                        buying = selling
-                    elif selling == 0 and buying > 0:
-                        selling = buying
-                    
-                    # Ortalama fiyat
-                    avg_price = (buying + selling) / 2 if (buying > 0 and selling > 0) else (buying if buying > 0 else selling)
-                    
-                    result['gold_prices'][code] = {
-                        'code': code,
-                        'name': name,
-                        'name_tr': name,
-                        'rate': avg_price,
-                        'buy': float(buying) if buying else 0,
-                        'sell': float(selling) if selling else 0,
-                        'change': float(change) if change else 0,
-                        'type': 'gold'
-                    }
-                    gold_count += 1
-                
-                # CryptoCurrency (Kripto Paralar)
-                elif item_type == 'CryptoCurrency':
-                    usd_price = item_data.get('USD_Price', 0)
-                    try_price = item_data.get('TRY_Price', 0)
-                    selling = item_data.get('Selling', try_price)  # TRY_Price genelde Selling ile aynı
-                    
-                    # TRY_Price yoksa Selling'i kullan
-                    if try_price == 0 and selling > 0:
-                        try_price = selling
-                    
-                    result['crypto_currencies'][code] = {
-                        'code': code,
-                        'name': name,
-                        'name_tr': name,
-                        'rate': float(try_price) if try_price else 0,
-                        'buy': float(try_price) if try_price else 0,  # Kripto için genelde buy/sell aynı
-                        'sell': float(selling) if selling else float(try_price) if try_price else 0,
-                        'usd_price': float(usd_price) if usd_price else 0,
-                        'change': float(change) if change else 0,
-                        'type': 'crypto'
-                    }
-                    crypto_count += 1
-                
-                # Platinum (Platin)
-                elif item_type == 'Platinum':
-                    buying = item_data.get('Buying', 0)
-                    selling = item_data.get('Selling', 0)
-                    avg_price = (buying + selling) / 2 if (buying > 0 and selling > 0) else (buying if buying > 0 else selling)
-                    
-                    result['precious_metals'][code] = {
-                        'code': code,
-                        'name': name,
-                        'name_tr': name,
-                        'rate': avg_price,
-                        'buy': float(buying) if buying else 0,
-                        'sell': float(selling) if selling else 0,
-                        'change': float(change) if change else 0,
-                        'type': 'platinum'
-                    }
-                    metal_count += 1
-                
-                # Palladium (Paladyum)
-                elif item_type == 'Palladium':
-                    buying = item_data.get('Buying', 0)
-                    selling = item_data.get('Selling', 0)
-                    avg_price = (buying + selling) / 2 if (buying > 0 and selling > 0) else (buying if buying > 0 else selling)
-                    
-                    result['precious_metals'][code] = {
-                        'code': code,
-                        'name': name,
-                        'name_tr': name,
-                        'rate': avg_price,
-                        'buy': float(buying) if buying else 0,
-                        'sell': float(selling) if selling else 0,
-                        'change': float(change) if change else 0,
-                        'type': 'palladium'
-                    }
-                    metal_count += 1
-            
-            # TRY'yi ekle (base currency)
-            result['currencies']['TRY'] = {
-                'code': 'TRY',
-                'name': 'Turkish Lira',
-                'name_tr': 'TÜRK LİRASI',
-                'rate': 1,
-                'buy': 1,
-                'sell': 1,
-                'change': 0,
-                'type': 'currency'
-            }
-            
-            result['date'] = update_date.split(' ')[0] if update_date else ''
-            result['date_en'] = update_date
-            
-            return result
-            
-        except json.JSONDecodeError as e:
-            logger.error(f"Finans API JSON parse hatası: {e}")
+            return data
+        except Exception as e:
+            logger.error("Finans API istek hatası | url=%s | %s", url, e)
+            return None
+
+    def _parse_rates_payload(self, data: dict, source_label: str) -> Optional[Dict[str, Any]]:
+        """Truncgil today.json gövdesini iç modele çevirir (v3/v4)."""
+        if not _raw_payload_has_rates(data):
+            return None
+
+        update_date = data.get('Update_Date', '') or ''
+        result: Dict[str, Any] = {
+            'currencies': {},
+            'gold_prices': {},
+            'crypto_currencies': {},
+            'precious_metals': {},
+            'timestamp': datetime.now().isoformat(),
+            'fetch_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'source': source_label,
+            'update_date': update_date,
+        }
+
+        currency_count = 0
+        gold_count = 0
+        crypto_count = 0
+        metal_count = 0
+
+        for code, item_data in data.items():
+            if code == 'Update_Date':
+                continue
+            if not isinstance(item_data, dict):
+                continue
+
+            item_type = item_data.get('Type', '') or ''
+            name = item_data.get('Name', code) or code
+            change = parse_tr_number(item_data.get('Change', 0))
+
+            # v3: platin/paladyum bazen Type=Gold — metal kodlarına ayır
+            code_l = str(code).lower()
+            if item_type == 'Gold' and (
+                'platin' in code_l or 'platinum' in code_l
+            ):
+                item_type = 'Platinum'
+            elif item_type == 'Gold' and (
+                'paladyum' in code_l or 'palladium' in code_l
+            ):
+                item_type = 'Palladium'
+
+            if item_type == 'Currency':
+                buying = parse_tr_number(item_data.get('Buying', 0))
+                selling = parse_tr_number(item_data.get('Selling', 0))
+                avg_rate = (
+                    (buying + selling) / 2
+                    if (buying > 0 and selling > 0)
+                    else (buying if buying > 0 else selling)
+                )
+                result['currencies'][code] = {
+                    'code': code,
+                    'name': name,
+                    'name_tr': name,
+                    'rate': avg_rate,
+                    'buy': buying,
+                    'sell': selling,
+                    'change': change,
+                    'type': 'currency',
+                }
+                currency_count += 1
+
+            elif item_type == 'Gold':
+                buying = parse_tr_number(item_data.get('Buying', 0))
+                selling = parse_tr_number(item_data.get('Selling', 0))
+                if buying == 0 and selling > 0:
+                    buying = selling
+                elif selling == 0 and buying > 0:
+                    selling = buying
+                avg_price = (
+                    (buying + selling) / 2
+                    if (buying > 0 and selling > 0)
+                    else (buying if buying > 0 else selling)
+                )
+                result['gold_prices'][code] = {
+                    'code': code,
+                    'name': name,
+                    'name_tr': name,
+                    'rate': avg_price,
+                    'buy': buying,
+                    'sell': selling,
+                    'change': change,
+                    'type': 'gold',
+                }
+                gold_count += 1
+
+            elif item_type == 'CryptoCurrency':
+                usd_price = parse_tr_number(item_data.get('USD_Price', 0))
+                try_price = parse_tr_number(item_data.get('TRY_Price', 0))
+                selling = parse_tr_number(item_data.get('Selling', try_price))
+                if try_price == 0 and selling > 0:
+                    try_price = selling
+                result['crypto_currencies'][code] = {
+                    'code': code,
+                    'name': name,
+                    'name_tr': name,
+                    'rate': try_price,
+                    'buy': try_price,
+                    'sell': selling if selling else try_price,
+                    'usd_price': usd_price,
+                    'change': change,
+                    'type': 'crypto',
+                }
+                crypto_count += 1
+
+            elif item_type == 'Platinum':
+                buying = parse_tr_number(item_data.get('Buying', 0))
+                selling = parse_tr_number(item_data.get('Selling', 0))
+                avg_price = (
+                    (buying + selling) / 2
+                    if (buying > 0 and selling > 0)
+                    else (buying if buying > 0 else selling)
+                )
+                result['precious_metals'][code] = {
+                    'code': code,
+                    'name': name,
+                    'name_tr': name,
+                    'rate': avg_price,
+                    'buy': buying,
+                    'sell': selling,
+                    'change': change,
+                    'type': 'platinum',
+                }
+                metal_count += 1
+
+            elif item_type == 'Palladium':
+                buying = parse_tr_number(item_data.get('Buying', 0))
+                selling = parse_tr_number(item_data.get('Selling', 0))
+                avg_price = (
+                    (buying + selling) / 2
+                    if (buying > 0 and selling > 0)
+                    else (buying if buying > 0 else selling)
+                )
+                result['precious_metals'][code] = {
+                    'code': code,
+                    'name': name,
+                    'name_tr': name,
+                    'rate': avg_price,
+                    'buy': buying,
+                    'sell': selling,
+                    'change': change,
+                    'type': 'palladium',
+                }
+                metal_count += 1
+
+        if currency_count == 0 and gold_count == 0 and crypto_count == 0 and metal_count == 0:
+            return None
+
+        result['currencies']['TRY'] = {
+            'code': 'TRY',
+            'name': 'Turkish Lira',
+            'name_tr': 'TÜRK LİRASI',
+            'rate': 1,
+            'buy': 1,
+            'sell': 1,
+            'change': 0,
+            'type': 'currency',
+        }
+        result['date'] = update_date.split(' ')[0] if update_date else ''
+        result['date_en'] = update_date
+        logger.info(
+            "Finans API parse OK | source=%s | fx=%s gold=%s crypto=%s metal=%s",
+            source_label,
+            currency_count,
+            gold_count,
+            crypto_count,
+            metal_count,
+        )
+        return result
+
+    def get_exchange_rates(self) -> Optional[Dict[str, Any]]:
+        """
+        Finans API'den güncel kurları alır.
+        Önce v4; boş/hatalıysa v3 (string sayı formatı normalize edilir).
+        """
+        try:
+            raw_v4 = self._fetch_raw_json(FINANS_API_URL_V4)
+            if raw_v4:
+                parsed = self._parse_rates_payload(raw_v4, 'Finans API v4')
+                if parsed:
+                    return parsed
+                logger.warning(
+                    "Finans API v4 boş veya geçersiz (örn. sadece Update_Date); v3 deneniyor"
+                )
+            else:
+                logger.warning("Finans API v4 alınamadı; v3 deneniyor")
+
+            raw_v3 = self._fetch_raw_json(FINANS_API_URL_V3)
+            if raw_v3:
+                parsed = self._parse_rates_payload(raw_v3, 'Finans API v3 (fallback)')
+                if parsed:
+                    return parsed
+                logger.warning("Finans API v3 de geçersiz/boş")
+
             return None
         except Exception as e:
-            logger.error(f"Finans API servisi hatası: {e}")
+            logger.error("Finans API servisi hatası: %s", e)
             return None
     
     def get_formatted_rates(self) -> Optional[Dict[str, Any]]:
@@ -412,7 +478,9 @@ class TCMBService:
             'parities': {},
             'last_updated': data.get('timestamp'),
             'date': data.get('date'),
-            'date_en': data.get('date_en')
+            'date_en': data.get('date_en'),
+            'source': data.get('source', 'Finans API'),
+            'fetch_time': data.get('fetch_time'),
         }
         
         # Format currencies

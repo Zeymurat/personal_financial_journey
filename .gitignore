@@ -13,3 +13,7 @@ finance_backend/.venv/
 # macOS AppleDouble metadata (harici disk / exFAT)
 ._*
 .DS_Store
+
+# Kişisel roadmap / notlar (repoya gitmesin)
+FUTURE_ROADMAP.local.md
+*.local.md
