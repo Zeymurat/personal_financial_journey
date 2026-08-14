@@ -3,11 +3,12 @@ import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { Investment } from '../../types';
 import { fundsAPI, investmentAPI } from '../../services/apiService';
+import { parseTrMoneyString } from '../../utils/trNumberInput';
+import { toLocalDateString } from '../../utils/localDate';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTokenValidation } from '../../hooks/useTokenValidation';
 import { useFinance } from '../../contexts/FinanceContext';
 import { HisseSelectionModal, FundsSelectionModal, CurrencySelectionModal } from '../shared/modals';
-import { parseTrMoneyString } from '../../utils/trNumberInput';
 import AddInvestmentModal from './modals/AddInvestmentModal';
 import InvestmentDetailModal from './modals/InvestmentDetailModal';
 import FundDetailModal from './modals/FundDetailModal';
@@ -515,7 +516,7 @@ const Investments: React.FC = () => {
 
       if (fundInvestments.length === 0) return;
 
-      const today = new Date().toISOString().split('T')[0];
+      const today = toLocalDateString();
       const pricePromises = fundInvestments.map(async (inv) => {
         try {
           const response = await fundsAPI.checkFundPrice(inv.symbol, today);

@@ -5,6 +5,7 @@ import { ModalPortal } from '../../common/ModalPortal';
 import { BarChart3, TrendingUp, Coins, Gem, DollarSign, X, Search, AlertCircle, Loader2, Save } from 'lucide-react';
 import { Investment } from '../../../types';
 import { fundsAPI } from '../../../services/apiService';
+import { toLocalDateString } from '../../../utils/localDate';
 import { formatTrMoneyInput, formatTrMoneyFromNumber, parseTrMoneyString } from '../../../utils/trNumberInput';
 
 const INV_AMOUNT_FRAC = 8;
@@ -248,7 +249,7 @@ const EditInvestmentModal: React.FC<EditInvestmentModalProps> = ({
   const checkFundPrice = async (fundCode: string) => {
     if (formData.type !== 'fund') return;
     
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateString();
     setFundPriceLoading(true);
     setFundPriceInfo(null);
     
@@ -292,7 +293,7 @@ const EditInvestmentModal: React.FC<EditInvestmentModalProps> = ({
   const handleFetchPrice = async () => {
     if (!formData.symbol || formData.type !== 'fund') return;
     
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateString();
     setFundPriceLoading(true);
     
     try {

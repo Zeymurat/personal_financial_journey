@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { ModalPortal } from '../../common/ModalPortal';
 import { BarChart3, TrendingUp, TrendingDown, Coins, Gem, DollarSign, X, Search, AlertCircle, Loader2 } from 'lucide-react';
 import { fundsAPI } from '../../../services/apiService';
+import { toLocalDateString } from '../../../utils/localDate';
 import { formatTrMoneyInput, formatTrMoneyFromNumber, parseTrMoneyString } from '../../../utils/trNumberInput';
 
 /** Döviz / altın / kripto / fon fiyat ve miktar girişi (kuruş + uzun ondalık) */
@@ -290,7 +291,7 @@ const AddInvestmentModal: React.FC<AddInvestmentModalProps> = ({
         let price: number | null = null;
         
         // Güncel tarih için topList'ten fiyat al
-        const today = new Date().toISOString().split('T')[0];
+        const today = toLocalDateString();
         if (formData.date === today) {
           for (const item of topList) {
             if (item.key === 'Son Fiyat (TL)') {

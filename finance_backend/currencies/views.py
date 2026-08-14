@@ -46,6 +46,10 @@ _borsa_fetching = False
 _json_file_cache = {}
 _json_cache_lock = threading.Lock()
 
+# Fon detayı: disk yazılamasa bile aynı worker içinde aynı gün RapidAPI'ye tekrar gitme
+_fund_detail_memory = {}
+_fund_detail_memory_lock = threading.Lock()
+
 
 def load_json_file_cached(file_path: str):
     """mtime değişmedikçe aynı JSON'u diskten tekrar parse etme."""
@@ -493,7 +497,7 @@ def read_fund_api_quota() -> dict:
     
     if not os.path.exists(file_path):
         return {
-            'date': datetime.now().strftime('%Y-%m-%d'),
+            'date': _local_today_str(),
             'request_count': 0,
             'last_request_time': None
         }
@@ -503,7 +507,7 @@ def read_fund_api_quota() -> dict:
             data = json.load(f)
         
         # Eğer tarih bugün değilse, sıfırla
-        today = datetime.now().strftime('%Y-%m-%d')
+        today = _local_today_str()
         if data.get('date') != today:
             return {
                 'date': today,
@@ -514,7 +518,7 @@ def read_fund_api_quota() -> dict:
         return data
     except Exception:
         return {
-            'date': datetime.now().strftime('%Y-%m-%d'),
+            'date': _local_today_str(),
             'request_count': 0,
             'last_request_time': None
         }
@@ -556,7 +560,7 @@ def increment_fund_api_quota() -> dict:
         Güncellenmiş quota dict
     """
     quota = read_fund_api_quota()
-    today = datetime.now().strftime('%Y-%m-%d')
+    today = _local_today_str()
     
     # Eğer tarih bugün değilse, sıfırla
     if quota.get('date') != today:
@@ -582,7 +586,7 @@ def can_make_fund_api_request() -> tuple:
         (can_request: bool, quota_info: dict)
     """
     quota = read_fund_api_quota()
-    today = datetime.now().strftime('%Y-%m-%d')
+    today = _local_today_str()
     
     # Eğer tarih bugün değilse, sıfırla ve izin ver
     if quota.get('date') != today:
@@ -618,25 +622,19 @@ def read_fund_detail_from_cache(fund_code: str) -> dict:
             'data': { ... full API response ... }
         } veya None
     """
+    fund_code_upper = fund_code.upper()
     file_path = get_json_file_path('fundsDetails.json')
     
-    if not os.path.exists(file_path):
-        return None
-    
-    try:
-        data = load_json_file_cached(file_path)
-        if not isinstance(data, dict):
-            return None
-        
-        # Fon kodunu büyük harfe çevir (case-insensitive)
-        fund_code_upper = fund_code.upper()
-        
-        if fund_code_upper in data:
-            return data[fund_code_upper]
-        
-        return None
-    except Exception:
-        return None
+    if os.path.exists(file_path):
+        try:
+            data = load_json_file_cached(file_path)
+            if isinstance(data, dict) and fund_code_upper in data:
+                return data[fund_code_upper]
+        except Exception:
+            pass
+
+    with _fund_detail_memory_lock:
+        return _fund_detail_memory.get(fund_code_upper)
 
 
 def write_fund_detail_to_cache(fund_code: str, api_response: dict) -> bool:
@@ -651,38 +649,39 @@ def write_fund_detail_to_cache(fund_code: str, api_response: dict) -> bool:
     Returns:
         True if successful, False otherwise
     """
+    fund_code_upper = fund_code.upper()
+    record = {
+        'lastFetchDate': _local_today_str(),
+        'fetchTime': datetime.now().isoformat(),
+        'data': api_response
+    }
+
+    with _fund_detail_memory_lock:
+        _fund_detail_memory[fund_code_upper] = record
+
     file_path = get_json_file_path('fundsDetails.json')
     
     file_dir = os.path.dirname(file_path)
     if file_dir and not os.path.exists(file_dir):
         os.makedirs(file_dir, exist_ok=True)
     
-    # Mevcut dosyayı oku (varsa)
     existing_data = {}
     if os.path.exists(file_path):
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 existing_data = json.load(f)
-        except:
+        except Exception:
             existing_data = {}
     
-    # Fon kodunu büyük harfe çevir
-    fund_code_upper = fund_code.upper()
-    today = datetime.now().strftime('%Y-%m-%d')
-    
-    # Yeni veriyi ekle/güncelle
-    existing_data[fund_code_upper] = {
-        'lastFetchDate': today,
-        'fetchTime': datetime.now().isoformat(),
-        'data': api_response
-    }
+    existing_data[fund_code_upper] = record
     
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, ensure_ascii=False, indent=2)
         invalidate_json_file_cache(file_path)
         return True
-    except Exception:
+    except Exception as e:
+        logger.warning(f"Fon detay cache yazılamadı ({fund_code_upper}): {e}")
         return False
 
 
@@ -752,136 +751,48 @@ def get_fund_price_from_line_values(line_values: list, target_date: str) -> dict
 
 def should_fetch_fund_detail_from_api(fund_code: str, target_date: str = None) -> tuple:
     """
-    Fon detayı için API'den çekilmeli mi kontrol eder.
-    
-    Mantık:
-    1. Eğer target_date geçmiş bir tarihse:
-       - Cache'de fon var mı kontrol et
-       - lineValues içinde target_date var mı kontrol et
-       - Varsa → Cache'den oku (API'ye istek yok)
-       - Yoksa → API'ye istek yap (eğer quota varsa)
-    
-    2. Eğer target_date bugün veya None ise:
-       - Cache'de fon var mı ve lastFetchDate bugün mü kontrol et
-       - Varsa ve bugünse → Cache'den oku
-       - Yoksa veya eskiyse → API'ye istek yap (eğer quota varsa)
-       - lineValues'ın son tarihi bugünden eskiyse → API'ye istek yap
-    
-    Args:
-        fund_code: Fon kodu (örn: 'GSP')
-        target_date: Hedef tarih (YYYY-MM-DD) veya None (bugün için)
-    
-    Returns:
-        (should_fetch: bool, cached_data: dict or None)
+    Fon detayı için RapidAPI'ye gidilmeli mi?
+
+    Kural: aynı fon, aynı takvim gününde en fazla 1 kez ücretli API'ye gider.
+    TEFAS lineValues çoğu zaman T+1/T+2 (hafta sonu/tatil daha eski) olduğu için
+    "serinin son tarihi dünden eski" kontrolü her tıklamada kotayı yakıyordu.
     """
-    today = datetime.now().strftime('%Y-%m-%d')
+    today = _local_today_str()
     
-    # target_date None ise bugün kabul et
     if target_date is None:
         target_date = today
     
-    # Cache'den oku
     cached = read_fund_detail_from_cache(fund_code)
     
     if cached is None:
-        # Cache'de yok, API'den çek
-        can_request, quota_info = can_make_fund_api_request()
+        can_request, _quota_info = can_make_fund_api_request()
         if not can_request:
-            return False, None  # Quota yok, çekemeyiz
-        return True, None  # Cache'de yok, API'den çek
+            return False, None
+        return True, None
     
     cached_data = cached.get('data', {})
     cached_date = cached.get('lastFetchDate')
     
-    # API response yapısı: { "data": { "lineValues": [...] }, "success": true }
+    # Bugün zaten çekildiyse RapidAPI'ye tekrar gitme
+    if cached_date == today:
+        return False, cached_data
+    
     line_values = []
     if isinstance(cached_data, dict):
         data_section = cached_data.get('data', {})
         if isinstance(data_section, dict):
             line_values = data_section.get('lineValues', [])
     
-    # Geçmiş tarih kontrolü
+    # Geçmiş tarih cache'de varsa ücretli istek yok
     if target_date < today:
-        # lineValues içinde bu tarih var mı?
         price_data = get_fund_price_from_line_values(line_values, target_date)
         if price_data:
-            # Cache'den oku, API'ye istek yok
-            return False, cached_data
-        else:
-            # lineValues'da yok, API'ye istek yap (eğer quota varsa)
-            can_request, quota_info = can_make_fund_api_request()
-            if not can_request:
-                return False, cached_data  # Quota yok, eski cache'i döndür
-            return True, cached_data  # API'den çek
-    
-    # Bugün için kontrol
-    if cached_date == today:
-        # Bugün çekilmiş, lineValues'ın son tarihini kontrol et
-        # API'den bugün çekilen veri, lineValues'da düne kadar oluyor (bugünün verisi henüz API'de yok)
-        if line_values and len(line_values) > 0:
-            # Son tarihi bul
-            last_item = max(line_values, key=lambda x: x.get('date', ''))
-            last_date_str = last_item.get('date', '')
-            
-            if 'T' in last_date_str:
-                last_date_str = last_date_str.split('T')[0]
-            
-            try:
-                last_date = datetime.strptime(last_date_str, '%Y-%m-%d').date()
-                today_date = datetime.strptime(today, '%Y-%m-%d').date()
-                yesterday_date = (today_date - timedelta(days=1))
-                
-                # Eğer lineValues'ın son tarihi dün ise → Cache'den oku (bugün çekilmiş ama bugünün verisi henüz API'de yok)
-                if last_date == yesterday_date:
-                    return False, cached_data
-                
-                # Eğer lineValues'ın son tarihi dünden eski ise → Yeni veri çek
-                if last_date < yesterday_date:
-                    can_request, quota_info = can_make_fund_api_request()
-                    if not can_request:
-                        return False, cached_data
-                    return True, cached_data
-                
-                # Eğer lineValues'ın son tarihi bugün veya bugünden yeni ise → Cache'den oku
-                return False, cached_data
-            except Exception:
-                return False, cached_data
-        
-        # lineValues yok veya boş, bugün çekilmişse cache'den oku
-        return False, cached_data
-    
-    # Cache'deki tarih bugünden eski
-    # Bu durumda lineValues'ın son tarihini kontrol et
-    if line_values and len(line_values) > 0:
-        # Son tarihi bul
-        last_item = max(line_values, key=lambda x: x.get('date', ''))
-        last_date_str = last_item.get('date', '')
-        
-        if 'T' in last_date_str:
-            last_date_str = last_date_str.split('T')[0]
-        
-        try:
-            last_date = datetime.strptime(last_date_str, '%Y-%m-%d').date()
-            today_date = datetime.strptime(today, '%Y-%m-%d').date()
-            yesterday_date = (today_date - timedelta(days=1))
-            
-            # Eğer lineValues'ın son tarihi dün veya bugün ise → Cache'den oku (güncel veri)
-            if last_date >= yesterday_date:
-                return False, cached_data
-            
-            # Eğer lineValues'ın son tarihi dünden eskiyse, yeni veri çek
-            can_request, quota_info = can_make_fund_api_request()
-            if not can_request:
-                return False, cached_data
-            return True, cached_data
-        except Exception:
             return False, cached_data
     
-    # lineValues yok veya boş, yeni veri çek
-    can_request, quota_info = can_make_fund_api_request()
+    can_request, _quota_info = can_make_fund_api_request()
     if not can_request:
         return False, cached_data
-    return True, cached_data  # API'den çek
+    return True, cached_data
 
 
 class GetMainDataView(AuthenticatedCurrencyView):
@@ -1805,7 +1716,6 @@ class FundDetailView(AuthenticatedCurrencyView):
                 )
             
             fund_code = fund_code.upper().strip()
-            today = datetime.now().strftime('%Y-%m-%d')
             
             # Akıllı cache kontrolü
             should_fetch, cached_data = should_fetch_fund_detail_from_api(fund_code, target_date)
@@ -1885,7 +1795,7 @@ class FundDetailView(AuthenticatedCurrencyView):
                         },
                         status=status.HTTP_200_OK
                     )
-                except requests.exceptions.RequestException:
+                except requests.exceptions.RequestException as e:
                     # Hata durumunda cache'deki veriyi döndür (varsa)
                     if cached_data:
                         logger.info("Funds verileri (kaynak: cache)")
@@ -1973,7 +1883,7 @@ class FundPriceCheckView(AuthenticatedCurrencyView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            today = datetime.now().strftime('%Y-%m-%d')
+            today = _local_today_str()
             if target_date is None:
                 target_date = today
             

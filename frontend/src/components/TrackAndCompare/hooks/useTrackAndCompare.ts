@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fundsAPI } from '../../../services/apiService';
+import { toLocalDateString } from '../../../utils/localDate';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useFinance } from '../../../contexts/FinanceContext';
 import {
@@ -351,7 +352,7 @@ export function useTrackAndCompare() {
     const checkFundPrices = async () => {
       if (followedFunds.length === 0 || allFunds.length === 0) return;
 
-      const today = new Date().toISOString().split('T')[0];
+      const today = toLocalDateString();
       const pricePromises = followedFunds.map(async (ff) => {
         try {
           // Önce fiyat kontrolü yap

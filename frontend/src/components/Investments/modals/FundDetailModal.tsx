@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { X, ExternalLink, DollarSign, TrendingUp, TrendingDown, Loader2, AlertCircle } from 'lucide-react';
 import { ModalPortal } from '../../common/ModalPortal';
 import { fundsAPI } from '../../../services/apiService';
+import { toLocalDateString } from '../../../utils/localDate';
 
 interface FundDetailModalProps {
     isOpen: boolean;
@@ -57,7 +58,7 @@ const FundDetailModal: React.FC<FundDetailModalProps> = ({
 
         try {
             // Önce cache'de bugünün verisi var mı kontrol et
-            const today = new Date().toISOString().split('T')[0];
+            const today = toLocalDateString();
             const priceCheckResponse = await fundsAPI.checkFundPrice(fundCode, today);
             
             // Eğer cache'de bugünün verisi varsa, detay bilgisini de cache'den yükle
@@ -113,7 +114,10 @@ const FundDetailModal: React.FC<FundDetailModalProps> = ({
         setError(null);
 
         try {
-            const response = await fundsAPI.getFundDetail(fundCode, targetDate);
+            const response = await fundsAPI.getFundDetail(
+                fundCode,
+                targetDate ?? toLocalDateString()
+            );
 
             if (response.success && response.data) {
                 const data = response.data.data || response.data;
@@ -146,7 +150,7 @@ const FundDetailModal: React.FC<FundDetailModalProps> = ({
     };
 
     const handleShowData = async () => {
-        // Fon detayını yükle (quota bilgisi zaten modal açıldığında yüklenmiş)
+        if (fundDetail) return;
         loadFundDetail();
     };
 
