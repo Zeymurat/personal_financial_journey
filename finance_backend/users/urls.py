@@ -19,11 +19,15 @@ from users.firestore_views import (
     FirestoreEventDetailView,
     FirestorePreferenceView,
     AIChatView,
+    AccountDeleteView,
 )
 
 urlpatterns = [
     # 1. Kimlik Doğrulama Uç Noktası (Örn: /api/auth/firebase-login/)
     path('firebase-login/', FirebaseLoginView.as_view(), name='firebase_login'),
+
+    # Kalıcı hesap silme (App Store 5.1.1(v))
+    path('account/', AccountDeleteView.as_view(), name='account_delete'),
     
     # 2. Firestore Finansal Veri Uç Noktaları (Transactions.tsx'in çağırdığı yer)
     

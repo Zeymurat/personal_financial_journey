@@ -1594,6 +1594,96 @@ class FirestoreService:
             'preferences': prefs,
         }
 
+    # --- Account deletion (App Store Guideline 5.1.1(v)) ---
+
+    _ACCOUNT_DELETE_BATCH_SIZE = 400
+
+    _USER_ACCOUNT_SUBCOLLECTIONS = (
+        'transactions',
+        'quickTransactions',
+        'quickInvestments',
+        'notifications',
+        'events',
+        'settings',
+        'aiLogs',
+    )
+
+    def _delete_collection_documents(self, coll_ref) -> int:
+        """Delete all documents in a Firestore collection (500 batch limit'e uygun)."""
+        deleted = 0
+        while True:
+            snapshots = list(coll_ref.limit(self._ACCOUNT_DELETE_BATCH_SIZE).stream())
+            if not snapshots:
+                break
+            batch = self.db.batch()
+            for snap in snapshots:
+                batch.delete(snap.reference)
+            batch.commit()
+            deleted += len(snapshots)
+            if len(snapshots) < self._ACCOUNT_DELETE_BATCH_SIZE:
+                break
+        return deleted
+
+    def _delete_investments_tree(self, user_id: str) -> int:
+        """investments + her investment altındaki transactions subcollection."""
+        deleted = 0
+        investments_ref = self.get_user_investments_ref(user_id)
+        for inv_snap in investments_ref.stream():
+            tx_ref = inv_snap.reference.collection('transactions')
+            deleted += self._delete_collection_documents(tx_ref)
+            inv_snap.reference.delete()
+            deleted += 1
+        return deleted
+
+    async def delete_user_account(self, user_id: str) -> bool:
+        """
+        users/{user_id} altındaki tüm veriyi ve kök dokümanı kalıcı sil.
+        Firebase Auth silme bu metodun dışında (view → auth.delete_user).
+
+        Returns:
+            True if deletion completed without error.
+
+        Raises:
+            Exception: Firestore bağlantısı yok veya kısmi/başarısız silme.
+        """
+        if not self.db:
+            raise Exception('Firestore veritabanı bağlantısı bulunamadı')
+        if not user_id or not isinstance(user_id, str):
+            raise ValueError('Geçersiz user_id')
+
+        user_ref = self.get_user_doc(user_id)
+        total_deleted = 0
+
+        try:
+            total_deleted += self._delete_investments_tree(user_id)
+
+            collection_names = set(self._USER_ACCOUNT_SUBCOLLECTIONS)
+            for cfg in self.PREFERENCE_RESOURCES.values():
+                collection_names.add(cfg['collection'])
+
+            for coll_name in sorted(collection_names):
+                coll_ref = user_ref.collection(coll_name)
+                total_deleted += self._delete_collection_documents(coll_ref)
+
+            user_snap = user_ref.get()
+            if user_snap.exists:
+                user_ref.delete()
+                total_deleted += 1
+
+            logger.info(
+                'Firestore hesap silindi uid=%s deleted_docs_approx=%s',
+                user_id,
+                total_deleted,
+            )
+            return True
+        except Exception:
+            logger.error(
+                'Firestore hesap silme başarısız uid=%s',
+                user_id,
+                exc_info=True,
+            )
+            raise
+
 
 # Global Firestore service instance
 firestore_service = FirestoreService() 

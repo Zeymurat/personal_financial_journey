@@ -1158,7 +1158,7 @@ class AIChatView(BaseFirestoreView):
                         'model': model_used,
                         'messages': messages,
                         'temperature': 0.3,
-                        'max_tokens': 1200,
+                        'max_tokens': 800,
                     }
                 ).encode('utf-8')
                 req = urllib.request.Request(
@@ -1272,5 +1272,86 @@ class AIChatView(BaseFirestoreView):
             logger.error(f"AI chat hatası: {e}", exc_info=True)
             return Response(
                 {'success': False, 'error': 'Sunucu hatası: AI yanıtı alınamadı.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class AccountDeleteView(BaseFirestoreView):
+    """
+    DELETE /api/auth/account/
+
+    Apple App Store Guideline 5.1.1(v) — uygulama içi kalıcı hesap silme.
+
+    Contract:
+      - Authorization: Bearer <Firebase ID Token> (zorunlu)
+      - Body: boş veya opsiyonel { "confirm": true }
+      - 200: { "success": true, "message": "Hesap ve tüm veriler kalıcı olarak silindi." }
+      - 401: token geçersiz / süresi dolmuş
+      - 400: uid boş
+      - 500: Firestore veya Firebase Auth silme hatası
+
+    Mobil akış:
+      1. DELETE /api/auth/account/
+      2. firebase deleteUser()
+      3. logout
+
+    Prod: https://personal-financial-journey.onrender.com/api/auth/account/
+    """
+
+    def delete(self, request):
+        from firebase_admin import auth as fb_auth
+
+        try:
+            firebase_uid = self.validate_user_access(request)
+            if not firebase_uid or not str(firebase_uid).strip():
+                return Response(
+                    {'success': False, 'error': 'Geçersiz kullanıcı kimliği.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            _run_async(firestore_service.delete_user_account(firebase_uid))
+
+            try:
+                fb_auth.delete_user(firebase_uid)
+            except fb_auth.UserNotFoundError:
+                # Mobil deleteUser() önce çalışmış olabilir — idempotent
+                pass
+            except Exception as auth_err:
+                logger.error(
+                    'Hesap silme: Firestore tamam, Auth silinemedi uid=%s err=%s',
+                    firebase_uid,
+                    type(auth_err).__name__,
+                )
+                return Response(
+                    {
+                        'success': False,
+                        'error': 'Veriler silindi ancak kimlik doğrulama kaydı silinemedi.',
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+
+            logger.info('Hesap kalıcı silindi uid=%s', firebase_uid)
+            return Response(
+                {
+                    'success': True,
+                    'message': 'Hesap ve tüm veriler kalıcı olarak silindi.',
+                },
+                status=status.HTTP_200_OK,
+            )
+        except exceptions.AuthenticationFailed as e:
+            return Response(
+                {'success': False, 'error': str(e)},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        except exceptions.PermissionDenied as e:
+            return Response(
+                {'success': False, 'error': str(e)},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        except Exception:
+            uid = getattr(request.user, 'firebase_uid', '?')
+            logger.error('Hesap silme hatası uid=%s', uid, exc_info=True)
+            return Response(
+                {'success': False, 'error': 'Sunucu hatası: Hesap silinemedi.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
