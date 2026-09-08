@@ -41,6 +41,11 @@ const mapApiItemToTransaction = (item: any): Transaction => {
     date,
     currency: item.currency || 'TRY',
     amountInTRY: item.amountInTRY || item.amount || 0,
+    paymentMethod: item.paymentMethod || 'cash',
+    creditCardDebtId: item.creditCardDebtId,
+    installmentCount: item.installmentCount || 1,
+    effectiveDate: item.effectiveDate || date,
+    debtId: item.debtId,
     createdAt,
     updatedAt,
   } as Transaction;

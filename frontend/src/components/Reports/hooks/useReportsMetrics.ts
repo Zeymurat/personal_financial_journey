@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import type { Transaction } from '../../../types';
 import { getMonthStart, getMonthEnd, formatMonthYear } from '../utils/monthHelpers';
+import { transactionRecognitionDate } from '../../../utils/transactionRecognition';
+import { toLocalDateString } from '../../../utils/localDate';
 
 export function useReportsMetrics(
   transactions: Transaction[],
@@ -12,23 +14,29 @@ export function useReportsMetrics(
   const currentDate = new Date();
   const currentMonthStart = getMonthStart(currentDate);
   const currentMonthEnd = getMonthEnd(currentDate);
+  const today = toLocalDateString();
 
   const previousMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
   const previousMonthStart = getMonthStart(previousMonthDate);
   const previousMonthEnd = getMonthEnd(previousMonthDate);
 
-  // Bu ay transaction'ları
+  // Bu ay transaction'ları (tanınma tarihi = effectiveDate)
   const currentMonthTransactions = useMemo(() => {
     return transactions.filter(t => {
-      const transactionDate = new Date(t.date);
-      return transactionDate >= currentMonthStart && transactionDate <= currentMonthEnd;
+      const recognition = transactionRecognitionDate(t);
+      const transactionDate = new Date(recognition);
+      return (
+        transactionDate >= currentMonthStart &&
+        transactionDate <= currentMonthEnd &&
+        recognition <= today
+      );
     });
-  }, [transactions, currentMonthStart, currentMonthEnd]);
+  }, [transactions, currentMonthStart, currentMonthEnd, today]);
 
   // Önceki ay transaction'ları
   const previousMonthTransactions = useMemo(() => {
     return transactions.filter(t => {
-      const transactionDate = new Date(t.date);
+      const transactionDate = new Date(transactionRecognitionDate(t));
       return transactionDate >= previousMonthStart && transactionDate <= previousMonthEnd;
     });
   }, [transactions, previousMonthStart, previousMonthEnd]);
@@ -80,7 +88,7 @@ export function useReportsMetrics(
 
     return months.map(({ monthStart, monthEnd, label }) => {
       const monthTransactions = transactions.filter(t => {
-        const transactionDate = new Date(t.date);
+        const transactionDate = new Date(transactionRecognitionDate(t));
         return transactionDate >= monthStart && transactionDate <= monthEnd;
       });
 
@@ -132,7 +140,7 @@ export function useReportsMetrics(
     return months.map(({ monthStart, monthEnd, label }) => {
       // Gelir/Gider hesaplamaları
       const monthTransactions = transactions.filter(t => {
-        const transactionDate = new Date(t.date);
+        const transactionDate = new Date(transactionRecognitionDate(t));
         return transactionDate >= monthStart && transactionDate <= monthEnd;
       });
 

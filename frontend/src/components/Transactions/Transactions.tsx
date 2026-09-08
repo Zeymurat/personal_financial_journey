@@ -262,14 +262,20 @@ const Transactions: React.FC = () => {
             date,
             currency: item.currency || 'TRY',
             amountInTRY: item.amountInTRY,
+            paymentMethod: item.paymentMethod || 'cash',
+            creditCardDebtId: item.creditCardDebtId,
+            installmentCount: item.installmentCount,
+            effectiveDate: item.effectiveDate,
             createdAt,
             updatedAt
           } as Transaction;
         });
 
-        setTransactions(transactionsMapped);
+        setTransactions(
+          transactionsMapped.filter((tx) => tx.paymentMethod !== 'credit_card')
+        );
       } else if (Array.isArray(response)) {
-        setTransactions(response);
+        setTransactions(response.filter((tx: Transaction) => tx.paymentMethod !== 'credit_card'));
       } else {
         console.error('Beklenmeyen response formatı:', response);
         setTransactions([]);

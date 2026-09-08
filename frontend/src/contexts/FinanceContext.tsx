@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { Transaction, Investment, Currency } from '../types';
+import { Transaction, Investment, Currency, Debt, DebtScheduleItem } from '../types';
 import { 
   getTransactions as fetchTransactions,
   addTransaction as createTransaction,
@@ -17,7 +17,7 @@ import {
   deleteInvestmentTransaction as removeInvestmentTransaction
 } from '../services/investmentService';
 import { getExchangeRates, convertCurrency } from '../services/currencyService';
-import { tcmbAPI, borsaAPI } from '../services/apiService';
+import { tcmbAPI, borsaAPI, debtAPI } from '../services/apiService';
 import { hasStoredAccessToken } from '../services/authTokenStore';
 import { useAuth } from './AuthContext';
 
@@ -42,6 +42,12 @@ interface FinanceContextType {
   updateTransaction: (id: string, updates: Partial<Transaction>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
   refreshTransactions: () => Promise<void>;
+
+  // Debts
+  debts: Debt[];
+  debtSchedules: Record<string, DebtScheduleItem[]>;
+  loadingDebts: boolean;
+  refreshDebts: () => Promise<void>;
   
   // Investments
   investments: Investment[];
@@ -85,6 +91,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   
   // State
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [debts, setDebts] = useState<Debt[]>([]);
+  const [debtSchedules, setDebtSchedules] = useState<Record<string, DebtScheduleItem[]>>({});
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [exchangeRates, setExchangeRates] = useState<Record<string, Currency>>({});
   const [goldPrices, setGoldPrices] = useState<Record<string, Currency>>({});
@@ -92,6 +100,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [preciousMetals, setPreciousMetals] = useState<Record<string, Currency>>({});
   const [borsaData, setBorsaData] = useState<StockData[]>([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
+  const [loadingDebts, setLoadingDebts] = useState(false);
   const [loadingInvestments, setLoadingInvestments] = useState(false);
   const [loadingRates, setLoadingRates] = useState(false);
   const [loadingBorsa, setLoadingBorsa] = useState(false);
@@ -118,11 +127,40 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       setLoadingTransactions(true);
       const data = await fetchTransactions(currentUser.id);
-      setTransactions(data);
+      // Eski KK harcama kayıtları P&L işlemi değildi; nakit çıkışı kart ödemesinde doğar
+      setTransactions(
+        (Array.isArray(data) ? data : []).filter((tx) => tx.paymentMethod !== 'credit_card')
+      );
     } catch (err) {
       handleError(err, 'Failed to load transactions');
     } finally {
       setLoadingTransactions(false);
+    }
+  };
+
+  const loadDebts = async () => {
+    if (!currentUser?.id) return;
+    try {
+      setLoadingDebts(true);
+      const res = await debtAPI.getAll();
+      const list: Debt[] = Array.isArray(res?.data) ? res.data : [];
+      setDebts(list);
+      const active = list.filter((d) => d.status === 'active');
+      const entries = await Promise.all(
+        active.map(async (d) => {
+          try {
+            const sched = await debtAPI.getSchedule(d.id);
+            return [d.id, Array.isArray(sched?.data) ? sched.data : []] as const;
+          } catch {
+            return [d.id, []] as const;
+          }
+        })
+      );
+      setDebtSchedules(Object.fromEntries(entries));
+    } catch (err) {
+      handleError(err, 'Failed to load debts');
+    } finally {
+      setLoadingDebts(false);
     }
   };
 
@@ -442,6 +480,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (currentUser === null) {
       dataLoadedRef.current = false;
       setTransactions([]);
+      setDebts([]);
+      setDebtSchedules({});
       setInvestments([]);
       setExchangeRates({});
       setGoldPrices({});
@@ -467,6 +507,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (currentUser?.id && !dataLoadedRef.current) {
       dataLoadedRef.current = true;
       loadTransactions();
+      loadDebts();
       loadInvestments();
       
       // Currency ve Borsa verilerini paralel yükle
@@ -485,6 +526,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     updateTransaction,
     deleteTransaction,
     refreshTransactions: loadTransactions,
+
+    debts,
+    debtSchedules,
+    loadingDebts,
+    refreshDebts: loadDebts,
     
     // Investments
     investments,

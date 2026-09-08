@@ -57,7 +57,8 @@
     "quickSaveSuccess": "Quick action saved.",
     "quickSaveError": "Could not save quick action. Please try again.",
     "quickDeleteSuccess": "Quick action deleted.",
-    "quickDeleteError": "Could not delete quick action. Please try again."
+    "quickDeleteError": "Could not delete quick action. Please try again.",
+    "cardChargeSuccess": "Card charge saved (card balance, not a cash transaction)."
   },
   "list": {
     "title": "All transactions",
@@ -102,7 +103,20 @@
     "addButton": "Add",
     "editTitle": "Edit transaction",
     "editSubtitle": "Update transaction details",
-    "updateButton": "Update"
+    "updateButton": "Update",
+    "paymentMethod": "Payment method",
+    "cash": "Cash",
+    "creditCard": "Credit card",
+    "creditCardSelect": "Credit card",
+    "selectCard": "Select card",
+    "selectCardRequired": "Select a credit card or add one under Cards.",
+    "noCardsHint": "Add a credit card under Cards first.",
+    "cutoffShort": "cutoff {{day}}",
+    "installments": "Installments",
+    "singlePayment": "One-shot (1)",
+    "nInstallments": "{{count}} installments",
+    "effectivePreview": "First statement / due: {{date}}",
+    "cardChargeHint": "This is not a cash transaction. It increases your card balance. A cash expense is created when you pay the card."
   },
   "detail": {
     "title": "Transaction details",

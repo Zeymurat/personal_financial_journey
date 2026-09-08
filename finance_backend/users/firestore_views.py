@@ -1276,6 +1276,213 @@ class AIChatView(BaseFirestoreView):
             )
 
 
+class FirestoreDebtView(BaseFirestoreView):
+    """GET/POST /api/auth/debts/"""
+
+    def get(self, request):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            filters = {}
+            if request.query_params.get('kind'):
+                filters['kind'] = request.query_params.get('kind')
+            if request.query_params.get('status'):
+                filters['status'] = request.query_params.get('status')
+            debts = _run_async(firestore_service.get_user_debts(firebase_uid, filters))
+            return Response({'success': True, 'data': debts})
+        except exceptions.PermissionDenied as e:
+            return Response({'success': False, 'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Debts list error: {e}", exc_info=True)
+            return Response({'success': False, 'error': 'Borçlar getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            debt_id = _run_async(firestore_service.create_debt(firebase_uid, request.data))
+            return Response({'id': debt_id, 'message': 'Borç oluşturuldu'}, status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except exceptions.PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Debt create error: {e}", exc_info=True)
+            return Response({'error': 'Borç oluşturulamadı.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class FirestoreDebtDetailView(BaseFirestoreView):
+    """GET/PUT/DELETE /api/auth/debts/<id>/"""
+
+    def get(self, request, debt_id):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            debt = _run_async(firestore_service.get_debt(firebase_uid, debt_id))
+            if not debt:
+                return Response({'error': 'Borç bulunamadı'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'success': True, 'data': debt})
+        except exceptions.PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Debt get error: {e}", exc_info=True)
+            return Response({'error': 'Borç getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self, request, debt_id):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            ok = _run_async(firestore_service.update_debt(firebase_uid, debt_id, request.data))
+            if not ok:
+                return Response({'error': 'Borç bulunamadı'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'Borç güncellendi'})
+        except exceptions.PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Debt update error: {e}", exc_info=True)
+            return Response({'error': 'Borç güncellenemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, debt_id):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            ok = _run_async(firestore_service.delete_debt(firebase_uid, debt_id))
+            if not ok:
+                return Response({'error': 'Borç bulunamadı'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'Borç silindi'})
+        except exceptions.PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Debt delete error: {e}", exc_info=True)
+            return Response({'error': 'Borç silinemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class FirestoreDebtScheduleView(BaseFirestoreView):
+    """GET /api/auth/debts/<id>/schedule/"""
+
+    def get(self, request, debt_id):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            debt = _run_async(firestore_service.get_debt(firebase_uid, debt_id))
+            if not debt:
+                return Response({'error': 'Borç bulunamadı'}, status=status.HTTP_404_NOT_FOUND)
+            schedule = _run_async(firestore_service.get_debt_schedule(firebase_uid, debt_id))
+            return Response({'success': True, 'data': schedule})
+        except exceptions.PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Debt schedule error: {e}", exc_info=True)
+            return Response({'error': 'Plan getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class FirestoreDebtPaymentView(BaseFirestoreView):
+    """POST /api/auth/debts/<id>/payments/"""
+
+    def post(self, request, debt_id):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            result = _run_async(
+                firestore_service.record_debt_payment(firebase_uid, debt_id, request.data)
+            )
+            return Response({'success': True, 'data': result}, status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except exceptions.PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Debt payment error: {e}", exc_info=True)
+            return Response({'error': 'Ödeme kaydedilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class FirestoreDebtChargeView(BaseFirestoreView):
+    """POST /api/auth/debts/<id>/charges/ — KK harcama (işlem oluşturmaz)."""
+
+    def post(self, request, debt_id):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            result = _run_async(
+                firestore_service.add_credit_card_charge(firebase_uid, debt_id, request.data)
+            )
+            return Response({'success': True, 'data': result}, status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except exceptions.PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Debt charge error: {e}", exc_info=True)
+            return Response({'error': 'Harcama kaydedilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class FirestoreDebtChargeDetailView(BaseFirestoreView):
+    """PUT/DELETE /api/auth/debts/<id>/charges/<charge_id>/"""
+
+    def put(self, request, debt_id, charge_id):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            result = _run_async(
+                firestore_service.update_credit_card_charge(
+                    firebase_uid, debt_id, charge_id, request.data
+                )
+            )
+            return Response({'success': True, 'data': result})
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except exceptions.PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Debt charge update error: {e}", exc_info=True)
+            return Response({'error': 'Harcama güncellenemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, debt_id, charge_id):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            result = _run_async(
+                firestore_service.delete_credit_card_charge(firebase_uid, debt_id, charge_id)
+            )
+            return Response({'success': True, 'data': result})
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except exceptions.PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Debt charge delete error: {e}", exc_info=True)
+            return Response({'error': 'Harcama silinemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class FirestoreDebtScheduleItemView(BaseFirestoreView):
+    """DELETE /api/auth/debts/<id>/schedule/<item_id>/"""
+
+    def delete(self, request, debt_id, item_id):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            result = _run_async(
+                firestore_service.delete_debt_schedule_item(firebase_uid, debt_id, item_id)
+            )
+            return Response({'success': True, 'data': result})
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except exceptions.PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Schedule item delete error: {e}", exc_info=True)
+            return Response({'error': 'Plan satırı silinemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class FirestoreDebtStatementSummaryView(BaseFirestoreView):
+    """GET /api/auth/debts/<id>/statement-summary/"""
+
+    def get(self, request, debt_id):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            as_of = request.query_params.get('asOf')
+            summary = _run_async(
+                firestore_service.get_debt_statement_summary(firebase_uid, debt_id, as_of)
+            )
+            return Response({'success': True, 'data': summary})
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except exceptions.PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Debt statement summary error: {e}", exc_info=True)
+            return Response({'error': 'Özet getirilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class AccountDeleteView(BaseFirestoreView):
     """
     DELETE /api/auth/account/

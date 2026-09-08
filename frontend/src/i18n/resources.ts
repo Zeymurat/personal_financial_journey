@@ -13,6 +13,8 @@ import trTransactions from '../locales/tr/transactions.json';
 import trInvestments from '../locales/tr/investments.json';
 import trShared from '../locales/tr/shared.json';
 import trAssistant from '../locales/tr/assistant.json';
+import trDebts from '../locales/tr/debts.json';
+import trCards from '../locales/tr/cards.json';
 
 import enCommon from '../locales/en/common.json';
 import enSettings from '../locales/en/settings.json';
@@ -29,6 +31,8 @@ import enTransactions from '../locales/en/transactions.json';
 import enInvestments from '../locales/en/investments.json';
 import enShared from '../locales/en/shared.json';
 import enAssistant from '../locales/en/assistant.json';
+import enDebts from '../locales/en/debts.json';
+import enCards from '../locales/en/cards.json';
 
 import deCommon from '../locales/de/common.json';
 import deSettings from '../locales/de/settings.json';
@@ -45,6 +49,8 @@ import deTransactions from '../locales/de/transactions.json';
 import deInvestments from '../locales/de/investments.json';
 import deShared from '../locales/de/shared.json';
 import deAssistant from '../locales/de/assistant.json';
+import deDebts from '../locales/de/debts.json';
+import deCards from '../locales/de/cards.json';
 
 import frCommon from '../locales/fr/common.json';
 import frSettings from '../locales/fr/settings.json';
@@ -61,6 +67,8 @@ import frTransactions from '../locales/fr/transactions.json';
 import frInvestments from '../locales/fr/investments.json';
 import frShared from '../locales/fr/shared.json';
 import frAssistant from '../locales/fr/assistant.json';
+import frDebts from '../locales/fr/debts.json';
+import frCards from '../locales/fr/cards.json';
 
 import esCommon from '../locales/es/common.json';
 import esSettings from '../locales/es/settings.json';
@@ -77,6 +85,8 @@ import esTransactions from '../locales/es/transactions.json';
 import esInvestments from '../locales/es/investments.json';
 import esShared from '../locales/es/shared.json';
 import esAssistant from '../locales/es/assistant.json';
+import esDebts from '../locales/es/debts.json';
+import esCards from '../locales/es/cards.json';
 
 export const resources = {
   tr: {
@@ -94,7 +104,9 @@ export const resources = {
     transactions: trTransactions,
     investments: trInvestments,
     shared: trShared,
-    assistant: trAssistant
+    assistant: trAssistant,
+    debts: trDebts,
+    cards: trCards
   },
   en: {
     common: enCommon,
@@ -111,7 +123,9 @@ export const resources = {
     transactions: enTransactions,
     investments: enInvestments,
     shared: enShared,
-    assistant: enAssistant
+    assistant: enAssistant,
+    debts: enDebts,
+    cards: enCards
   },
   de: {
     common: deCommon,
@@ -128,7 +142,9 @@ export const resources = {
     transactions: deTransactions,
     investments: deInvestments,
     shared: deShared,
-    assistant: deAssistant
+    assistant: deAssistant,
+    debts: deDebts,
+    cards: deCards
   },
   fr: {
     common: frCommon,
@@ -145,7 +161,9 @@ export const resources = {
     transactions: frTransactions,
     investments: frInvestments,
     shared: frShared,
-    assistant: frAssistant
+    assistant: frAssistant,
+    debts: frDebts,
+    cards: frCards
   },
   es: {
     common: esCommon,
@@ -162,6 +180,8 @@ export const resources = {
     transactions: esTransactions,
     investments: esInvestments,
     shared: esShared,
-    assistant: esAssistant
+    assistant: esAssistant,
+    debts: esDebts,
+    cards: esCards
   }
 } as const;

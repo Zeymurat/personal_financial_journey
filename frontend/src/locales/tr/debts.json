@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "Borçlar",
+    "subtitle": "Borç, alacak ve kredi takibi — kart kesimleri de burada"
+  },
+  "actions": {
+    "add": "Yeni kayıt",
+    "pay": "Ödeme kaydet",
+    "collect": "Tahsilat kaydet",
+    "payCard": "Kart ödemesi",
+    "delete": "Sil",
+    "close": "Kapat",
+    "save": "Kaydet",
+    "cancel": "Vazgeç",
+    "payNext": "Bu taksiti öde",
+    "payEarly": "Erken ödeme"
+  },
+  "filters": {
+    "all": "Tümü",
+    "payable": "Borçlarım",
+    "receivable": "Alacaklarım",
+    "loan": "Krediler",
+    "credit_card": "Kartlar",
+    "active": "Aktif",
+    "paid": "Ödenmiş"
+  },
+  "kinds": {
+    "payable": "Borç",
+    "receivable": "Alacak",
+    "loan": "Kredi / taksit",
+    "credit_card": "Kredi kartı"
+  },
+  "summary": {
+    "totalPayable": "Toplam borç",
+    "totalReceivable": "Toplam alacak",
+    "dueThisMonth": "Bu ay vadesi gelen",
+    "totalPaid": "Toplam ödenen",
+    "remainingDebt": "Kalan borç",
+    "tryNote": "TRY karşılığı (yaklaşık)"
+  },
+  "form": {
+    "kind": "Tür",
+    "name": "Ad",
+    "nameLoan": "Kredi adı",
+    "nameCard": "Kart adı",
+    "namePayable": "Borç adı",
+    "nameReceivable": "Alacak adı",
+    "counterparty": "Karşı taraf",
+    "counterpartyLoan": "Banka",
+    "counterpartyPayable": "Alacaklı",
+    "counterpartyReceivable": "Borçlu",
+    "amount": "Tutar",
+    "amountLoan": "Kredi tutarı",
+    "currency": "Para birimi",
+    "interestRate": "Faiz oranı (%)",
+    "interestRateHint": "0 girebilirsiniz. Bilgi amaçlı tutulur.",
+    "notes": "Not",
+    "startDate": "İlk taksit tarihi",
+    "installments": "Taksit sayısı",
+    "cutoffDay": "Kesim günü (1–28)",
+    "creditLimit": "Kart limiti",
+    "paymentAmount": "Ödeme tutarı",
+    "paymentDate": "Ödeme tarihi",
+    "payInstallmentCount": "Kaç taksit ödenecek",
+    "nextInstallment": "Sıradaki taksit",
+    "earlyHint": "Yalnızca sıradaki tam taksit(ler). Kısmi tutar kabul edilmez.",
+    "addTitle": "Yeni borç / alacak",
+    "payTitle": "Ödeme",
+    "collectTitle": "Tahsilat",
+    "cardPayTitle": "Kart ödemesi"
+  },
+  "detail": {
+    "remaining": "Kalan",
+    "original": "Ana tutar",
+    "remainingOfTotal": "Kalan / Toplam",
+    "progress": "Ödeme ilerlemesi",
+    "paidAmount": "Ödenen",
+    "limitUsed": "Limit kullanımı",
+    "interestRate": "Faiz",
+    "schedule": "Ödeme planı",
+    "periodBalance": "Dönem borcu",
+    "minPayment": "Asgari ödeme",
+    "statementDate": "Kesim tarihi",
+    "pending": "Bekleyen",
+    "paid": "Ödendi",
+    "noSchedule": "Plan yok",
+    "empty": "Henüz kayıt yok",
+    "status": "Durum",
+    "selectHint": "Detay için soldan bir kayıt seçin"
+  },
+  "toast": {
+    "created": "Kayıt oluşturuldu",
+    "updated": "Güncellendi",
+    "deleted": "Silindi",
+    "paid": "Ödeme kaydedildi",
+    "error": "İşlem başarısız"
+  },
+  "status": {
+    "active": "Aktif",
+    "paid": "Kapandı",
+    "closed": "Kapalı"
+  },
+  "confirm": {
+    "deleteTitle": "Kaydı sil",
+    "deleteMessage": "“{{name}}” kaydını silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+  }
+}

@@ -18,6 +18,8 @@ const Settings = lazy(() => import('./components/Settings'));
 const Notifications = lazy(() => import('./components/Notifications'));
 const Agenda = lazy(() => import('./components/Agenda/Agenda'));
 const Calculator = lazy(() => import('./components/Calculator/Calculator'));
+const Debts = lazy(() => import('./components/Debts/Debts'));
+const Cards = lazy(() => import('./components/Cards/Cards'));
 // Assistant prod’da kapalı — lazy import yok (bundle’a girmesin)
 
 const TabFallback: React.FC = () => (
@@ -35,6 +37,10 @@ const MainApp: React.FC = () => {
         return <Dashboard />;
       case 'transactions':
         return <Transactions />;
+      case 'debts':
+        return <Debts />;
+      case 'cards':
+        return <Cards />;
       case 'investments':
         return <Investments />;
       case 'track':

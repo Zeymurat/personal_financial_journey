@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "title": "Cartes de crédit",
+    "subtitle": "Enregistrer les cartes, dépenses et échéances"
+  },
+  "actions": {
+    "addCard": "Ajouter une carte",
+    "addExpense": "Ajouter une dépense",
+    "payCard": "Payer la carte",
+    "delete": "Supprimer",
+    "close": "Fermer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "editCharge": "Edit charge",
+    "deleteCharge": "Delete charge"
+  },
+  "summary": {
+    "totalDebt": "Solde total des cartes",
+    "cardCount": "Cartes actives",
+    "tryNote": "Équivalent TRY approx."
+  },
+  "form": {
+    "addCardTitle": "Nouvelle carte",
+    "addExpenseTitle": "Dépense carte",
+    "name": "Nom de la carte",
+    "bank": "Banque",
+    "currency": "Devise",
+    "cutoffDay": "Jour de coupure (1–28)",
+    "creditLimit": "Plafond",
+    "openingBalance": "Solde actuel (optionnel)",
+    "openingBalanceHint": "Saisir s’il y a déjà un solde. Sinon laisser vide.",
+    "notes": "Notes",
+    "amount": "Montant",
+    "date": "Date d’achat",
+    "category": "Catégorie",
+    "description": "Description",
+    "installments": "Mensualités",
+    "singlePayment": "Comptant",
+    "nInstallments": "{{count}} mensualités",
+    "selectCategory": "Choisir une catégorie",
+    "effectivePreview": "Première échéance : {{date}}",
+    "chargeHint": "N’apparaît pas dans Transactions. La sortie d’argent a lieu au paiement.",
+    "editChargeTitle": "Edit card charge",
+    "editPaidBlocked": "Charges with paid installments cannot be rebuilt; only category/description can change."
+  },
+  "detail": {
+    "remaining": "Restant dû",
+    "limit": "Plafond",
+    "cutoff": "Jour de coupure",
+    "periodBalance": "Solde de période",
+    "minPayment": "Paiement minimum",
+    "statementDate": "Date de relevé",
+    "schedule": "Plan d’échéances",
+    "pending": "En attente",
+    "paid": "Payé",
+    "noSchedule": "Pas encore de plan — ajoutez une dépense",
+    "empty": "Aucune carte",
+    "selectHint": "Sélectionnez une carte pour le détail",
+    "goDebtsHint": "Les paiements et relevés apparaissent aussi dans Dettes.",
+    "charges": "Charges",
+    "chargeFallback": "Charge",
+    "chargeTotal": "Total {{amount}}"
+  },
+  "toast": {
+    "created": "Carte créée",
+    "expenseAdded": "Dépense enregistrée",
+    "deleted": "Carte supprimée",
+    "paid": "Paiement enregistré",
+    "error": "Échec",
+    "amountInvalid": "Montant invalide",
+    "chargeDeleted": "Charge deleted",
+    "chargeUpdated": "Charge updated"
+  },
+  "confirm": {
+    "deleteTitle": "Supprimer la carte",
+    "deleteMessage": "Voulez-vous vraiment supprimer la carte « {{name}} » ? Cette action est irréversible.",
+    "deleteChargeTitle": "Delete charge",
+    "deleteChargeMessage": "Delete charge “{{name}}” ({{amount}})?"
+  }
+}

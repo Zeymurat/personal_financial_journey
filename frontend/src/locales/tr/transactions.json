@@ -57,7 +57,8 @@
     "quickSaveSuccess": "Hızlı işlem başarıyla kaydedildi.",
     "quickSaveError": "Hızlı işlem kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.",
     "quickDeleteSuccess": "Hızlı işlem başarıyla silindi.",
-    "quickDeleteError": "Hızlı işlem silinirken bir hata oluştu. Lütfen tekrar deneyin."
+    "quickDeleteError": "Hızlı işlem silinirken bir hata oluştu. Lütfen tekrar deneyin.",
+    "cardChargeSuccess": "Kart harcaması kaydedildi (işlem değil, kart borcu)."
   },
   "list": {
     "title": "Tüm İşlemler",
@@ -97,12 +98,25 @@
     "description": "Açıklama",
     "descriptionPlaceholder": "İşlem açıklaması",
     "date": "Tarih",
+    "paymentMethod": "Ödeme tipi",
+    "cash": "Nakit",
+    "creditCard": "Kredi kartı",
+    "creditCardSelect": "Kredi kartı",
+    "selectCard": "Kart seçin",
+    "selectCardRequired": "Kredi kartı seçin veya Kartlar’dan kart ekleyin.",
+    "noCardsHint": "Önce Kartlar menüsünden bir kredi kartı ekleyin.",
+    "cutoffShort": "kesim {{day}}",
+    "installments": "Taksit",
+    "singlePayment": "Peşin (1)",
+    "nInstallments": "{{count}} taksit",
+    "effectivePreview": "İlk kesim / vade: {{date}}",
     "addTitle": "Yeni İşlem Ekle",
     "addSubtitle": "Gelir veya gider işlemi ekleyin",
     "addButton": "Ekle",
     "editTitle": "İşlem Düzenle",
     "editSubtitle": "İşlem bilgilerini güncelleyin",
-    "updateButton": "Güncelle"
+    "updateButton": "Güncelle",
+    "cardChargeHint": "Bu kayıt İşlemler’e düşmez; kart borcuna yazılır. Hesaptan çıkan para, kart ödemesinde gider olarak oluşur."
   },
   "detail": {
     "title": "İşlem Detayları",

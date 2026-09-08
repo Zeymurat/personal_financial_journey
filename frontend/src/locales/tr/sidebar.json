@@ -6,6 +6,8 @@
   "nav": {
     "dashboard": "Kişisel Özet",
     "transactions": "İşlemler",
+    "debts": "Borçlar",
+    "cards": "Kartlar",
     "investments": "Yatırımlar",
     "track": "Takip ve Karşılaştırma",
     "reports": "Raporlar",

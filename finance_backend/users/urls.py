@@ -20,6 +20,14 @@ from users.firestore_views import (
     FirestorePreferenceView,
     AIChatView,
     AccountDeleteView,
+    FirestoreDebtView,
+    FirestoreDebtDetailView,
+    FirestoreDebtScheduleView,
+    FirestoreDebtPaymentView,
+    FirestoreDebtChargeView,
+    FirestoreDebtChargeDetailView,
+    FirestoreDebtScheduleItemView,
+    FirestoreDebtStatementSummaryView,
 )
 
 urlpatterns = [
@@ -94,4 +102,26 @@ urlpatterns = [
     
     # Etkinlik Detay (PUT/DELETE) için: Tam URL: /api/auth/events/<id>/
     path('events/<str:event_id>/', FirestoreEventDetailView.as_view(), name='firestore_event_detail'),
+
+    # Borçlar
+    path('debts/', FirestoreDebtView.as_view(), name='firestore_debts'),
+    path('debts/<str:debt_id>/', FirestoreDebtDetailView.as_view(), name='firestore_debt_detail'),
+    path('debts/<str:debt_id>/schedule/', FirestoreDebtScheduleView.as_view(), name='firestore_debt_schedule'),
+    path('debts/<str:debt_id>/payments/', FirestoreDebtPaymentView.as_view(), name='firestore_debt_payments'),
+    path('debts/<str:debt_id>/charges/', FirestoreDebtChargeView.as_view(), name='firestore_debt_charges'),
+    path(
+        'debts/<str:debt_id>/charges/<str:charge_id>/',
+        FirestoreDebtChargeDetailView.as_view(),
+        name='firestore_debt_charge_detail',
+    ),
+    path(
+        'debts/<str:debt_id>/schedule/<str:item_id>/',
+        FirestoreDebtScheduleItemView.as_view(),
+        name='firestore_debt_schedule_item',
+    ),
+    path(
+        'debts/<str:debt_id>/statement-summary/',
+        FirestoreDebtStatementSummaryView.as_view(),
+        name='firestore_debt_statement_summary',
+    ),
 ]

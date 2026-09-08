@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "Schulden",
+    "subtitle": "Schulden, Forderungen und Kreditkarten"
+  },
+  "actions": {
+    "add": "New entry",
+    "pay": "Record payment",
+    "collect": "Record collection",
+    "payCard": "Card payment",
+    "delete": "Delete",
+    "close": "Close",
+    "save": "Save",
+    "payNext": "Pay this installment",
+    "payEarly": "Early payment",
+    "cancel": "Abbrechen"
+  },
+  "filters": {
+    "all": "All",
+    "payable": "I owe",
+    "receivable": "Owed to me",
+    "loan": "Loans",
+    "credit_card": "Cards",
+    "active": "Active",
+    "paid": "Paid"
+  },
+  "kinds": {
+    "payable": "Debt",
+    "receivable": "Receivable",
+    "loan": "Loan / installments",
+    "credit_card": "Credit card"
+  },
+  "summary": {
+    "totalPayable": "Gesamtschulden",
+    "totalReceivable": "Forderungen gesamt",
+    "dueThisMonth": "Diesen Monat fällig",
+    "totalPaid": "Gesamt gezahlt",
+    "remainingDebt": "Restschuld",
+    "tryNote": "Ca. TRY"
+  },
+  "form": {
+    "kind": "Type",
+    "name": "Name / card name",
+    "counterparty": "Counterparty",
+    "amount": "Amount",
+    "currency": "Currency",
+    "notes": "Notes",
+    "startDate": "First installment date",
+    "installments": "Installments",
+    "cutoffDay": "Statement day (1–28)",
+    "creditLimit": "Card limit",
+    "paymentAmount": "Payment amount",
+    "paymentDate": "Payment date",
+    "addTitle": "New debt / receivable",
+    "payTitle": "Payment",
+    "collectTitle": "Collection",
+    "cardPayTitle": "Card payment",
+    "nameLoan": "Loan name",
+    "nameCard": "Card name",
+    "namePayable": "Debt name",
+    "nameReceivable": "Receivable name",
+    "counterpartyLoan": "Bank",
+    "counterpartyPayable": "Creditor",
+    "counterpartyReceivable": "Debtor",
+    "amountLoan": "Loan amount",
+    "interestRate": "Interest rate (%)",
+    "interestRateHint": "You can enter 0. Stored for reference.",
+    "payInstallmentCount": "How many installments",
+    "nextInstallment": "Next installment",
+    "earlyHint": "Only full next installment(s). Partial amounts are rejected."
+  },
+  "detail": {
+    "remaining": "Remaining",
+    "original": "Principal",
+    "schedule": "Schedule",
+    "periodBalance": "Statement balance",
+    "minPayment": "Minimum payment",
+    "statementDate": "Statement date",
+    "pending": "Pending",
+    "paid": "Paid",
+    "noSchedule": "No schedule",
+    "empty": "No entries yet",
+    "status": "Status",
+    "remainingOfTotal": "Remaining / Total",
+    "progress": "Payment progress",
+    "paidAmount": "Paid",
+    "interestRate": "Interest",
+    "selectHint": "Select a record on the left",
+    "limitUsed": "Limit used"
+  },
+  "toast": {
+    "created": "Created",
+    "updated": "Updated",
+    "deleted": "Deleted",
+    "paid": "Payment recorded",
+    "error": "Action failed"
+  },
+  "status": {
+    "active": "Active",
+    "paid": "Paid off",
+    "closed": "Closed"
+  },
+  "confirm": {
+    "deleteTitle": "Eintrag löschen",
+    "deleteMessage": "Möchten Sie „{{name}}“ wirklich löschen? Dies kann nicht rückgängig gemacht werden."
+  }
+}

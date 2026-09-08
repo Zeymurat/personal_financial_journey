@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "title": "Tarjetas de crédito",
+    "subtitle": "Registra tarjetas, gastos y cuotas"
+  },
+  "actions": {
+    "addCard": "Añadir tarjeta",
+    "addExpense": "Añadir gasto",
+    "payCard": "Pagar tarjeta",
+    "delete": "Eliminar",
+    "close": "Cerrar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "editCharge": "Edit charge",
+    "deleteCharge": "Delete charge"
+  },
+  "summary": {
+    "totalDebt": "Saldo total de tarjetas",
+    "cardCount": "Tarjetas activas",
+    "tryNote": "Equivalente TRY aprox."
+  },
+  "form": {
+    "addCardTitle": "Nueva tarjeta",
+    "addExpenseTitle": "Gasto con tarjeta",
+    "name": "Nombre de la tarjeta",
+    "bank": "Banco",
+    "currency": "Moneda",
+    "cutoffDay": "Día de corte (1–28)",
+    "creditLimit": "Límite",
+    "openingBalance": "Saldo actual (opcional)",
+    "openingBalanceHint": "Indica si ya hay saldo. Si no, déjalo vacío.",
+    "notes": "Notas",
+    "amount": "Importe",
+    "date": "Fecha de compra",
+    "category": "Categoría",
+    "description": "Descripción",
+    "installments": "Cuotas",
+    "singlePayment": "Al contado",
+    "nInstallments": "{{count}} cuotas",
+    "selectCategory": "Elige categoría",
+    "effectivePreview": "Primer corte / vencimiento: {{date}}",
+    "chargeHint": "No se añade a Transacciones. El efectivo sale al pagar la tarjeta.",
+    "editChargeTitle": "Edit card charge",
+    "editPaidBlocked": "Charges with paid installments cannot be rebuilt; only category/description can change."
+  },
+  "detail": {
+    "remaining": "Pendiente",
+    "limit": "Límite",
+    "cutoff": "Día de corte",
+    "periodBalance": "Saldo del periodo",
+    "minPayment": "Pago mínimo",
+    "statementDate": "Fecha de extracto",
+    "schedule": "Plan de cuotas / cortes",
+    "pending": "Pendiente",
+    "paid": "Pagado",
+    "noSchedule": "Sin plan — añade un gasto",
+    "empty": "Aún no hay tarjetas",
+    "selectHint": "Selecciona una tarjeta para ver detalle",
+    "goDebtsHint": "Los pagos y extractos también aparecen en Deudas.",
+    "charges": "Charges",
+    "chargeFallback": "Charge",
+    "chargeTotal": "Total {{amount}}"
+  },
+  "toast": {
+    "created": "Tarjeta creada",
+    "expenseAdded": "Gasto guardado",
+    "deleted": "Tarjeta eliminada",
+    "paid": "Pago registrado",
+    "error": "Error en la operación",
+    "amountInvalid": "Importe no válido",
+    "chargeDeleted": "Charge deleted",
+    "chargeUpdated": "Charge updated"
+  },
+  "confirm": {
+    "deleteTitle": "Eliminar tarjeta",
+    "deleteMessage": "¿Seguro que quieres eliminar la tarjeta “{{name}}”? Esta acción no se puede deshacer.",
+    "deleteChargeTitle": "Delete charge",
+    "deleteChargeMessage": "Delete charge “{{name}}” ({{amount}})?"
+  }
+}

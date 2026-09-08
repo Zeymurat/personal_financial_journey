@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "title": "Kreditkarten",
+    "subtitle": "Karten speichern, Ausgaben und Raten erfassen"
+  },
+  "actions": {
+    "addCard": "Karte hinzufügen",
+    "addExpense": "Ausgabe hinzufügen",
+    "payCard": "Karte zahlen",
+    "delete": "Löschen",
+    "close": "Schließen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "editCharge": "Edit charge",
+    "deleteCharge": "Delete charge"
+  },
+  "summary": {
+    "totalDebt": "Kartensaldo gesamt",
+    "cardCount": "Aktive Karten",
+    "tryNote": "Ca. TRY-Gegenwert"
+  },
+  "form": {
+    "addCardTitle": "Neue Kreditkarte",
+    "addExpenseTitle": "Kartenausgabe",
+    "name": "Kartenname",
+    "bank": "Bank",
+    "currency": "Währung",
+    "cutoffDay": "Abrechnungstag (1–28)",
+    "creditLimit": "Kreditlimit",
+    "openingBalance": "Aktueller Saldo (optional)",
+    "openingBalanceHint": "Eingeben, wenn bereits ein Saldo besteht. Sonst leer lassen.",
+    "notes": "Notizen",
+    "amount": "Betrag",
+    "date": "Kaufdatum",
+    "category": "Kategorie",
+    "description": "Beschreibung",
+    "installments": "Raten",
+    "singlePayment": "Einmalzahlung",
+    "nInstallments": "{{count}} Raten",
+    "selectCategory": "Kategorie wählen",
+    "effectivePreview": "Erste Abrechnung / Fälligkeit: {{date}}",
+    "chargeHint": "Erscheint nicht unter Transaktionen. Bargeldabfluss bei Kartenzahlung.",
+    "editChargeTitle": "Edit card charge",
+    "editPaidBlocked": "Charges with paid installments cannot be rebuilt; only category/description can change."
+  },
+  "detail": {
+    "remaining": "Offen",
+    "limit": "Limit",
+    "cutoff": "Abrechnungstag",
+    "periodBalance": "Periodensaldo",
+    "minPayment": "Mindestzahlung",
+    "statementDate": "Abrechnungsdatum",
+    "schedule": "Raten- / Abrechnungsplan",
+    "pending": "Offen",
+    "paid": "Bezahlt",
+    "noSchedule": "Noch kein Plan — Ausgabe hinzufügen",
+    "empty": "Noch keine Karten",
+    "selectHint": "Karte für Details und Ausgaben wählen",
+    "goDebtsHint": "Kartenzahlungen und Abrechnungen erscheinen auch unter Schulden.",
+    "charges": "Charges",
+    "chargeFallback": "Charge",
+    "chargeTotal": "Summe {{amount}}"
+  },
+  "toast": {
+    "created": "Karte erstellt",
+    "expenseAdded": "Ausgabe gespeichert",
+    "deleted": "Karte gelöscht",
+    "paid": "Zahlung gespeichert",
+    "error": "Vorgang fehlgeschlagen",
+    "amountInvalid": "Gültigen Betrag eingeben",
+    "chargeDeleted": "Charge deleted",
+    "chargeUpdated": "Charge updated"
+  },
+  "confirm": {
+    "deleteTitle": "Karte löschen",
+    "deleteMessage": "Möchten Sie die Karte „{{name}}“ wirklich löschen? Dies kann nicht rückgängig gemacht werden.",
+    "deleteChargeTitle": "Delete charge",
+    "deleteChargeMessage": "Delete charge “{{name}}” ({{amount}})?"
+  }
+}

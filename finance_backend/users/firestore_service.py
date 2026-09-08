@@ -4,6 +4,16 @@ from typing import Dict, List, Optional, Any
 import json
 import logging
 
+from .debt_utils import (
+    parse_date,
+    format_date,
+    build_installment_due_dates,
+    build_loan_due_dates,
+    split_equal_amounts,
+    compute_cc_min_payment,
+    open_statement_period,
+)
+
 logger = logging.getLogger(__name__)
 
 class FirestoreService:
@@ -60,24 +70,77 @@ class FirestoreService:
         if not user_id or not isinstance(user_id, str):
             raise ValueError('Geçersiz user_id')
         return self.db.collection('users').document(user_id).collection('quickInvestments')
-    
+
+    def get_user_debts_ref(self, user_id: str):
+        if not self.db:
+            raise Exception("Firestore veritabanı bağlantısı bulunamadı")
+        if not user_id or not isinstance(user_id, str):
+            raise ValueError('Geçersiz user_id')
+        return self.db.collection('users').document(user_id).collection('debts')
+
+    def get_debt_schedule_ref(self, user_id: str, debt_id: str):
+        return self.get_user_debts_ref(user_id).document(debt_id).collection('schedule')
+
     # Transaction işlemleri
     async def create_transaction(self, user_id: str, transaction_data: Dict[str, Any]) -> str:
-        """Yeni işlem oluştur"""
+        """Yeni işlem oluştur.
+
+        Kredi kartı harcaması işlem (P&L) oluşturmaz; kart borcuna charge yazar.
+        Nakit çıkışı kart ödemesinde kaydedilir.
+        """
+        data = dict(transaction_data)
+        payment_method = data.get('paymentMethod') or 'cash'
+        if data.get('type') != 'expense':
+            payment_method = 'cash'
+        data['paymentMethod'] = payment_method
+
+        installment_count = int(data.get('installmentCount') or 1)
+        if installment_count < 1:
+            installment_count = 1
+        data['installmentCount'] = installment_count
+
+        tx_date = str(data.get('date') or '')
+
+        # KK harcama → sadece kart borcu / taksit (İşlemler listesine düşmez)
+        if (
+            data.get('type') == 'expense'
+            and payment_method == 'credit_card'
+            and data.get('creditCardDebtId')
+        ):
+            charge = await self.add_credit_card_charge(
+                user_id,
+                data['creditCardDebtId'],
+                {
+                    'amount': data.get('amount'),
+                    'date': tx_date,
+                    'installmentCount': installment_count,
+                    'category': data.get('category') or '',
+                    'description': data.get('description') or '',
+                    'currency': data.get('currency'),
+                },
+            )
+            # Geriye dönük istemciler için id döndür; gerçek bir transaction doc yok
+            return (charge.get('scheduleItemIds') or [None])[0] or charge['debtId']
+
+        if payment_method == 'cash' or not data.get('creditCardDebtId'):
+            data['effectiveDate'] = data.get('effectiveDate') or tx_date
+            data.pop('creditCardDebtId', None)
+            if payment_method != 'credit_card':
+                data['paymentMethod'] = 'cash'
+                data['installmentCount'] = 1
+
         doc_ref = self.get_user_transactions_ref(user_id).document()
-        transaction_data['id'] = doc_ref.id
-        transaction_data['createdAt'] = firestore.SERVER_TIMESTAMP
-        transaction_data['updatedAt'] = firestore.SERVER_TIMESTAMP
-        
-        doc_ref.set(transaction_data)
-        
-        # Transaction oluşturulduktan sonra bildirim kontrolü yap
+        data['id'] = doc_ref.id
+        data['createdAt'] = firestore.SERVER_TIMESTAMP
+        data['updatedAt'] = firestore.SERVER_TIMESTAMP
+
+        doc_ref.set(data)
+
         try:
-            await self._check_transaction_notifications(user_id, transaction_data)
+            await self._check_transaction_notifications(user_id, data)
         except Exception as e:
-            # Bildirim hatası transaction oluşturmayı engellemesin
             logger.error(f"Bildirim kontrolü yapılırken hata: {e}", exc_info=True)
-        
+
         return doc_ref.id
     
     async def get_user_transactions(self, user_id: str, filters: Optional[Dict] = None) -> List[Dict]:
@@ -1606,7 +1669,563 @@ class FirestoreService:
         'events',
         'settings',
         'aiLogs',
+        'debts',
     )
+
+    async def add_credit_card_charge(
+        self, user_id: str, debt_id: str, charge_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Kart harcaması: yalnızca borç + taksit planı.
+        Nakit çıkışı / P&L işlemi oluşturmaz — işlem kart ödemesinde doğar.
+        """
+        debt_ref = self.get_user_debts_ref(user_id).document(debt_id)
+        snap = debt_ref.get()
+        if not snap.exists:
+            raise ValueError('Kredi kartı bulunamadı')
+        debt = snap.to_dict() or {}
+        if debt.get('kind') != 'credit_card':
+            raise ValueError('Seçilen kayıt bir kredi kartı değil')
+        if debt.get('status') not in (None, 'active'):
+            raise ValueError('Kart aktif değil')
+
+        amount = float(charge_data.get('amount') or 0)
+        if amount <= 0:
+            raise ValueError('amount gerekli')
+        purchase_raw = charge_data.get('date')
+        if not purchase_raw:
+            raise ValueError('date gerekli')
+        purchase = parse_date(purchase_raw)
+        count = max(1, int(charge_data.get('installmentCount') or 1))
+        cutoff = int(debt.get('statementCutoffDay') or 1)
+        amounts = split_equal_amounts(amount, count)
+        due_dates = build_installment_due_dates(purchase, cutoff, count)
+
+        category = (charge_data.get('category') or '').strip()
+        description = (charge_data.get('description') or '').strip()
+        currency = (charge_data.get('currency') or debt.get('currency') or 'TRY').upper()
+        linked_expense_id = charge_data.get('linkedExpenseId')
+
+        schedule_ref = self.get_debt_schedule_ref(user_id, debt_id)
+        charge_ref = schedule_ref.document()
+        charge_id = charge_ref.id
+        item_ids: List[str] = []
+        for idx, (due, part) in enumerate(zip(due_dates, amounts), start=1):
+            item_ref = schedule_ref.document()
+            item_ids.append(item_ref.id)
+            item_ref.set({
+                'id': item_ref.id,
+                'chargeId': charge_id,
+                'sequence': idx,
+                'dueDate': format_date(due),
+                'amount': part,
+                'status': 'pending',
+                'source': 'cc_expense',
+                'purchaseDate': format_date(purchase),
+                'category': category,
+                'description': description,
+                'currency': currency,
+                'installmentCount': count,
+                'chargeTotal': amount,
+                'linkedExpenseId': linked_expense_id,
+                'createdAt': firestore.SERVER_TIMESTAMP,
+                'updatedAt': firestore.SERVER_TIMESTAMP,
+            })
+
+        remaining = round(float(debt.get('remainingAmount') or 0) + amount, 2)
+        debt_ref.update({
+            'remainingAmount': remaining,
+            'updatedAt': firestore.SERVER_TIMESTAMP,
+        })
+
+        return {
+            'debtId': debt_id,
+            'chargeId': charge_id,
+            'amount': amount,
+            'installmentCount': count,
+            'firstDueDate': format_date(due_dates[0]),
+            'scheduleItemIds': item_ids,
+            'remainingAmount': remaining,
+        }
+
+    async def delete_credit_card_charge(
+        self, user_id: str, debt_id: str, charge_id: str
+    ) -> Dict[str, Any]:
+        """Silinmemiş (pending) harcama grubunu sil; kalan borcu düş."""
+        debt = await self.get_debt(user_id, debt_id)
+        if not debt or debt.get('kind') != 'credit_card':
+            raise ValueError('Kredi kartı bulunamadı')
+
+        schedule = await self.get_debt_schedule(user_id, debt_id)
+        items = [s for s in schedule if s.get('chargeId') == charge_id]
+        if not items and isinstance(charge_id, str) and charge_id.startswith('linked:'):
+            linked = charge_id.split(':', 1)[1]
+            items = [s for s in schedule if s.get('linkedExpenseId') == linked]
+        if not items and isinstance(charge_id, str) and charge_id.startswith('legacy:'):
+            ids = [x for x in charge_id.split(':', 1)[1].split(',') if x]
+            id_set = set(ids)
+            items = [s for s in schedule if s.get('id') in id_set]
+        if not items:
+            # Eski kayıtlar: chargeId yoksa tek satır id ile sil
+            items = [s for s in schedule if s.get('id') == charge_id]
+        if not items:
+            raise ValueError('Harcama bulunamadı')
+
+        if any(s.get('status') == 'paid' for s in items):
+            raise ValueError(
+                'Bu harcamanın ödenmiş taksiti var. Önce ilgili ödemeyi geri alın veya '
+                'yalnızca ödenmemiş satırları silin.'
+            )
+
+        removed = round(sum(float(s.get('amount') or 0) for s in items), 2)
+        schedule_ref = self.get_debt_schedule_ref(user_id, debt_id)
+        for s in items:
+            schedule_ref.document(s['id']).delete()
+
+        new_remaining = max(0.0, round(float(debt.get('remainingAmount') or 0) - removed, 2))
+        self.get_user_debts_ref(user_id).document(debt_id).update({
+            'remainingAmount': new_remaining,
+            'updatedAt': firestore.SERVER_TIMESTAMP,
+        })
+        return {
+            'debtId': debt_id,
+            'chargeId': charge_id,
+            'removedAmount': removed,
+            'remainingAmount': new_remaining,
+            'deletedCount': len(items),
+        }
+
+    async def update_credit_card_charge(
+        self, user_id: str, debt_id: str, charge_id: str, updates: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Bekleyen harcamayı güncelle.
+        category/description her zaman; tutar/tarih/taksit tüm satırlar pending ise yeniden üretilir.
+        """
+        debt = await self.get_debt(user_id, debt_id)
+        if not debt or debt.get('kind') != 'credit_card':
+            raise ValueError('Kredi kartı bulunamadı')
+
+        schedule = await self.get_debt_schedule(user_id, debt_id)
+        items = [s for s in schedule if s.get('chargeId') == charge_id]
+        if not items and isinstance(charge_id, str) and charge_id.startswith('linked:'):
+            linked = charge_id.split(':', 1)[1]
+            items = [s for s in schedule if s.get('linkedExpenseId') == linked]
+        if not items and isinstance(charge_id, str) and charge_id.startswith('legacy:'):
+            ids = [x for x in charge_id.split(':', 1)[1].split(',') if x]
+            id_set = set(ids)
+            items = [s for s in schedule if s.get('id') in id_set]
+        if not items:
+            items = [s for s in schedule if s.get('id') == charge_id]
+        if not items:
+            raise ValueError('Harcama bulunamadı')
+        if any(s.get('status') == 'paid' for s in items):
+            raise ValueError('Ödenmiş taksiti olan harcama yeniden yapılandırılamaz')
+
+        items_sorted = sorted(items, key=lambda x: (x.get('dueDate') or '', x.get('sequence') or 0))
+        old_total = round(sum(float(s.get('amount') or 0) for s in items_sorted), 2)
+        category = updates.get('category')
+        description = updates.get('description')
+        meta_only = (
+            updates.get('amount') is None
+            and updates.get('date') is None
+            and updates.get('installmentCount') is None
+        )
+
+        schedule_ref = self.get_debt_schedule_ref(user_id, debt_id)
+
+        if meta_only:
+            patch: Dict[str, Any] = {'updatedAt': firestore.SERVER_TIMESTAMP}
+            if category is not None:
+                patch['category'] = str(category).strip()
+            if description is not None:
+                patch['description'] = str(description).strip()
+            for s in items_sorted:
+                schedule_ref.document(s['id']).update(patch)
+            return {'debtId': debt_id, 'chargeId': charge_id, 'updated': 'meta'}
+
+        # Yeniden oluştur (yeni chargeId ile tek grup)
+        await self.delete_credit_card_charge(user_id, debt_id, charge_id)
+        new_amount = float(updates['amount']) if updates.get('amount') is not None else old_total
+        purchase = updates.get('date') or items_sorted[0].get('purchaseDate') or items_sorted[0].get('dueDate')
+        count = int(
+            updates['installmentCount']
+            if updates.get('installmentCount') is not None
+            else (items_sorted[0].get('installmentCount') or len(items_sorted))
+        )
+        result = await self.add_credit_card_charge(
+            user_id,
+            debt_id,
+            {
+                'amount': new_amount,
+                'date': purchase,
+                'installmentCount': max(1, count),
+                'category': category if category is not None else (items_sorted[0].get('category') or ''),
+                'description': description if description is not None else (items_sorted[0].get('description') or ''),
+                'currency': items_sorted[0].get('currency') or debt.get('currency'),
+            },
+        )
+        return result
+
+    async def delete_debt_schedule_item(
+        self, user_id: str, debt_id: str, item_id: str
+    ) -> Dict[str, Any]:
+        """Tek bekleyen plan satırını sil."""
+        debt = await self.get_debt(user_id, debt_id)
+        if not debt:
+            raise ValueError('Borç bulunamadı')
+        schedule_ref = self.get_debt_schedule_ref(user_id, debt_id)
+        snap = schedule_ref.document(item_id).get()
+        if not snap.exists:
+            raise ValueError('Plan satırı bulunamadı')
+        item = snap.to_dict() or {}
+        if item.get('status') == 'paid':
+            raise ValueError('Ödenmiş satır silinemez')
+        amount = float(item.get('amount') or 0)
+        schedule_ref.document(item_id).delete()
+        new_remaining = max(0.0, round(float(debt.get('remainingAmount') or 0) - amount, 2))
+        self.get_user_debts_ref(user_id).document(debt_id).update({
+            'remainingAmount': new_remaining,
+            'updatedAt': firestore.SERVER_TIMESTAMP,
+        })
+        return {
+            'debtId': debt_id,
+            'itemId': item_id,
+            'removedAmount': amount,
+            'remainingAmount': new_remaining,
+        }
+
+    async def get_user_debts(self, user_id: str, filters: Optional[Dict] = None) -> List[Dict]:
+        query = self.get_user_debts_ref(user_id)
+        docs = query.stream()
+        debts = [{'id': doc.id, **doc.to_dict()} for doc in docs]
+        if filters:
+            kind = filters.get('kind')
+            status_f = filters.get('status')
+            if kind:
+                debts = [d for d in debts if d.get('kind') == kind]
+            if status_f:
+                debts = [d for d in debts if d.get('status') == status_f]
+        debts.sort(key=lambda d: d.get('createdAt') or '', reverse=True)
+        return debts
+
+    async def get_debt(self, user_id: str, debt_id: str) -> Optional[Dict]:
+        snap = self.get_user_debts_ref(user_id).document(debt_id).get()
+        if not snap.exists:
+            return None
+        return {'id': snap.id, **snap.to_dict()}
+
+    async def create_debt(self, user_id: str, debt_data: Dict[str, Any]) -> str:
+        kind = debt_data.get('kind')
+        if kind not in ('payable', 'receivable', 'loan', 'credit_card'):
+            raise ValueError('Geçersiz borç türü')
+
+        name = (debt_data.get('name') or '').strip()
+        if not name:
+            raise ValueError('name gerekli')
+
+        currency = (debt_data.get('currency') or 'TRY').upper()
+        original = float(debt_data.get('originalAmount') or 0)
+        if kind == 'credit_card':
+            # Cards start at 0 remaining; charges add balance
+            original = float(debt_data.get('originalAmount') or 0)
+            remaining = float(debt_data.get('remainingAmount') or 0)
+        else:
+            if original <= 0:
+                raise ValueError('originalAmount gerekli')
+            remaining = float(debt_data.get('remainingAmount') if debt_data.get('remainingAmount') is not None else original)
+
+        doc_ref = self.get_user_debts_ref(user_id).document()
+        record = {
+            'id': doc_ref.id,
+            'kind': kind,
+            'name': name,
+            'counterparty': (debt_data.get('counterparty') or '').strip(),
+            'currency': currency,
+            'originalAmount': original,
+            'remainingAmount': remaining,
+            'status': debt_data.get('status') or 'active',
+            'notes': debt_data.get('notes') or '',
+            'createdAt': firestore.SERVER_TIMESTAMP,
+            'updatedAt': firestore.SERVER_TIMESTAMP,
+        }
+        if debt_data.get('amountInTRY') is not None:
+            record['amountInTRY'] = float(debt_data['amountInTRY'])
+
+        # Faiz oranı bilgisel (0 serbest); eşit taksit hâlâ anapara üzerinden
+        if debt_data.get('interestRate') is not None and kind != 'credit_card':
+            try:
+                record['interestRate'] = max(0.0, float(debt_data.get('interestRate') or 0))
+            except (TypeError, ValueError):
+                record['interestRate'] = 0.0
+
+        if kind == 'credit_card':
+            cutoff = int(debt_data.get('statementCutoffDay') or 1)
+            record['statementCutoffDay'] = max(1, min(cutoff, 28))
+            record['creditLimit'] = float(debt_data.get('creditLimit') or 0)
+            if record['originalAmount'] == 0 and remaining == 0:
+                record['originalAmount'] = 0
+                record['remainingAmount'] = 0
+
+        installment_count = int(debt_data.get('installmentCount') or 0)
+        start_date = debt_data.get('startDate')
+        if kind == 'loan' or (kind in ('payable', 'receivable') and installment_count > 1):
+            if installment_count < 1:
+                installment_count = 1
+            if not start_date:
+                raise ValueError('startDate gerekli')
+            record['installmentCount'] = installment_count
+            record['startDate'] = start_date
+            if 'interestRate' not in record:
+                record['interestRate'] = 0.0
+            due_dates = build_loan_due_dates(parse_date(start_date), installment_count)
+            amounts = split_equal_amounts(original, installment_count)
+            schedule_ref = self.get_debt_schedule_ref(user_id, doc_ref.id)
+            for idx, (due, part) in enumerate(zip(due_dates, amounts), start=1):
+                item_ref = schedule_ref.document()
+                item_ref.set({
+                    'id': item_ref.id,
+                    'sequence': idx,
+                    'dueDate': format_date(due),
+                    'amount': part,
+                    'status': 'pending',
+                    'source': 'loan' if kind == 'loan' else 'manual',
+                    'createdAt': firestore.SERVER_TIMESTAMP,
+                    'updatedAt': firestore.SERVER_TIMESTAMP,
+                })
+
+        doc_ref.set(record)
+        return doc_ref.id
+
+    async def update_debt(self, user_id: str, debt_id: str, updates: Dict[str, Any]) -> bool:
+        doc_ref = self.get_user_debts_ref(user_id).document(debt_id)
+        if not doc_ref.get().exists:
+            return False
+        allowed = {
+            'name', 'counterparty', 'notes', 'status', 'creditLimit',
+            'statementCutoffDay', 'currency', 'originalAmount', 'remainingAmount',
+            'amountInTRY', 'interestRate',
+        }
+        clean = {k: v for k, v in updates.items() if k in allowed}
+        if 'statementCutoffDay' in clean:
+            clean['statementCutoffDay'] = max(1, min(int(clean['statementCutoffDay']), 28))
+        clean['updatedAt'] = firestore.SERVER_TIMESTAMP
+        doc_ref.update(clean)
+        return True
+
+    async def delete_debt(self, user_id: str, debt_id: str) -> bool:
+        doc_ref = self.get_user_debts_ref(user_id).document(debt_id)
+        if not doc_ref.get().exists:
+            return False
+        schedule_ref = self.get_debt_schedule_ref(user_id, debt_id)
+        self._delete_collection_documents(schedule_ref)
+        doc_ref.delete()
+        return True
+
+    async def get_debt_schedule(self, user_id: str, debt_id: str) -> List[Dict]:
+        docs = self.get_debt_schedule_ref(user_id, debt_id).stream()
+        items = [{'id': doc.id, **doc.to_dict()} for doc in docs]
+        items.sort(key=lambda x: (x.get('dueDate') or '', x.get('sequence') or 0))
+        return items
+
+    async def get_debt_statement_summary(
+        self, user_id: str, debt_id: str, as_of: Optional[str] = None
+    ) -> Dict[str, Any]:
+        debt = await self.get_debt(user_id, debt_id)
+        if not debt:
+            raise ValueError('Borç bulunamadı')
+        if debt.get('kind') != 'credit_card':
+            raise ValueError('Özet yalnızca kredi kartları için')
+
+        try:
+            from django.utils import timezone
+            as_of_date = parse_date(as_of) if as_of else timezone.localdate()
+        except Exception:
+            from datetime import date as date_cls
+            as_of_date = parse_date(as_of) if as_of else date_cls.today()
+
+        cutoff = int(debt.get('statementCutoffDay') or 1)
+        prev_cut, next_cut = open_statement_period(as_of_date, cutoff)
+        schedule = await self.get_debt_schedule(user_id, debt_id)
+        period_items = [
+            s for s in schedule
+            if s.get('status') == 'pending' and s.get('dueDate') == format_date(next_cut)
+        ]
+        period_balance = sum(float(s.get('amount') or 0) for s in period_items)
+        pending_total = sum(
+            float(s.get('amount') or 0) for s in schedule if s.get('status') == 'pending'
+        )
+        min_payment, rate = compute_cc_min_payment(
+            float(debt.get('creditLimit') or 0),
+            period_balance,
+        )
+        return {
+            'debtId': debt_id,
+            'asOf': format_date(as_of_date),
+            'periodStart': format_date(prev_cut),
+            'statementDate': format_date(next_cut),
+            'periodBalance': period_balance,
+            'pendingTotal': pending_total,
+            'remainingAmount': float(debt.get('remainingAmount') or 0),
+            'minPayment': min_payment,
+            'minPaymentRatePercent': rate,
+            'currency': debt.get('currency') or 'TRY',
+            'items': period_items,
+        }
+
+    async def record_debt_payment(
+        self, user_id: str, debt_id: str, payment_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        debt = await self.get_debt(user_id, debt_id)
+        if not debt:
+            raise ValueError('Borç bulunamadı')
+        if debt.get('status') == 'paid':
+            raise ValueError('Borç zaten ödenmiş')
+
+        pay_date = payment_data.get('date')
+        if not pay_date:
+            raise ValueError('date gerekli')
+        currency = (payment_data.get('currency') or debt.get('currency') or 'TRY').upper()
+        note = payment_data.get('note') or ''
+        kind = debt.get('kind')
+
+        schedule = await self.get_debt_schedule(user_id, debt_id)
+        pending = [s for s in schedule if s.get('status') == 'pending']
+        schedule_ref = self.get_debt_schedule_ref(user_id, debt_id)
+
+        # Kredi / taksitli borç-alacak: yalnızca sıradaki N tam taksit (kısmi yok)
+        if kind in ('loan', 'payable', 'receivable') and pending:
+            pay_count = int(payment_data.get('payInstallmentCount') or 1)
+            if pay_count < 1:
+                raise ValueError('En az 1 taksit ödenmeli')
+            if pay_count > len(pending):
+                raise ValueError(f'En fazla {len(pending)} bekleyen taksit var')
+
+            to_pay = pending[:pay_count]
+            amount = round(sum(float(s.get('amount') or 0) for s in to_pay), 2)
+
+            # İstemci amount gönderdiyse tam eşleşmeli
+            client_amount = payment_data.get('amount')
+            if client_amount is not None:
+                try:
+                    client_f = float(client_amount)
+                except (TypeError, ValueError):
+                    client_f = -1
+                if abs(client_f - amount) > 0.02:
+                    raise ValueError(
+                        f'Ödeme tutarı seçilen taksitlere denk olmalı ({amount}). '
+                        'Kısmi taksit ödemesi yapılamaz.'
+                    )
+        elif kind == 'credit_card' and pending:
+            amount = float(payment_data.get('amount') or 0)
+            if amount <= 0:
+                raise ValueError('amount gerekli')
+            # Tam taksit FIFO; kalan artı kabul etme
+            to_pay = []
+            running = 0.0
+            for item in pending:
+                next_sum = round(running + float(item.get('amount') or 0), 2)
+                if next_sum <= amount + 0.02:
+                    to_pay.append(item)
+                    running = next_sum
+                else:
+                    break
+            if not to_pay:
+                raise ValueError(
+                    'Tutar en az bir tam taksit / dönem satırına denk olmalı. '
+                    'Kısmi düşüm yapılmaz.'
+                )
+            if abs(running - amount) > 0.02:
+                raise ValueError(
+                    f'Tutar tam satır(lar)a denk olmalı. Ödenebilir: {running} '
+                    f'({len(to_pay)} satır). Artan {round(amount - running, 2)} kabul edilmez.'
+                )
+            amount = running
+        else:
+            # Schedule yoksa serbest tutar (basit borç)
+            amount = float(payment_data.get('amount') or 0)
+            if amount <= 0:
+                raise ValueError('amount gerekli')
+            to_pay = []
+
+        linked_tx_id = None
+        if kind in ('payable', 'loan'):
+            tx_payload = {
+                'type': 'expense',
+                'amount': amount,
+                'category': 'Borç Ödemesi',
+                'description': note or f"{debt.get('name')} ödemesi",
+                'date': pay_date,
+                'currency': currency,
+                'paymentMethod': 'cash',
+                'effectiveDate': pay_date,
+                'debtId': debt_id,
+            }
+            if payment_data.get('amountInTRY') is not None:
+                tx_payload['amountInTRY'] = payment_data.get('amountInTRY')
+            linked_tx_id = await self.create_transaction(user_id, tx_payload)
+        elif kind == 'credit_card':
+            # Kart ödemesi = hesaptan çıkan para → gider işlemi
+            tx_payload = {
+                'type': 'expense',
+                'amount': amount,
+                'category': 'Kredi Kartı Ödemesi',
+                'description': note or f"{debt.get('name')} kart ödemesi",
+                'date': pay_date,
+                'currency': currency,
+                'paymentMethod': 'cash',
+                'effectiveDate': pay_date,
+                'debtId': debt_id,
+            }
+            if payment_data.get('amountInTRY') is not None:
+                tx_payload['amountInTRY'] = payment_data.get('amountInTRY')
+            linked_tx_id = await self.create_transaction(user_id, tx_payload)
+        elif kind == 'receivable':
+            tx_payload = {
+                'type': 'income',
+                'amount': amount,
+                'category': 'Alacak Tahsilatı',
+                'description': note or f"{debt.get('name')} tahsilatı",
+                'date': pay_date,
+                'currency': currency,
+                'paymentMethod': 'cash',
+                'effectiveDate': pay_date,
+                'debtId': debt_id,
+            }
+            if payment_data.get('amountInTRY') is not None:
+                tx_payload['amountInTRY'] = payment_data.get('amountInTRY')
+            linked_tx_id = await self.create_transaction(user_id, tx_payload)
+
+        for item in to_pay:
+            schedule_ref.document(item['id']).update({
+                'status': 'paid',
+                'linkedPaymentTxId': linked_tx_id,
+                'updatedAt': firestore.SERVER_TIMESTAMP,
+            })
+
+        # Kalan = bekleyen schedule toplamı (yoksa eski remaining - amount)
+        refreshed = await self.get_debt_schedule(user_id, debt_id)
+        still_pending = [s for s in refreshed if s.get('status') == 'pending']
+        if refreshed:
+            new_remaining = round(sum(float(s.get('amount') or 0) for s in still_pending), 2)
+        else:
+            new_remaining = max(0.0, float(debt.get('remainingAmount') or 0) - amount)
+
+        status_value = 'paid' if new_remaining <= 1e-9 else 'active'
+        self.get_user_debts_ref(user_id).document(debt_id).update({
+            'remainingAmount': 0.0 if status_value == 'paid' else new_remaining,
+            'status': status_value,
+            'updatedAt': firestore.SERVER_TIMESTAMP,
+        })
+
+        return {
+            'debtId': debt_id,
+            'remainingAmount': 0.0 if status_value == 'paid' else new_remaining,
+            'status': status_value,
+            'linkedTransactionId': linked_tx_id,
+            'paidInstallments': len(to_pay),
+            'amount': amount,
+        }
 
     def _delete_collection_documents(self, coll_ref) -> int:
         """Delete all documents in a Firestore collection (500 batch limit'e uygun)."""
@@ -1635,6 +2254,16 @@ class FirestoreService:
             deleted += 1
         return deleted
 
+    def _delete_debts_tree(self, user_id: str) -> int:
+        deleted = 0
+        debts_ref = self.get_user_debts_ref(user_id)
+        for debt_snap in debts_ref.stream():
+            schedule_ref = debt_snap.reference.collection('schedule')
+            deleted += self._delete_collection_documents(schedule_ref)
+            debt_snap.reference.delete()
+            deleted += 1
+        return deleted
+
     async def delete_user_account(self, user_id: str) -> bool:
         """
         users/{user_id} altındaki tüm veriyi ve kök dokümanı kalıcı sil.
@@ -1656,8 +2285,9 @@ class FirestoreService:
 
         try:
             total_deleted += self._delete_investments_tree(user_id)
+            total_deleted += self._delete_debts_tree(user_id)
 
-            collection_names = set(self._USER_ACCOUNT_SUBCOLLECTIONS)
+            collection_names = set(self._USER_ACCOUNT_SUBCOLLECTIONS) - {'debts'}
             for cfg in self.PREFERENCE_RESOURCES.values():
                 collection_names.add(cfg['collection'])
 

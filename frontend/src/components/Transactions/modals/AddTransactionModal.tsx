@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { Transaction } from '../../../types';
-import { transactionAPI } from '../../../services/apiService';
+import { Transaction, Debt } from '../../../types';
+import { transactionAPI, debtAPI, tcmbAPI } from '../../../services/apiService';
 import { getExchangeRates } from '../../../services/currencyService';
-import { tcmbAPI } from '../../../services/apiService';
 import { TRANSACTION_CURRENCIES } from '../constants';
 import { formatTrMoneyInput, parseTrMoneyString } from '../../../utils/trNumberInput';
+import { toLocalDateString } from '../../../utils/localDate';
+import { buildInstallmentDueDates, nextStatementDate, parseDateOnly } from '../../../utils/creditCardCycle';
+import { useFinance } from '../../../contexts/FinanceContext';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -29,76 +31,81 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 }) => {
   const { t } = useTranslation('transactions');
   const { t: tCommon } = useTranslation('common');
+  const { refreshDebts } = useFinance();
   const [formData, setFormData] = useState({
     type: defaultType as 'income' | 'expense',
     amount: '',
     category: '',
     description: '',
-    date: new Date().toISOString().split('T')[0],
-    currency: 'TRY'
+    date: toLocalDateString(),
+    currency: 'TRY',
+    paymentMethod: 'cash' as 'cash' | 'credit_card',
+    creditCardDebtId: '',
+    installmentCount: '1',
   });
+  const [creditCards, setCreditCards] = useState<Debt[]>([]);
 
-  // defaultType değiştiğinde formData'yı güncelle
   useEffect(() => {
     if (isOpen) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        type: defaultType
+        type: defaultType,
+        date: toLocalDateString(),
       }));
+      void debtAPI
+        .getAll({ kind: 'credit_card', status: 'active' })
+        .then((res) => {
+          const list = Array.isArray(res?.data) ? res.data : [];
+          setCreditCards(list.filter((d: Debt) => d.kind === 'credit_card' && d.status === 'active'));
+        })
+        .catch(() => setCreditCards([]));
     }
   }, [defaultType, isOpen]);
 
-  // Prop'tan gelen kategorileri kullan, yoksa varsayılan kategorileri kullan
   const categories = propCategories || {
     income: ['Maaş', 'Freelance', 'Yatırım', 'Bonus', 'Kira', 'Diğer'],
     expense: ['Kira', 'Market', 'Ulaşım', 'Eğlence', 'Sağlık', 'Eğitim', 'Teknoloji', 'Giyim', 'Yatırım', 'Diğer']
   };
 
-  // Döviz kurlarını yükle ve TL karşılığını hesapla - TCMB API kullan
+  const selectedCard = creditCards.find((c) => c.id === formData.creditCardDebtId);
+  const previewEffective =
+    formData.type === 'expense' &&
+    formData.paymentMethod === 'credit_card' &&
+    selectedCard?.statementCutoffDay
+      ? toLocalDateString(
+          nextStatementDate(parseDateOnly(formData.date), selectedCard.statementCutoffDay)
+        )
+      : formData.date;
+  const previewInstallments =
+    formData.type === 'expense' &&
+    formData.paymentMethod === 'credit_card' &&
+    selectedCard?.statementCutoffDay
+      ? buildInstallmentDueDates(
+          formData.date,
+          selectedCard.statementCutoffDay,
+          parseInt(formData.installmentCount, 10) || 1
+        )
+      : [];
+
   const calculateAmountInTRY = async (amount: number, currency: string): Promise<number> => {
-    if (currency === 'TRY') {
-      return amount;
-    }
-    
+    if (currency === 'TRY') return amount;
     try {
-      // Önce TCMB API'sinden dene
       try {
         const tcmbData = await tcmbAPI.getMain();
         if (tcmbData?.success && tcmbData?.data?.exchange_rates) {
           const rateData = tcmbData.data.exchange_rates[currency];
           const rate = rateData?.rate || rateData?.buy || 0;
-          if (rate && rate > 0) {
-            return amount * rate;
-          }
+          if (rate && rate > 0) return amount * rate;
         }
       } catch (tcmbError) {
         console.warn('TCMB API hatası, Firestore\'a fallback:', tcmbError);
       }
-      
-      // Fallback: Firestore
       const rates = await getExchangeRates('TRY');
       const rate = rates[currency]?.rate;
-      if (!rate || rate === 0) {
-        console.warn(`Döviz kuru bulunamadı: ${currency}, varsayılan değer kullanılıyor`);
-        return amount;
-      }
-      // rate değeri "1 [currency] = rate TRY" formatında (örn: 1 USD = 30 TRY ise rate = 30)
+      if (!rate || rate === 0) return amount;
       return amount * rate;
-    } catch (error) {
-      console.error('Döviz kuru hesaplanırken hata:', error);
-      // Hata durumunda varsayılan kurlar
-      const defaultRates: Record<string, number> = {
-        'USD': 30,
-        'EUR': 29,
-        'GBP': 37,
-        'JPY': 0.20,
-        'CHF': 32,
-        'AUD': 20,
-        'CAD': 22,
-        'CNY': 4.2
-      };
-      const defaultRate = defaultRates[currency] || 1;
-      return amount * defaultRate;
+    } catch {
+      return amount;
     }
   };
 
@@ -110,36 +117,71 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         toast.error(t('form.amountInvalid'));
         return;
       }
-      // O günkü kur ile TL karşılığını hesapla
+      if (
+        formData.type === 'expense' &&
+        formData.paymentMethod === 'credit_card' &&
+        !formData.creditCardDebtId
+      ) {
+        toast.error(t('form.selectCardRequired'));
+        return;
+      }
+
+      // KK harcama: hesaptan para çıkmaz → yalnızca kart borcu; işlem kart ödemesinde doğar
+      if (formData.type === 'expense' && formData.paymentMethod === 'credit_card') {
+        const installmentCount = Math.max(1, parseInt(formData.installmentCount, 10) || 1);
+        await debtAPI.addCharge(formData.creditCardDebtId, {
+          amount,
+          date: formData.date,
+          currency: formData.currency,
+          category: formData.category,
+          description: formData.description,
+          installmentCount,
+        });
+        await refreshDebts();
+        onClose();
+        setFormData({
+          type: 'expense',
+          amount: '',
+          category: '',
+          description: '',
+          date: toLocalDateString(),
+          currency: 'TRY',
+          paymentMethod: 'cash',
+          creditCardDebtId: '',
+          installmentCount: '1',
+        });
+        toast.success(t('toast.cardChargeSuccess'));
+        return;
+      }
+
       const amountInTRY = await calculateAmountInTRY(amount, formData.currency);
-      
-      const newTransactionData = {
+
+      const newTransactionData: Omit<Transaction, 'id'> = {
         type: formData.type,
-        amount: amount,
+        amount,
         category: formData.category,
         description: formData.description,
         date: formData.date,
         currency: formData.currency,
-        amountInTRY: amountInTRY // O günkü kur ile hesaplanmış TL karşılığı
+        amountInTRY,
+        paymentMethod: 'cash',
+        effectiveDate: formData.date,
+        installmentCount: 1,
       };
 
       const result = await transactionAPI.create(newTransactionData);
-      
-      // Yeni işlemi listeye ekle
-      const newTransaction: Transaction = {
-        id: result.id || Date.now().toString(),
-        ...newTransactionData
-      };
-      
-      onTransactionAdded(newTransaction);
+      onTransactionAdded({ id: result.id || Date.now().toString(), ...newTransactionData });
       onClose();
       setFormData({
         type: 'expense',
         amount: '',
         category: '',
         description: '',
-        date: new Date().toISOString().split('T')[0],
-        currency: 'TRY'
+        date: toLocalDateString(),
+        currency: 'TRY',
+        paymentMethod: 'cash',
+        creditCardDebtId: '',
+        installmentCount: '1',
       });
       toast.success(t('toast.addSuccess'));
     } catch (error) {
@@ -151,12 +193,12 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 !mt-0 !mb-0"
       onClick={onClose}
     >
-      <div 
-        className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 w-full max-w-md mx-4 shadow-brand-lg border border-brand-ink/10 dark:border-brand-champagne/15"
+      <div
+        className="bg-brand-surface dark:bg-brand-surface-dark rounded-3xl p-8 w-full max-w-md mx-4 shadow-brand-lg border border-brand-ink/10 dark:border-brand-champagne/15 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-8">
@@ -171,7 +213,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             ×
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
@@ -180,23 +222,23 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setFormData({...formData, type: 'income'})}
+                onClick={() => setFormData({ ...formData, type: 'income', paymentMethod: 'cash' })}
                 className={`p-4 rounded-xl border-2 transition-all duration-200 ${
                   formData.type === 'income'
                     ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
-                    : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 text-slate-700 dark:text-slate-300 bg-brand-surface-muted dark:bg-brand-surface-dark-muted'
+                    : 'border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <ArrowUpRight className="w-6 h-6 mx-auto mb-2" />
-                <span className="font-semibold">Gelir</span>
+                <span className="font-semibold">{t('labels.income')}</span>
               </button>
               <button
                 type="button"
-                onClick={() => setFormData({...formData, type: 'expense'})}
+                onClick={() => setFormData({ ...formData, type: 'expense' })}
                 className={`p-4 rounded-xl border-2 transition-all duration-200 ${
                   formData.type === 'expense'
                     ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300'
-                    : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 text-slate-700 dark:text-slate-300 bg-brand-surface-muted dark:bg-brand-surface-dark-muted'
+                    : 'border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <ArrowDownRight className="w-6 h-6 mx-auto mb-2" />
@@ -205,99 +247,156 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             </div>
           </div>
 
+          {formData.type === 'expense' && (
+            <div>
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
+                {t('form.paymentMethod')}
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, paymentMethod: 'cash', creditCardDebtId: '' })}
+                  className={`p-3 rounded-xl border-2 font-semibold ${
+                    formData.paymentMethod === 'cash' ? 'border-brand-ink bg-brand-champagne/40' : 'border-slate-200 dark:border-slate-600'
+                  }`}
+                >
+                  {t('form.cash')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, paymentMethod: 'credit_card' })}
+                  className={`p-3 rounded-xl border-2 font-semibold ${
+                    formData.paymentMethod === 'credit_card' ? 'border-brand-ink bg-brand-champagne/40' : 'border-slate-200 dark:border-slate-600'
+                  }`}
+                >
+                  {t('form.creditCard')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {formData.type === 'expense' && formData.paymentMethod === 'credit_card' && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                  {t('form.creditCardSelect')}
+                </label>
+                {creditCards.length === 0 ? (
+                  <p className="text-sm text-amber-700 dark:text-amber-300">{t('form.noCardsHint')}</p>
+                ) : (
+                  <select
+                    value={formData.creditCardDebtId}
+                    onChange={(e) => setFormData({ ...formData, creditCardDebtId: e.target.value })}
+                    className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl dark:bg-slate-700 dark:text-white"
+                    required
+                  >
+                    <option value="">{t('form.selectCard')}</option>
+                    {creditCards.map((card) => (
+                      <option key={card.id} value={card.id}>
+                        {card.name} ({t('form.cutoffShort', { day: card.statementCutoffDay })})
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                  {t('form.installments')}
+                </label>
+                <select
+                  value={formData.installmentCount}
+                  onChange={(e) => setFormData({ ...formData, installmentCount: e.target.value })}
+                  className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl dark:bg-slate-700 dark:text-white"
+                >
+                  {[1, 2, 3, 4, 6, 9, 12].map((n) => (
+                    <option key={n} value={String(n)}>
+                      {n === 1 ? t('form.singlePayment') : t('form.nInstallments', { count: n })}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {selectedCard && (
+                <p className="text-sm text-slate-500">
+                  {t('form.effectivePreview', { date: previewEffective })}
+                  {previewInstallments.length > 1 ? ` · ${previewInstallments.join(', ')}` : ''}
+                </p>
+              )}
+              <p className="text-xs text-slate-400">{t('form.cardChargeHint')}</p>
+            </div>
+          )}
+
           <div className="grid grid-cols-[2fr_1.3fr] gap-4">
             <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                {t('form.amount')}
-              </label>
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('form.amount')}</label>
               <input
                 type="text"
                 inputMode="decimal"
                 autoComplete="off"
                 value={formData.amount}
-                onChange={(e) =>
-                  setFormData({ ...formData, amount: formatTrMoneyInput(e.target.value) })
-                }
-                className="w-full p-4 text-xl font-bold border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+                onChange={(e) => setFormData({ ...formData, amount: formatTrMoneyInput(e.target.value) })}
+                className="w-full p-4 text-xl font-bold border border-slate-300 dark:border-slate-600 rounded-xl dark:bg-slate-700 dark:text-white"
                 placeholder="0,00"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                {t('form.currency')}
-              </label>
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('form.currency')}</label>
               <select
                 value={formData.currency}
-                onChange={(e) => setFormData({...formData, currency: e.target.value})}
-                className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl dark:bg-slate-700 dark:text-white"
                 required
               >
                 {TRANSACTION_CURRENCIES.map((currency) => (
-                  <option key={currency.code} value={currency.code}>
-                    {currency.name}
-                  </option>
+                  <option key={currency.code} value={currency.code}>{currency.name}</option>
                 ))}
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-              {t('form.category')}
-            </label>
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('form.category')}</label>
             <select
               value={formData.category}
-              onChange={(e) => setFormData({...formData, category: e.target.value})}
-              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl dark:bg-slate-700 dark:text-white"
               required
             >
               <option value="">{t('form.selectCategory')}</option>
-              {categories[formData.type].map(cat => (
+              {categories[formData.type].map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-              {t('form.description')}
-            </label>
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('form.description')}</label>
             <input
               type="text"
               value={formData.description}
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
-              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl dark:bg-slate-700 dark:text-white"
               placeholder={t('form.descriptionPlaceholder')}
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-              {t('form.date')}
-            </label>
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{t('form.date')}</label>
             <input
               type="date"
               value={formData.date}
-              onChange={(e) => setFormData({...formData, date: e.target.value})}
-              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-brand-ink focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl dark:bg-slate-700 dark:text-white"
               required
             />
           </div>
 
           <div className="flex space-x-4 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-6 py-4 border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 font-semibold"
-            >
+            <button type="button" onClick={onClose} className="flex-1 px-6 py-4 border-2 border-slate-300 dark:border-slate-600 rounded-xl font-semibold">
               {tCommon('actions.cancel')}
             </button>
-            <button
-              type="submit"
-              className="flex-1 px-6 py-4 bg-gradient-to-r from-brand-ink to-brand-ink-light text-white rounded-xl hover:shadow-brand hover:scale-105 transition-all duration-200 font-semibold"
-            >
+            <button type="submit" className="flex-1 px-6 py-4 bg-gradient-to-r from-brand-ink to-brand-ink-light text-white rounded-xl font-semibold">
               {t('form.addButton')}
             </button>
           </div>
@@ -308,4 +407,3 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 };
 
 export default AddTransactionModal;
-

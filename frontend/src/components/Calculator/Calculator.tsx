@@ -13,9 +13,7 @@ import {
   parseTrMoneyString,
   parseTrPercentageString
 } from '../../utils/trNumberInput';
-
-/** BDDK: limit ≤ this → %20 asgari; üzeri → %40 (Türkiye kredi kartı, yaklaşık 2024 sonrası tablo). */
-const CC_MIN_PAYMENT_LIMIT_THRESHOLD = 50_000;
+import { computeCcMinPayment } from '../../utils/ccMinPayment';
 
 const Calculator: React.FC = () => {
   const { t } = useTranslation('calculator');
@@ -140,11 +138,10 @@ const Calculator: React.FC = () => {
       return;
     }
 
-    const ratePercent = limit <= CC_MIN_PAYMENT_LIMIT_THRESHOLD ? 20 : 40;
-    const min = (balance * ratePercent) / 100;
+    const { minPayment, ratePercent } = computeCcMinPayment(limit, balance);
     setSection6((prev) => ({
       ...prev,
-      minPayment: min.toFixed(2),
+      minPayment: minPayment.toFixed(2),
       appliedRatePercent: String(ratePercent)
     }));
   }, [section6.creditLimit, section6.statementBalance]);

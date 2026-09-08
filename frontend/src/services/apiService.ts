@@ -6,6 +6,11 @@ import {
   UserSettings,
   Notification,
   Event,
+  Debt,
+  DebtScheduleItem,
+  DebtStatementSummary,
+  DebtKind,
+  DebtStatus,
 } from '../types';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -410,6 +415,114 @@ export const eventsAPI = {
 
   async delete(id: string) {
     return await apiRequest(`/auth/events/${id}/`, { method: 'DELETE' });
+  },
+};
+
+export const debtAPI = {
+  async getAll(filters?: { kind?: DebtKind; status?: DebtStatus }) {
+    const queryParams = new URLSearchParams();
+    if (filters?.kind) queryParams.append('kind', filters.kind);
+    if (filters?.status) queryParams.append('status', filters.status);
+    const qs = queryParams.toString();
+    return await apiRequest(`/auth/debts/${qs ? `?${qs}` : ''}`);
+  },
+
+  async get(id: string) {
+    return await apiRequest(`/auth/debts/${id}/`);
+  },
+
+  async create(debt: Omit<Debt, 'id' | 'createdAt' | 'updatedAt'>) {
+    return await apiRequest('/auth/debts/', {
+      method: 'POST',
+      body: JSON.stringify(debt),
+    });
+  },
+
+  async update(id: string, updates: Partial<Debt>) {
+    return await apiRequest(`/auth/debts/${id}/`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+  },
+
+  async delete(id: string) {
+    return await apiRequest(`/auth/debts/${id}/`, { method: 'DELETE' });
+  },
+
+  async getSchedule(id: string): Promise<{ success: boolean; data: DebtScheduleItem[] }> {
+    return await apiRequest(`/auth/debts/${id}/schedule/`);
+  },
+
+  async pay(
+    id: string,
+    payload: {
+      amount: number;
+      date: string;
+      currency?: string;
+      note?: string;
+      amountInTRY?: number;
+      scheduleItemId?: string;
+      payInstallmentCount?: number;
+    }
+  ) {
+    return await apiRequest(`/auth/debts/${id}/payments/`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async addCharge(
+    id: string,
+    payload: {
+      amount: number;
+      date: string;
+      installmentCount?: number;
+      category?: string;
+      description?: string;
+      currency?: string;
+    }
+  ) {
+    return await apiRequest(`/auth/debts/${id}/charges/`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async updateCharge(
+    id: string,
+    chargeId: string,
+    payload: {
+      amount?: number;
+      date?: string;
+      installmentCount?: number;
+      category?: string;
+      description?: string;
+    }
+  ) {
+    return await apiRequest(`/auth/debts/${id}/charges/${chargeId}/`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async deleteCharge(id: string, chargeId: string) {
+    return await apiRequest(`/auth/debts/${id}/charges/${chargeId}/`, {
+      method: 'DELETE',
+    });
+  },
+
+  async deleteScheduleItem(id: string, itemId: string) {
+    return await apiRequest(`/auth/debts/${id}/schedule/${itemId}/`, {
+      method: 'DELETE',
+    });
+  },
+
+  async getStatementSummary(
+    id: string,
+    asOf?: string
+  ): Promise<{ success: boolean; data: DebtStatementSummary }> {
+    const qs = asOf ? `?asOf=${encodeURIComponent(asOf)}` : '';
+    return await apiRequest(`/auth/debts/${id}/statement-summary/${qs}`);
   },
 };
 

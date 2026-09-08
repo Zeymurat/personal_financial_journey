@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "title": "Credit Cards",
+    "subtitle": "Register cards, add spend and installments"
+  },
+  "actions": {
+    "addCard": "Add card",
+    "addExpense": "Add expense",
+    "payCard": "Pay card",
+    "delete": "Delete",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "editCharge": "Edit charge",
+    "deleteCharge": "Delete charge"
+  },
+  "summary": {
+    "totalDebt": "Total card balance",
+    "cardCount": "Active cards",
+    "tryNote": "Approx. TRY equivalent"
+  },
+  "form": {
+    "addCardTitle": "New credit card",
+    "addExpenseTitle": "Card expense",
+    "name": "Card name",
+    "bank": "Bank",
+    "currency": "Currency",
+    "cutoffDay": "Statement day (1–28)",
+    "creditLimit": "Credit limit",
+    "openingBalance": "Current balance (optional)",
+    "openingBalanceHint": "Enter if the card already has a balance. Leave empty otherwise.",
+    "notes": "Notes",
+    "amount": "Amount",
+    "date": "Purchase date",
+    "category": "Category",
+    "description": "Description",
+    "installments": "Installments",
+    "singlePayment": "Single payment",
+    "nInstallments": "{{count}} installments",
+    "selectCategory": "Select category",
+    "effectivePreview": "First statement / due: {{date}}",
+    "chargeHint": "Not added to Transactions. Cash leaves your account when you pay the card.",
+    "editChargeTitle": "Edit card charge",
+    "editPaidBlocked": "Charges with paid installments cannot be rebuilt; only category/description can change."
+  },
+  "detail": {
+    "remaining": "Outstanding",
+    "limit": "Limit",
+    "cutoff": "Cutoff day",
+    "periodBalance": "Period balance",
+    "minPayment": "Minimum payment",
+    "statementDate": "Statement date",
+    "schedule": "Installment / statement plan",
+    "pending": "Pending",
+    "paid": "Paid",
+    "noSchedule": "No plan yet — add an expense",
+    "empty": "No cards yet",
+    "selectHint": "Select a card for details and spending",
+    "goDebtsHint": "Card payments and statement summaries also appear under Debts.",
+    "charges": "Charges",
+    "chargeFallback": "Charge",
+    "chargeTotal": "Total {{amount}}"
+  },
+  "toast": {
+    "created": "Card created",
+    "expenseAdded": "Expense saved",
+    "deleted": "Card deleted",
+    "paid": "Payment saved",
+    "error": "Something went wrong",
+    "amountInvalid": "Enter a valid amount",
+    "chargeDeleted": "Charge deleted",
+    "chargeUpdated": "Charge updated"
+  },
+  "confirm": {
+    "deleteTitle": "Delete card",
+    "deleteMessage": "Are you sure you want to delete “{{name}}”? This cannot be undone.",
+    "deleteChargeTitle": "Delete charge",
+    "deleteChargeMessage": "Delete charge “{{name}}” ({{amount}})?"
+  }
+}

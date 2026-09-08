@@ -7,6 +7,67 @@ export interface Transaction {
   date: string;
   currency: string;
   amountInTRY?: number; // O günkü kur ile hesaplanmış TL karşılığı (sabit kalır)
+  paymentMethod?: 'cash' | 'credit_card';
+  creditCardDebtId?: string;
+  installmentCount?: number;
+  effectiveDate?: string;
+  debtId?: string;
+  debtPaymentId?: string;
+}
+
+export type DebtKind = 'payable' | 'receivable' | 'loan' | 'credit_card';
+export type DebtStatus = 'active' | 'paid' | 'closed';
+
+export interface Debt {
+  id: string;
+  kind: DebtKind;
+  name: string;
+  counterparty?: string;
+  currency: string;
+  originalAmount: number;
+  remainingAmount: number;
+  status: DebtStatus;
+  notes?: string;
+  statementCutoffDay?: number;
+  creditLimit?: number;
+  startDate?: string;
+  installmentCount?: number;
+  interestRate?: number;
+  amountInTRY?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface DebtScheduleItem {
+  id: string;
+  sequence: number;
+  dueDate: string;
+  amount: number;
+  status: 'pending' | 'paid';
+  source?: 'manual' | 'loan' | 'cc_expense';
+  chargeId?: string;
+  purchaseDate?: string;
+  category?: string;
+  description?: string;
+  currency?: string;
+  installmentCount?: number;
+  chargeTotal?: number;
+  linkedExpenseId?: string;
+  linkedPaymentTxId?: string;
+}
+
+export interface DebtStatementSummary {
+  debtId: string;
+  asOf: string;
+  periodStart: string;
+  statementDate: string;
+  periodBalance: number;
+  pendingTotal: number;
+  remainingAmount: number;
+  minPayment: number;
+  minPaymentRatePercent: number;
+  currency: string;
+  items: DebtScheduleItem[];
 }
 
 export interface Investment {

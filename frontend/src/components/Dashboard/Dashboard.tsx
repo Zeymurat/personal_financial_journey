@@ -15,6 +15,9 @@ import { TRANSACTION_CATEGORIES } from './constants';
 import { getLastMonthBounds, getThisMonthBounds, isDateInRange } from './utils/dateRange';
 import { calculatePercentageChange } from './utils/metrics';
 import { computeUpdatedInvestments } from './utils/updatedInvestments';
+import { transactionRecognitionDate } from '../../utils/transactionRecognition';
+import { toLocalDateString } from '../../utils/localDate';
+import { debtNetWorthAdjustment, dueInMonthTotalTry } from '../../utils/debtDueLogic';
 import type { DashboardStatItem } from './types';
 import DashboardHeader from './sections/DashboardHeader';
 import DashboardStatsGrid from './sections/DashboardStatsGrid';
@@ -36,7 +39,11 @@ const Dashboard: React.FC = () => {
     borsaData,
     investments: financeInvestments,
     transactions,
+    debts,
+    debtSchedules,
     loadingTransactions,
+    loadingDebts,
+    loadingInvestments,
     refreshTransactions,
     addInvestmentTransaction,
     refreshInvestments
@@ -44,7 +51,7 @@ const Dashboard: React.FC = () => {
 
   useTokenValidation();
 
-  const loading = loadingTransactions;
+  const loading = loadingTransactions || loadingDebts || loadingInvestments;
   const [exchangeRates, setExchangeRates] = useState<Record<string, { rate: number }>>({});
   const [showAddTransactionModal, setShowAddTransactionModal] = useState(false);
   const [defaultTransactionType, setDefaultTransactionType] = useState<'income' | 'expense'>('expense');
@@ -111,29 +118,67 @@ const Dashboard: React.FC = () => {
 
   const thisMonthIncome = useMemo(() => {
     return transactions
-      .filter((t) => t.type === 'income' && isDateInRange(t.date, thisMonthStart, thisMonthEnd))
+      .filter((t) => {
+        const d = transactionRecognitionDate(t);
+        return t.type === 'income' && isDateInRange(d, thisMonthStart, thisMonthEnd) && d <= toLocalDateString();
+      })
       .reduce((sum, t) => sum + convertToTRY(t), 0);
   }, [transactions, thisMonthStart, thisMonthEnd, convertToTRY]);
 
-  const thisMonthExpense = useMemo(() => {
+  const thisMonthExpenseCash = useMemo(() => {
     return transactions
-      .filter((t) => t.type === 'expense' && isDateInRange(t.date, thisMonthStart, thisMonthEnd))
+      .filter((t) => {
+        const d = transactionRecognitionDate(t);
+        return t.type === 'expense' && isDateInRange(d, thisMonthStart, thisMonthEnd) && d <= toLocalDateString();
+      })
       .reduce((sum, t) => sum + convertToTRY(t), 0);
   }, [transactions, thisMonthStart, thisMonthEnd, convertToTRY]);
+
+  const thisMonthDueObligations = useMemo(
+    () =>
+      dueInMonthTotalTry(
+        debts,
+        debtSchedules,
+        exchangeRates,
+        thisMonthStart,
+        thisMonthEnd,
+        toLocalDateString()
+      ),
+    [debts, debtSchedules, exchangeRates, thisMonthStart, thisMonthEnd]
+  );
+
+  // Nakit gider + bu ay vadesi gelen (henüz ödenmemiş) taksit/kesimler
+  const thisMonthExpense = thisMonthExpenseCash + thisMonthDueObligations;
 
   const netIncome = thisMonthIncome - thisMonthExpense;
 
   const lastMonthIncome = useMemo(() => {
     return transactions
-      .filter((t) => t.type === 'income' && isDateInRange(t.date, lastMonthStart, lastMonthEnd))
+      .filter((t) => {
+        const d = transactionRecognitionDate(t);
+        return t.type === 'income' && isDateInRange(d, lastMonthStart, lastMonthEnd);
+      })
       .reduce((sum, t) => sum + convertToTRY(t), 0);
   }, [transactions, lastMonthStart, lastMonthEnd, convertToTRY]);
 
-  const lastMonthExpense = useMemo(() => {
+  const lastMonthExpenseCash = useMemo(() => {
     return transactions
-      .filter((t) => t.type === 'expense' && isDateInRange(t.date, lastMonthStart, lastMonthEnd))
+      .filter((t) => {
+        const d = transactionRecognitionDate(t);
+        return t.type === 'expense' && isDateInRange(d, lastMonthStart, lastMonthEnd);
+      })
       .reduce((sum, t) => sum + convertToTRY(t), 0);
   }, [transactions, lastMonthStart, lastMonthEnd, convertToTRY]);
+
+  const lastMonthDueObligations = useMemo(
+    () =>
+      dueInMonthTotalTry(debts, debtSchedules, exchangeRates, lastMonthStart, lastMonthEnd),
+    [debts, debtSchedules, exchangeRates, lastMonthStart, lastMonthEnd]
+  );
+
+  // Geçmiş ay: yalnızca o ay ödenmiş nakit gider (vadesi geçmiş ayda kalmış ödenmemişler
+  // hâlâ pending ise thisMonthDue'ya düşer; çift saymamak için last month'a due ekleme)
+  const lastMonthExpense = lastMonthExpenseCash;
 
   const lastMonthNet = lastMonthIncome - lastMonthExpense;
 
@@ -142,11 +187,18 @@ const Dashboard: React.FC = () => {
   const netIncomeChange = calculatePercentageChange(netIncome, lastMonthNet);
 
   const totalNetWorth = useMemo(() => {
-    return (
-      transactions.filter((t) => t.type === 'income').reduce((sum, t) => sum + convertToTRY(t), 0) -
-      transactions.filter((t) => t.type === 'expense').reduce((sum, t) => sum + convertToTRY(t), 0)
-    );
-  }, [transactions, convertToTRY]);
+    const today = toLocalDateString();
+    const cashFlow =
+      transactions
+        .filter((t) => t.type === 'income' && transactionRecognitionDate(t) <= today)
+        .reduce((sum, t) => sum + convertToTRY(t), 0) -
+      transactions
+        .filter((t) => t.type === 'expense' && transactionRecognitionDate(t) <= today)
+        .reduce((sum, t) => sum + convertToTRY(t), 0);
+    // Vadesi gelmemiş taksitler net değere girmez; yalnızca matured pending
+    const debtAdj = debtNetWorthAdjustment(debts, debtSchedules, exchangeRates, today);
+    return cashFlow + debtAdj;
+  }, [transactions, debts, debtSchedules, convertToTRY, exchangeRates]);
 
   const netChangeAmount = netIncome - lastMonthNet;
   const netChangeText = `${netChangeAmount >= 0 ? '+' : ''}₺${Math.abs(netChangeAmount).toLocaleString('tr-TR')}`;

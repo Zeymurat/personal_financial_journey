@@ -6,6 +6,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "transactions": "Transactions",
+    "debts": "Debts",
+    "cards": "Cards",
     "investments": "Investments",
     "track": "Track & compare",
     "reports": "Reports",

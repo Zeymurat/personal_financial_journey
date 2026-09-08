@@ -57,7 +57,8 @@
     "quickSaveSuccess": "Quick action saved.",
     "quickSaveError": "Could not save quick action. Please try again.",
     "quickDeleteSuccess": "Quick action deleted.",
-    "quickDeleteError": "Could not delete quick action. Please try again."
+    "quickDeleteError": "Could not delete quick action. Please try again.",
+    "cardChargeSuccess": "Cargo guardado (saldo de tarjeta, no es un movimiento de caja)."
   },
   "list": {
     "title": "All transactions",
@@ -102,7 +103,20 @@
     "addButton": "Add",
     "editTitle": "Edit transaction",
     "editSubtitle": "Update transaction details",
-    "updateButton": "Update"
+    "updateButton": "Update",
+    "paymentMethod": "Payment method",
+    "cash": "Cash",
+    "creditCard": "Credit card",
+    "creditCardSelect": "Credit card",
+    "selectCard": "Select card",
+    "selectCardRequired": "Elige una tarjeta o añádela en Tarjetas.",
+    "noCardsHint": "Primero añade una tarjeta en Tarjetas.",
+    "cutoffShort": "cutoff {{day}}",
+    "installments": "Installments",
+    "singlePayment": "One-shot (1)",
+    "nInstallments": "{{count}} installments",
+    "effectivePreview": "Primer corte / vencimiento: {{date}}",
+    "cardChargeHint": "No es un movimiento de efectivo; aumenta el saldo de la tarjeta. El gasto aparece al pagar."
   },
   "detail": {
     "title": "Transaction details",

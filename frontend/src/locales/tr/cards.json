@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "title": "Kredi Kartları",
+    "subtitle": "Kartlarını kaydet, harcama ve taksit ekle"
+  },
+  "actions": {
+    "addCard": "Kart ekle",
+    "addExpense": "Harcama ekle",
+    "payCard": "Kart ödemesi",
+    "delete": "Sil",
+    "close": "Kapat",
+    "save": "Kaydet",
+    "cancel": "Vazgeç",
+    "editCharge": "Harcamayı düzenle",
+    "deleteCharge": "Harcamayı sil"
+  },
+  "summary": {
+    "totalDebt": "Toplam kart borcu",
+    "cardCount": "Aktif kart",
+    "tryNote": "TRY karşılığı (yaklaşık)"
+  },
+  "form": {
+    "addCardTitle": "Yeni kredi kartı",
+    "addExpenseTitle": "Kart harcaması",
+    "name": "Kart adı",
+    "bank": "Banka",
+    "currency": "Para birimi",
+    "cutoffDay": "Kesim günü (1–28)",
+    "creditLimit": "Kart limiti",
+    "openingBalance": "Mevcut borç (opsiyonel)",
+    "openingBalanceHint": "Kartta zaten borç varsa girin. Yoksa boş bırakın.",
+    "notes": "Not",
+    "amount": "Tutar",
+    "date": "Harcama tarihi",
+    "category": "Kategori",
+    "description": "Açıklama",
+    "installments": "Taksit",
+    "singlePayment": "Peşin (1 taksit)",
+    "nInstallments": "{{count}} taksit",
+    "selectCategory": "Kategori seçin",
+    "effectivePreview": "İlk kesim / vade: {{date}}",
+    "chargeHint": "İşlemler listesine eklenmez. Hesaptan para kartı ödediğinizde çıkar.",
+    "editChargeTitle": "Kart harcamasını düzenle",
+    "editPaidBlocked": "Ödenmiş taksit içeren harcama yeniden yapılandırılamaz; yalnızca kategori/açıklama güncellenebilir."
+  },
+  "detail": {
+    "remaining": "Kalan borç",
+    "limit": "Limit",
+    "cutoff": "Kesim günü",
+    "periodBalance": "Dönem borcu",
+    "minPayment": "Asgari ödeme",
+    "statementDate": "Kesim tarihi",
+    "schedule": "Taksit / kesim planı",
+    "pending": "Bekleyen",
+    "paid": "Ödendi",
+    "noSchedule": "Henüz plan yok — harcama ekleyin",
+    "empty": "Henüz kart yok",
+    "selectHint": "Detay ve harcama için bir kart seçin",
+    "goDebtsHint": "Kart ödemesi ve dönem özeti Borçlar sayfasında da görünür.",
+    "charges": "Harcamalar",
+    "chargeFallback": "Harcama",
+    "chargeTotal": "Toplam {{amount}}"
+  },
+  "toast": {
+    "created": "Kart eklendi",
+    "expenseAdded": "Harcama kaydedildi",
+    "deleted": "Kart silindi",
+    "paid": "Ödeme kaydedildi",
+    "error": "İşlem başarısız",
+    "amountInvalid": "Geçerli bir tutar girin",
+    "chargeDeleted": "Harcama silindi",
+    "chargeUpdated": "Harcama güncellendi"
+  },
+  "confirm": {
+    "deleteTitle": "Kartı sil",
+    "deleteMessage": "“{{name}}” kartını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+    "deleteChargeTitle": "Harcamayı sil",
+    "deleteChargeMessage": "“{{name}}” ({{amount}}) harcamasını silmek istediğinize emin misiniz?"
+  }
+}

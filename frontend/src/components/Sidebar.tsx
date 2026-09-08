@@ -15,6 +15,8 @@ import {
   Calendar,
   Calculator,
   Bot,
+  HandCoins,
+  CreditCard,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../contexts/NotificationContext';
@@ -29,6 +31,8 @@ type MenuItem = {
   labelKey:
     | 'nav.dashboard'
     | 'nav.transactions'
+    | 'nav.debts'
+    | 'nav.cards'
     | 'nav.investments'
     | 'nav.track'
     | 'nav.reports'
@@ -52,6 +56,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const menuItems: MenuItem[] = [
     { id: 'dashboard', labelKey: 'nav.dashboard', icon: Home },
     { id: 'transactions', labelKey: 'nav.transactions', icon: ArrowUpDown },
+    { id: 'debts', labelKey: 'nav.debts', icon: HandCoins },
+    { id: 'cards', labelKey: 'nav.cards', icon: CreditCard },
     { id: 'investments', labelKey: 'nav.investments', icon: TrendingUp },
     { id: 'track', labelKey: 'nav.track', icon: Eye },
     { id: 'reports', labelKey: 'nav.reports', icon: BarChart3 },
