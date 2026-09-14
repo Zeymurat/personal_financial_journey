@@ -15,7 +15,8 @@
     "cancel": "Cancel",
     "payNext": "Pay this installment",
     "payEarly": "Early payment",
-    "recalcInstallment": "Recalculate by type"
+    "recalcInstallment": "Recalculate by type",
+    "updateDates": "Update due dates"
   },
   "filters": {
     "all": "All",
@@ -75,7 +76,8 @@
     "nextInstallment": "Next installment",
     "earlyHint": "Only full next installment(s). Partial amounts are rejected.",
     "loanType": "Loan type",
-    "loanTypeTaxHint": "For this type: KKDF %{kkdf}, BSMV %{bsmv}"
+    "loanTypeTaxHint": "For this type: KKDF %{kkdf}, BSMV %{bsmv}",
+    "startDateShiftHint": "All installment due dates shift monthly from this date. Paid/pending status is kept."
   },
   "detail": {
     "remaining": "Remaining",
@@ -102,7 +104,8 @@
     "updated": "Updated",
     "deleted": "Deleted",
     "paid": "Payment recorded",
-    "error": "Action failed"
+    "error": "Action failed",
+    "datesUpdated": "Installment dates updated"
   },
   "status": {
     "active": "Active",

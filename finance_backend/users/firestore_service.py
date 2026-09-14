@@ -2058,15 +2058,19 @@ class FirestoreService:
         allowed = {
             'name', 'counterparty', 'notes', 'status', 'creditLimit',
             'statementCutoffDay', 'currency', 'originalAmount', 'remainingAmount',
-            'amountInTRY', 'interestRate', 'installmentAmount', 'loanType',
+            'amountInTRY', 'interestRate', 'installmentAmount', 'loanType', 'startDate',
         }
         clean = {k: v for k, v in updates.items() if k in allowed}
         if 'statementCutoffDay' in clean:
             clean['statementCutoffDay'] = max(1, min(int(clean['statementCutoffDay']), 28))
         if 'loanType' in clean:
             clean['loanType'] = normalize_loan_type(clean.get('loanType'))
+        if 'startDate' in clean:
+            if not clean.get('startDate'):
+                raise ValueError('startDate gerekli')
+            clean['startDate'] = format_date(parse_date(clean['startDate']))
 
-        # Manuel / yeniden hesaplanan taksit: bekleyen satırları güncelle
+        # Manuel / yeniden hesaplanan taksit tutarı
         if (
             'installmentAmount' in clean
             or 'loanType' in clean
@@ -2078,10 +2082,35 @@ class FirestoreService:
         ):
             await self._apply_loan_installment_update(user_id, debt, clean, updates)
 
+        # İlk taksit tarihi → tüm plan vadelerini kaydır (status korunur)
+        if 'startDate' in clean and debt.get('kind') in ('loan', 'payable', 'receivable'):
+            await self._rebuild_loan_schedule_dates(
+                user_id, debt['id'], clean['startDate']
+            )
+
         clean['updatedAt'] = firestore.SERVER_TIMESTAMP
         # _apply may have set remainingAmount / installmentAmount
         doc_ref.update(clean)
         return True
+
+    async def _rebuild_loan_schedule_dates(
+        self, user_id: str, debt_id: str, start_date: str
+    ) -> None:
+        """İlk taksit tarihinden itibaren sequence sırasıyla vadeleri yeniden yaz."""
+        schedule = await self.get_debt_schedule(user_id, debt_id)
+        if not schedule:
+            return
+        schedule_sorted = sorted(
+            schedule,
+            key=lambda x: (x.get('sequence') or 0, x.get('dueDate') or ''),
+        )
+        due_dates = build_loan_due_dates(parse_date(start_date), len(schedule_sorted))
+        schedule_ref = self.get_debt_schedule_ref(user_id, debt_id)
+        for item, due in zip(schedule_sorted, due_dates):
+            schedule_ref.document(item['id']).update({
+                'dueDate': format_date(due),
+                'updatedAt': firestore.SERVER_TIMESTAMP,
+            })
 
     async def _apply_loan_installment_update(
         self,

@@ -40,8 +40,10 @@ const Debts: React.FC = () => {
   const [deleting, setDeleting] = useState(false);
   const [editInstallment, setEditInstallment] = useState('');
   const [editLoanType, setEditLoanType] = useState<LoanType>(DEFAULT_LOAN_TYPE);
+  const [editStartDate, setEditStartDate] = useState('');
   const [savingInstallment, setSavingInstallment] = useState(false);
   const [savingLoanType, setSavingLoanType] = useState(false);
+  const [savingStartDate, setSavingStartDate] = useState(false);
 
   const toTry = useCallback(
     (amount: number, currency: string) => {
@@ -97,11 +99,23 @@ const Debts: React.FC = () => {
         : ''
     );
     setEditLoanType(normalizeLoanType(debt.loanType));
+    const firstDue =
+      debt.startDate ||
+      '';
+    setEditStartDate(firstDue);
     try {
       const sched = await debtAPI.getSchedule(debt.id);
       const items = Array.isArray(sched?.data) ? sched.data : [];
       setSchedule(items);
       setAllSchedules((prev) => ({ ...prev, [debt.id]: items }));
+      const sorted = [...items].sort(
+        (a, b) => (a.sequence || 0) - (b.sequence || 0)
+      );
+      if (sorted[0]?.dueDate) {
+        setEditStartDate(sorted[0].dueDate);
+      } else if (debt.startDate) {
+        setEditStartDate(debt.startDate);
+      }
       const pendingItem = items.find((i) => i.status === 'pending');
       if (pendingItem?.amount) {
         setEditInstallment(
@@ -166,6 +180,27 @@ const Debts: React.FC = () => {
       toast.error(e instanceof Error ? e.message : t('toast.error'));
     } finally {
       setSavingLoanType(false);
+    }
+  };
+
+  const saveStartDateAndShift = async () => {
+    if (!selected || selected.kind === 'credit_card') return;
+    if (!editStartDate) {
+      toast.error(t('toast.error'));
+      return;
+    }
+    setSavingStartDate(true);
+    try {
+      await debtAPI.update(selected.id, { startDate: editStartDate });
+      toast.success(t('toast.datesUpdated'));
+      await loadDebts();
+      const refreshed = await debtAPI.get(selected.id);
+      await openDetail(refreshed?.data || selected);
+      await refreshDebts();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t('toast.error'));
+    } finally {
+      setSavingStartDate(false);
     }
   };
 
@@ -435,6 +470,30 @@ const Debts: React.FC = () => {
                             {t('actions.recalcInstallment')}
                           </button>
                         </div>
+                      </div>
+                    )}
+                    {selected.kind !== 'credit_card' && schedule.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-600/50 space-y-2">
+                        <label className="text-xs font-semibold text-slate-500 block">
+                          {t('form.startDate')}
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="date"
+                            value={editStartDate}
+                            onChange={(e) => setEditStartDate(e.target.value)}
+                            className="flex-1 p-2 rounded-lg border text-sm dark:bg-slate-700 dark:border-slate-600"
+                          />
+                          <button
+                            type="button"
+                            disabled={savingStartDate || !editStartDate}
+                            onClick={() => void saveStartDateAndShift()}
+                            className="px-3 py-2 rounded-lg border text-xs font-semibold disabled:opacity-50 whitespace-nowrap"
+                          >
+                            {t('actions.updateDates')}
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-slate-400">{t('form.startDateShiftHint')}</p>
                       </div>
                     )}
                     {selected.kind !== 'credit_card' && schedule.length > 0 && (

@@ -11,6 +11,7 @@
     "delete": "Sil",
     "editInstallment": "Taksit tutarını düzelt",
     "recalcInstallment": "Türe göre yeniden hesapla",
+    "updateDates": "Vadeleri güncelle",
     "close": "Kapat",
     "save": "Kaydet",
     "cancel": "Vazgeç",
@@ -71,6 +72,7 @@
     "useSuggested": "Hesaplananı kullan ({{amount}})",
     "notes": "Not",
     "startDate": "İlk taksit tarihi",
+    "startDateShiftHint": "Tüm taksit vadeleri bu tarihten itibaren aylık kaydırılır. Ödenen/bekleyen durumu değişmez.",
     "installments": "Taksit sayısı",
     "cutoffDay": "Kesim günü (1–28)",
     "creditLimit": "Kart limiti",
@@ -107,6 +109,7 @@
   "toast": {
     "created": "Kayıt oluşturuldu",
     "updated": "Güncellendi",
+    "datesUpdated": "Taksit vadeleri güncellendi",
     "deleted": "Silindi",
     "paid": "Ödeme kaydedildi",
     "error": "İşlem başarısız"
