@@ -438,7 +438,10 @@ export const debtAPI = {
     });
   },
 
-  async update(id: string, updates: Partial<Debt>) {
+  async update(
+    id: string,
+    updates: Partial<Debt> & { recalcSchedule?: boolean }
+  ) {
     return await apiRequest(`/auth/debts/${id}/`, {
       method: 'PUT',
       body: JSON.stringify(updates),
@@ -477,6 +480,8 @@ export const debtAPI = {
       amount: number;
       date: string;
       installmentCount?: number;
+      /** İlk N taksit geçmişte ödendi — nakit gider yazılmaz */
+      paidInstallmentCount?: number;
       category?: string;
       description?: string;
       currency?: string;

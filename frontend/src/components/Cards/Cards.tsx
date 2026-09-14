@@ -12,6 +12,8 @@ import { debtProgress } from '../Debts/cards/DebtListCard';
 import DebtPaymentModal from '../Debts/modals/DebtPaymentModal';
 import AddCardModal from './modals/AddCardModal';
 import AddCardExpenseModal from './modals/AddCardExpenseModal';
+import EditCardModal from './modals/EditCardModal';
+import BulkAddCardExpensesModal from './modals/BulkAddCardExpensesModal';
 import EditCardChargeModal from './modals/EditCardChargeModal';
 import ConfirmModal from '../common/ConfirmModal';
 import { groupCharges, type ChargeGroup } from '../../utils/groupCardCharges';
@@ -25,6 +27,8 @@ const Cards: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [showExpense, setShowExpense] = useState(false);
+  const [showBulkExpense, setShowBulkExpense] = useState(false);
+  const [showEditCard, setShowEditCard] = useState(false);
   const [showPay, setShowPay] = useState(false);
   const [selected, setSelected] = useState<Debt | null>(null);
   const [schedule, setSchedule] = useState<DebtScheduleItem[]>([]);
@@ -249,14 +253,24 @@ const Cards: React.FC = () => {
                     {t('detail.cutoff')}: {selected.statementCutoffDay}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setPendingDelete(selected)}
-                  className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg"
-                  title={t('actions.delete')}
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditCard(true)}
+                    className="p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 rounded-lg"
+                    title={t('actions.editCard')}
+                  >
+                    <Pencil className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPendingDelete(selected)}
+                    className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg"
+                    title={t('actions.delete')}
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
               <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/40 p-4 border border-slate-100 dark:border-slate-700/50">
@@ -318,6 +332,13 @@ const Cards: React.FC = () => {
                   </button>
                 )}
               </div>
+              <button
+                type="button"
+                onClick={() => setShowBulkExpense(true)}
+                className="w-full py-3 rounded-xl border border-dashed border-brand-ink/30 dark:border-brand-champagne/30 text-sm font-semibold hover:bg-brand-champagne/20 dark:hover:bg-brand-ink/30 transition"
+              >
+                {t('actions.bulkExpense')}
+              </button>
 
               <p className="text-xs text-slate-400">{t('detail.goDebtsHint')}</p>
 
@@ -430,6 +451,39 @@ const Cards: React.FC = () => {
             const refreshed = await debtAPI.get(selected.id);
             await openDetail(refreshed?.data || selected);
             await refreshTransactions();
+            await refreshDebts();
+          }}
+        />
+      )}
+
+      {selected && (
+        <BulkAddCardExpensesModal
+          isOpen={showBulkExpense}
+          card={selected}
+          onClose={() => setShowBulkExpense(false)}
+          onCreated={async () => {
+            setShowBulkExpense(false);
+            await loadCards();
+            const refreshed = await debtAPI.get(selected.id);
+            await openDetail(refreshed?.data || selected);
+            await refreshTransactions();
+            await refreshDebts();
+          }}
+        />
+      )}
+
+      {selected && (
+        <EditCardModal
+          isOpen={showEditCard}
+          card={selected}
+          currencies={TRANSACTION_CURRENCIES}
+          onClose={() => setShowEditCard(false)}
+          onSaved={async () => {
+            setShowEditCard(false);
+            toast.success(t('toast.cardUpdated'));
+            await loadCards();
+            const refreshed = await debtAPI.get(selected.id);
+            await openDetail(refreshed?.data || selected);
             await refreshDebts();
           }}
         />

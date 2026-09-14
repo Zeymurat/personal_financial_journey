@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CreditCard, HandCoins, Landmark, Wallet } from 'lucide-react';
-import type { Debt, DebtKind } from '../../../types';
+import type { Debt, DebtKind, DebtScheduleItem } from '../../../types';
 
 function kindIcon(kind: DebtKind) {
   if (kind === 'credit_card') return CreditCard;
@@ -39,15 +39,18 @@ function kindAccent(kind: DebtKind) {
   };
 }
 
-export function debtProgress(debt: Debt): {
+export function debtProgress(
+  debt: Debt,
+  schedule?: DebtScheduleItem[]
+): {
   remaining: number;
   total: number;
   paid: number;
   pct: number;
   showBar: boolean;
 } {
-  const remaining = Math.max(0, debt.remainingAmount || 0);
   if (debt.kind === 'credit_card') {
+    const remaining = Math.max(0, debt.remainingAmount || 0);
     const total = Math.max(remaining, debt.creditLimit || 0);
     const usedPct =
       total > 0 ? Math.min(100, Math.round((remaining / total) * 100)) : 0;
@@ -59,7 +62,30 @@ export function debtProgress(debt: Debt): {
       showBar: (debt.creditLimit || 0) > 0,
     };
   }
-  const total = Math.max(remaining, debt.originalAmount || 0);
+
+  const items = schedule || [];
+  if (items.length > 0) {
+    const paid = items
+      .filter((s) => s.status === 'paid')
+      .reduce((sum, s) => sum + (s.amount || 0), 0);
+    const remaining = items
+      .filter((s) => s.status === 'pending')
+      .reduce((sum, s) => sum + (s.amount || 0), 0);
+    const total = Math.max(
+      paid + remaining,
+      debt.originalAmount || 0,
+      debt.remainingAmount || 0
+    );
+    const pct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
+    return { remaining, total, paid, pct, showBar: total > 0 };
+  }
+
+  const remaining = Math.max(0, debt.remainingAmount || 0);
+  const total = Math.max(
+    remaining,
+    debt.originalAmount || 0,
+    (debt.installmentAmount || 0) * (debt.installmentCount || 0)
+  );
   const paid = Math.max(0, total - remaining);
   const pct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
   return { remaining, total, paid, pct, showBar: total > 0 };
@@ -67,15 +93,21 @@ export function debtProgress(debt: Debt): {
 
 interface DebtListCardProps {
   debt: Debt;
+  schedule?: DebtScheduleItem[];
   selected: boolean;
   onSelect: () => void;
 }
 
-const DebtListCard: React.FC<DebtListCardProps> = ({ debt, selected, onSelect }) => {
+const DebtListCard: React.FC<DebtListCardProps> = ({
+  debt,
+  schedule,
+  selected,
+  onSelect,
+}) => {
   const { t } = useTranslation('debts');
   const Icon = kindIcon(debt.kind);
   const accent = kindAccent(debt.kind);
-  const { remaining, total, paid, pct, showBar } = debtProgress(debt);
+  const { remaining, total, paid, pct, showBar } = debtProgress(debt, schedule);
   const isCard = debt.kind === 'credit_card';
 
   return (
@@ -141,7 +173,7 @@ const DebtListCard: React.FC<DebtListCardProps> = ({ debt, selected, onSelect })
           <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${accent.bar}`}
-              style={{ width: `${isCard ? pct : pct}%` }}
+              style={{ width: `${pct}%` }}
               title={isCard ? `${pct}% limit` : `${pct}%`}
             />
           </div>

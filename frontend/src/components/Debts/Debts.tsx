@@ -8,6 +8,13 @@ import { useFinance } from '../../contexts/FinanceContext';
 import { debtAPI } from '../../services/apiService';
 import type { Debt, DebtKind, DebtScheduleItem, DebtStatementSummary } from '../../types';
 import { TRANSACTION_CURRENCIES } from '../Transactions/constants';
+import { formatTrMoneyInput, parseTrMoneyString } from '../../utils/trNumberInput';
+import {
+  DEFAULT_LOAN_TYPE,
+  LOAN_TYPES,
+  normalizeLoanType,
+  type LoanType,
+} from '../../utils/loanInstallment';
 import AddDebtModal from './modals/AddDebtModal';
 import DebtPaymentModal from './modals/DebtPaymentModal';
 import DebtListCard, { debtProgress } from './cards/DebtListCard';
@@ -31,6 +38,10 @@ const Debts: React.FC = () => {
   const [showPay, setShowPay] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Debt | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [editInstallment, setEditInstallment] = useState('');
+  const [editLoanType, setEditLoanType] = useState<LoanType>(DEFAULT_LOAN_TYPE);
+  const [savingInstallment, setSavingInstallment] = useState(false);
+  const [savingLoanType, setSavingLoanType] = useState(false);
 
   const toTry = useCallback(
     (amount: number, currency: string) => {
@@ -75,17 +86,86 @@ const Debts: React.FC = () => {
     setSelected(debt);
     setSummary(null);
     setSchedule([]);
+    const seed =
+      debt.installmentAmount ??
+      (debt.originalAmount && debt.installmentCount
+        ? debt.originalAmount / debt.installmentCount
+        : 0);
+    setEditInstallment(
+      seed
+        ? seed.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : ''
+    );
+    setEditLoanType(normalizeLoanType(debt.loanType));
     try {
       const sched = await debtAPI.getSchedule(debt.id);
       const items = Array.isArray(sched?.data) ? sched.data : [];
       setSchedule(items);
       setAllSchedules((prev) => ({ ...prev, [debt.id]: items }));
+      const pendingItem = items.find((i) => i.status === 'pending');
+      if (pendingItem?.amount) {
+        setEditInstallment(
+          pendingItem.amount.toLocaleString('tr-TR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        );
+      } else if (debt.installmentAmount) {
+        setEditInstallment(
+          debt.installmentAmount.toLocaleString('tr-TR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        );
+      }
       if (debt.kind === 'credit_card') {
         const sum = await debtAPI.getStatementSummary(debt.id);
         setSummary(sum?.data || null);
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const saveInstallmentAmount = async () => {
+    if (!selected || selected.kind === 'credit_card') return;
+    const value = parseTrMoneyString(editInstallment);
+    if (!(value > 0)) {
+      toast.error(t('toast.error'));
+      return;
+    }
+    setSavingInstallment(true);
+    try {
+      await debtAPI.update(selected.id, { installmentAmount: value });
+      toast.success(t('toast.updated'));
+      await loadDebts();
+      const refreshed = await debtAPI.get(selected.id);
+      await openDetail(refreshed?.data || selected);
+      await refreshDebts();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t('toast.error'));
+    } finally {
+      setSavingInstallment(false);
+    }
+  };
+
+  const saveLoanTypeAndRecalc = async () => {
+    if (!selected || selected.kind !== 'loan') return;
+    setSavingLoanType(true);
+    try {
+      await debtAPI.update(selected.id, {
+        loanType: editLoanType,
+        recalcSchedule: true,
+      });
+      toast.success(t('toast.updated'));
+      await loadDebts();
+      const refreshed = await debtAPI.get(selected.id);
+      await openDetail(refreshed?.data || selected);
+      await refreshDebts();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t('toast.error'));
+    } finally {
+      setSavingLoanType(false);
     }
   };
 
@@ -166,11 +246,9 @@ const Debts: React.FC = () => {
     }
   };
 
-  const detailProgress = selected ? debtProgress(selected) : null;
-  const scheduleRemaining =
-    schedule.length > 0
-      ? schedule.filter((s) => s.status === 'pending').reduce((sum, s) => sum + (s.amount || 0), 0)
-      : null;
+  const detailProgress = selected
+    ? debtProgress(selected, schedule.length ? schedule : allSchedules[selected.id])
+    : null;
 
   return (
     <div className="p-8 min-h-screen space-y-8 bg-[radial-gradient(ellipse_at_top,_rgba(196,165,116,0.08),_transparent_55%)]">
@@ -272,6 +350,7 @@ const Debts: React.FC = () => {
               <DebtListCard
                 key={debt.id}
                 debt={debt}
+                schedule={allSchedules[debt.id]}
                 selected={selected?.id === debt.id}
                 onSelect={() => void openDetail(debt)}
               />
@@ -307,11 +386,10 @@ const Debts: React.FC = () => {
               </div>
 
               {(() => {
-                const remaining =
-                  scheduleRemaining !== null ? scheduleRemaining : detailProgress.remaining;
-                const total = selected.originalAmount || detailProgress.total;
-                const paid = Math.max(0, total - remaining);
-                const pct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
+                const remaining = detailProgress.remaining;
+                const total = detailProgress.total;
+                const paid = detailProgress.paid;
+                const pct = detailProgress.pct;
                 return (
                   <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/40 p-4 border border-slate-100 dark:border-slate-700/50">
                     <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
@@ -326,7 +404,61 @@ const Debts: React.FC = () => {
                     {selected.interestRate !== undefined && selected.interestRate !== null && (
                       <p className="text-xs text-slate-400 mt-1">
                         {t('detail.interestRate')}: %{selected.interestRate}
+                        {selected.kind === 'loan' && selected.loanType
+                          ? ` · ${t(`loanTypes.${normalizeLoanType(selected.loanType)}`)}`
+                          : ''}
                       </p>
+                    )}
+                    {selected.kind === 'loan' && schedule.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-600/50 space-y-2">
+                        <label className="text-xs font-semibold text-slate-500 block">
+                          {t('form.loanType')}
+                        </label>
+                        <div className="flex gap-2">
+                          <select
+                            value={editLoanType}
+                            onChange={(e) => setEditLoanType(e.target.value as LoanType)}
+                            className="flex-1 p-2 rounded-lg border text-sm dark:bg-slate-700 dark:border-slate-600"
+                          >
+                            {LOAN_TYPES.map((lt) => (
+                              <option key={lt} value={lt}>
+                                {t(`loanTypes.${lt}`)}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            disabled={savingLoanType}
+                            onClick={() => void saveLoanTypeAndRecalc()}
+                            className="px-3 py-2 rounded-lg border text-xs font-semibold disabled:opacity-50 whitespace-nowrap"
+                          >
+                            {t('actions.recalcInstallment')}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {selected.kind !== 'credit_card' && schedule.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-600/50">
+                        <label className="text-xs font-semibold text-slate-500 block mb-1">
+                          {t('detail.installmentAmount')}
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            value={editInstallment}
+                            onChange={(e) => setEditInstallment(formatTrMoneyInput(e.target.value))}
+                            className="flex-1 p-2 rounded-lg border text-sm dark:bg-slate-700 dark:border-slate-600 tabular-nums"
+                          />
+                          <button
+                            type="button"
+                            disabled={savingInstallment}
+                            onClick={() => void saveInstallmentAmount()}
+                            className="px-3 py-2 rounded-lg bg-brand-ink text-white text-xs font-semibold disabled:opacity-50 whitespace-nowrap"
+                          >
+                            {t('actions.save')}
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-1">{t('form.installmentAmountHint')}</p>
+                      </div>
                     )}
                     {total > 0 && selected.kind !== 'credit_card' && (
                       <div className="mt-3">

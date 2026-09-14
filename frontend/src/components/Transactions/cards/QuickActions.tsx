@@ -337,7 +337,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onTransactionAdded, categor
   // Prop'tan gelen kategorileri kullan, yoksa varsayılan kategorileri kullan
   const categories = propCategories || {
     income: ['Maaş', 'Freelance', 'Yatırım', 'Bonus', 'Kira', 'Diğer'],
-    expense: ['Kira', 'Market', 'Ulaşım', 'Eğlence', 'Sağlık', 'Eğitim', 'Teknoloji', 'Giyim', 'Yatırım', 'Diğer']
+    expense: ['Kira', 'Fatura', 'Market', 'Gıda', 'Ulaşım', 'Eğlence', 'Sağlık', 'Eğitim', 'Teknoloji', 'Giyim', 'Yatırım', 'Diğer']
   };
 
   return (

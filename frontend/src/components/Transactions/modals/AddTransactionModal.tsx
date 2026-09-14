@@ -64,7 +64,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
   const categories = propCategories || {
     income: ['Maaş', 'Freelance', 'Yatırım', 'Bonus', 'Kira', 'Diğer'],
-    expense: ['Kira', 'Market', 'Ulaşım', 'Eğlence', 'Sağlık', 'Eğitim', 'Teknoloji', 'Giyim', 'Yatırım', 'Diğer']
+    expense: ['Kira', 'Fatura', 'Market', 'Gıda', 'Ulaşım', 'Eğlence', 'Sağlık', 'Eğitim', 'Teknoloji', 'Giyim', 'Yatırım', 'Diğer']
   };
 
   const selectedCard = creditCards.find((c) => c.id === formData.creditCardDebtId);

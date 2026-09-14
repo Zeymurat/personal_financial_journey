@@ -1,10 +1,18 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { debtAPI } from '../../../services/apiService';
 import type { DebtKind } from '../../../types';
 import { formatTrMoneyInput, parseTrMoneyString } from '../../../utils/trNumberInput';
 import { toLocalDateString } from '../../../utils/localDate';
+import {
+  computeLoanInstallmentAmount,
+  loanEffectiveMonthlyRate,
+  loanTaxRates,
+  LOAN_TYPES,
+  DEFAULT_LOAN_TYPE,
+  type LoanType,
+} from '../../../utils/loanInstallment';
 
 interface Props {
   isOpen: boolean;
@@ -26,6 +34,9 @@ const AddDebtModal: React.FC<Props> = ({ isOpen, onClose, onCreated, currencies 
   const [notes, setNotes] = useState('');
   const [startDate, setStartDate] = useState(toLocalDateString());
   const [installments, setInstallments] = useState('12');
+  const [loanType, setLoanType] = useState<LoanType>(DEFAULT_LOAN_TYPE);
+  const [installmentAmount, setInstallmentAmount] = useState('');
+  const [installmentTouched, setInstallmentTouched] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const nameLabel = useMemo(() => {
@@ -42,26 +53,67 @@ const AddDebtModal: React.FC<Props> = ({ isOpen, onClose, onCreated, currencies 
     return t('form.counterparty');
   }, [kind, t]);
 
+  const parsedAmount = parseTrMoneyString(amount);
+  const rate = Number.parseFloat(interestRate.replace(',', '.')) || 0;
+  const installmentCount = Math.max(
+    kind === 'loan' ? 2 : 1,
+    parseInt(installments, 10) || 1
+  );
+
+  const suggestedInstallment = useMemo(() => {
+    if (!(parsedAmount > 0)) return 0;
+    if (kind === 'loan' || rate > 0) {
+      return computeLoanInstallmentAmount({
+        principal: parsedAmount,
+        monthlyInterestPercent: rate,
+        installmentCount,
+        loanType: kind === 'loan' ? loanType : DEFAULT_LOAN_TYPE,
+      });
+    }
+    return Math.round((parsedAmount / installmentCount) * 100) / 100;
+  }, [parsedAmount, rate, installmentCount, kind, loanType]);
+
+  const effectiveRatePct = useMemo(() => {
+    if (kind !== 'loan' && rate <= 0) return 0;
+    return Math.round(loanEffectiveMonthlyRate(rate, loanType) * 10000) / 100;
+  }, [kind, rate, loanType]);
+
+  const taxProfile = useMemo(() => loanTaxRates(loanType), [loanType]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!installmentTouched && suggestedInstallment > 0) {
+      setInstallmentAmount(
+        suggestedInstallment.toLocaleString('tr-TR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
+      );
+    }
+  }, [suggestedInstallment, installmentTouched, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setInstallmentTouched(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsedAmount = parseTrMoneyString(amount);
     if (!(parsedAmount > 0) || !name.trim()) {
       toast.error(t('toast.error'));
       return;
     }
-
-    const rateRaw = interestRate.replace(',', '.');
-    const rate = Number.parseFloat(rateRaw);
     if (Number.isNaN(rate) || rate < 0) {
       toast.error(t('toast.error'));
       return;
     }
 
+    const manualInstallment = parseTrMoneyString(installmentAmount);
     setSaving(true);
     try {
-      const installmentCount = Math.max(1, parseInt(installments, 10) || 1);
       const payload: Record<string, unknown> = {
         kind,
         name: name.trim(),
@@ -77,6 +129,12 @@ const AddDebtModal: React.FC<Props> = ({ isOpen, onClose, onCreated, currencies 
       if (kind === 'loan' || installmentCount > 1) {
         payload.installmentCount = kind === 'loan' ? Math.max(2, installmentCount) : installmentCount;
         payload.startDate = startDate;
+        if (kind === 'loan') {
+          payload.loanType = loanType;
+        }
+        if (manualInstallment > 0) {
+          payload.installmentAmount = manualInstallment;
+        }
       }
 
       await debtAPI.create(payload as never);
@@ -85,6 +143,8 @@ const AddDebtModal: React.FC<Props> = ({ isOpen, onClose, onCreated, currencies 
       setCounterparty('');
       setNotes('');
       setInterestRate('0');
+      setInstallmentAmount('');
+      setInstallmentTouched(false);
       onCreated();
     } catch (err) {
       console.error(err);
@@ -93,6 +153,8 @@ const AddDebtModal: React.FC<Props> = ({ isOpen, onClose, onCreated, currencies 
       setSaving(false);
     }
   };
+
+  const showInstallmentPlan = kind === 'loan' || parseInt(installments, 10) > 1;
 
   return (
     <div
@@ -109,7 +171,10 @@ const AddDebtModal: React.FC<Props> = ({ isOpen, onClose, onCreated, currencies 
             <label className="block text-sm font-semibold mb-1">{t('form.kind')}</label>
             <select
               value={kind}
-              onChange={(e) => setKind(e.target.value as DebtFormKind)}
+              onChange={(e) => {
+                setKind(e.target.value as DebtFormKind);
+                setInstallmentTouched(false);
+              }}
               className="w-full p-3 rounded-xl border dark:bg-slate-700 dark:border-slate-600"
             >
               <option value="loan">{t('kinds.loan')}</option>
@@ -144,7 +209,10 @@ const AddDebtModal: React.FC<Props> = ({ isOpen, onClose, onCreated, currencies 
               </label>
               <input
                 value={amount}
-                onChange={(e) => setAmount(formatTrMoneyInput(e.target.value))}
+                onChange={(e) => {
+                  setAmount(formatTrMoneyInput(e.target.value));
+                  setInstallmentTouched(false);
+                }}
                 className="w-full p-3 rounded-xl border dark:bg-slate-700 dark:border-slate-600"
                 required
               />
@@ -165,16 +233,50 @@ const AddDebtModal: React.FC<Props> = ({ isOpen, onClose, onCreated, currencies 
             </div>
           </div>
 
+          {kind === 'loan' && (
+            <div>
+              <label className="block text-sm font-semibold mb-1">{t('form.loanType')}</label>
+              <select
+                value={loanType}
+                onChange={(e) => {
+                  setLoanType(e.target.value as LoanType);
+                  setInstallmentTouched(false);
+                }}
+                className="w-full p-3 rounded-xl border dark:bg-slate-700 dark:border-slate-600"
+              >
+                {LOAN_TYPES.map((lt) => (
+                  <option key={lt} value={lt}>
+                    {t(`loanTypes.${lt}`)}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-slate-400 mt-1">
+                {t('form.loanTypeTaxHint', {
+                  kkdf: Math.round(taxProfile.kkdf * 100),
+                  bsmv: Math.round(taxProfile.bsmv * 100),
+                })}
+              </p>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-semibold mb-1">{t('form.interestRate')}</label>
             <input
               type="text"
               inputMode="decimal"
               value={interestRate}
-              onChange={(e) => setInterestRate(e.target.value)}
+              onChange={(e) => {
+                setInterestRate(e.target.value);
+                setInstallmentTouched(false);
+              }}
               className="w-full p-3 rounded-xl border dark:bg-slate-700 dark:border-slate-600"
             />
             <p className="text-xs text-slate-400 mt-1">{t('form.interestRateHint')}</p>
+            {kind === 'loan' && rate > 0 && (
+              <p className="text-xs text-slate-500 mt-1">
+                {t('form.effectiveRate', { rate: effectiveRatePct.toLocaleString('tr-TR') })}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -184,11 +286,14 @@ const AddDebtModal: React.FC<Props> = ({ isOpen, onClose, onCreated, currencies 
                 type="number"
                 min={kind === 'loan' ? 2 : 1}
                 value={installments}
-                onChange={(e) => setInstallments(e.target.value)}
+                onChange={(e) => {
+                  setInstallments(e.target.value);
+                  setInstallmentTouched(false);
+                }}
                 className="w-full p-3 rounded-xl border dark:bg-slate-700 dark:border-slate-600"
               />
             </div>
-            {(kind === 'loan' || parseInt(installments, 10) > 1) && (
+            {showInstallmentPlan && (
               <div>
                 <label className="block text-sm font-semibold mb-1">{t('form.startDate')}</label>
                 <input
@@ -201,6 +306,43 @@ const AddDebtModal: React.FC<Props> = ({ isOpen, onClose, onCreated, currencies 
               </div>
             )}
           </div>
+
+          {showInstallmentPlan && (
+            <div>
+              <label className="block text-sm font-semibold mb-1">{t('form.installmentAmount')}</label>
+              <input
+                value={installmentAmount}
+                onChange={(e) => {
+                  setInstallmentTouched(true);
+                  setInstallmentAmount(formatTrMoneyInput(e.target.value));
+                }}
+                className="w-full p-3 rounded-xl border dark:bg-slate-700 dark:border-slate-600"
+              />
+              <p className="text-xs text-slate-400 mt-1">{t('form.installmentAmountHint')}</p>
+              {suggestedInstallment > 0 && (
+                <button
+                  type="button"
+                  className="text-xs text-brand-ink dark:text-brand-champagne underline mt-1"
+                  onClick={() => {
+                    setInstallmentTouched(false);
+                    setInstallmentAmount(
+                      suggestedInstallment.toLocaleString('tr-TR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })
+                    );
+                  }}
+                >
+                  {t('form.useSuggested', {
+                    amount: suggestedInstallment.toLocaleString('tr-TR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }),
+                  })}
+                </button>
+              )}
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-semibold mb-1">{t('form.notes')}</label>

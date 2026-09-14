@@ -33,6 +33,10 @@ export interface Debt {
   startDate?: string;
   installmentCount?: number;
   interestRate?: number;
+  /** Aylık taksit tutarı (faizli kredide plan satırı) */
+  installmentAmount?: number;
+  /** TR kredi ürün tipi: consumer | vehicle | commercial | housing | special */
+  loanType?: string;
   amountInTRY?: number;
   createdAt?: string;
   updatedAt?: string;

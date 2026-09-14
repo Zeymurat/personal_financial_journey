@@ -12,6 +12,9 @@ from .debt_utils import (
     split_equal_amounts,
     compute_cc_min_payment,
     open_statement_period,
+    compute_loan_installment_amount,
+    build_fixed_installment_amounts,
+    normalize_loan_type,
 )
 
 logger = logging.getLogger(__name__)
@@ -1697,6 +1700,15 @@ class FirestoreService:
             raise ValueError('date gerekli')
         purchase = parse_date(purchase_raw)
         count = max(1, int(charge_data.get('installmentCount') or 1))
+        try:
+            paid_count = int(charge_data.get('paidInstallmentCount') or 0)
+        except (TypeError, ValueError):
+            paid_count = 0
+        if paid_count < 0:
+            paid_count = 0
+        if paid_count > count:
+            raise ValueError('paidInstallmentCount taksit sayısından büyük olamaz')
+
         cutoff = int(debt.get('statementCutoffDay') or 1)
         amounts = split_equal_amounts(amount, count)
         due_dates = build_installment_due_dates(purchase, cutoff, count)
@@ -1713,13 +1725,14 @@ class FirestoreService:
         for idx, (due, part) in enumerate(zip(due_dates, amounts), start=1):
             item_ref = schedule_ref.document()
             item_ids.append(item_ref.id)
-            item_ref.set({
+            is_paid = idx <= paid_count
+            item_doc: Dict[str, Any] = {
                 'id': item_ref.id,
                 'chargeId': charge_id,
                 'sequence': idx,
                 'dueDate': format_date(due),
                 'amount': part,
-                'status': 'pending',
+                'status': 'paid' if is_paid else 'pending',
                 'source': 'cc_expense',
                 'purchaseDate': format_date(purchase),
                 'category': category,
@@ -1730,9 +1743,14 @@ class FirestoreService:
                 'linkedExpenseId': linked_expense_id,
                 'createdAt': firestore.SERVER_TIMESTAMP,
                 'updatedAt': firestore.SERVER_TIMESTAMP,
-            })
+            }
+            if is_paid:
+                # Geçmiş ödeme: P&L / nakit işlem yazılmaz
+                item_doc['paidWithoutTransaction'] = True
+            item_ref.set(item_doc)
 
-        remaining = round(float(debt.get('remainingAmount') or 0) + amount, 2)
+        pending_total = round(sum(amounts[paid_count:]), 2)
+        remaining = round(float(debt.get('remainingAmount') or 0) + pending_total, 2)
         debt_ref.update({
             'remainingAmount': remaining,
             'updatedAt': firestore.SERVER_TIMESTAMP,
@@ -1743,6 +1761,7 @@ class FirestoreService:
             'chargeId': charge_id,
             'amount': amount,
             'installmentCount': count,
+            'paidInstallmentCount': paid_count,
             'firstDueDate': format_date(due_dates[0]),
             'scheduleItemIds': item_ids,
             'remainingAmount': remaining,
@@ -1952,7 +1971,7 @@ class FirestoreService:
         if debt_data.get('amountInTRY') is not None:
             record['amountInTRY'] = float(debt_data['amountInTRY'])
 
-        # Faiz oranı bilgisel (0 serbest); eşit taksit hâlâ anapara üzerinden
+        # Faiz: loan'da aylık akdi faiz (KKDF+BSMV ile taksit hesabına girer)
         if debt_data.get('interestRate') is not None and kind != 'credit_card':
             try:
                 record['interestRate'] = max(0.0, float(debt_data.get('interestRate') or 0))
@@ -1978,8 +1997,39 @@ class FirestoreService:
             record['startDate'] = start_date
             if 'interestRate' not in record:
                 record['interestRate'] = 0.0
+
+            rate = float(record.get('interestRate') or 0)
+            loan_type = normalize_loan_type(debt_data.get('loanType'))
+            if kind == 'loan':
+                record['loanType'] = loan_type
+
+            override_raw = debt_data.get('installmentAmount')
+            override = None
+            if override_raw is not None and str(override_raw).strip() != '':
+                try:
+                    override = float(override_raw)
+                except (TypeError, ValueError):
+                    raise ValueError('installmentAmount geçersiz')
+
+            if kind == 'loan':
+                unit = compute_loan_installment_amount(
+                    original, rate, installment_count, override, loan_type
+                )
+                amounts = build_fixed_installment_amounts(unit, installment_count)
+                record['installmentAmount'] = unit
+            else:
+                # Borç/alacak: faiz yoksa eşit anapara; faiz varsa loan formülü (varsayılan vergi profili)
+                if rate > 0 or (override is not None and override > 0):
+                    unit = compute_loan_installment_amount(
+                        original, rate, installment_count, override, loan_type
+                    )
+                    amounts = build_fixed_installment_amounts(unit, installment_count)
+                    record['installmentAmount'] = unit
+                else:
+                    amounts = split_equal_amounts(original, installment_count)
+                    record['installmentAmount'] = amounts[0] if amounts else original
+
             due_dates = build_loan_due_dates(parse_date(start_date), installment_count)
-            amounts = split_equal_amounts(original, installment_count)
             schedule_ref = self.get_debt_schedule_ref(user_id, doc_ref.id)
             for idx, (due, part) in enumerate(zip(due_dates, amounts), start=1):
                 item_ref = schedule_ref.document()
@@ -1993,25 +2043,118 @@ class FirestoreService:
                     'createdAt': firestore.SERVER_TIMESTAMP,
                     'updatedAt': firestore.SERVER_TIMESTAMP,
                 })
+            # Kalan = plan toplamı (faizli kredide anaparadan büyük olabilir)
+            record['remainingAmount'] = round(sum(amounts), 2)
 
         doc_ref.set(record)
         return doc_ref.id
 
     async def update_debt(self, user_id: str, debt_id: str, updates: Dict[str, Any]) -> bool:
         doc_ref = self.get_user_debts_ref(user_id).document(debt_id)
-        if not doc_ref.get().exists:
+        snap = doc_ref.get()
+        if not snap.exists:
             return False
+        debt = {'id': snap.id, **(snap.to_dict() or {})}
         allowed = {
             'name', 'counterparty', 'notes', 'status', 'creditLimit',
             'statementCutoffDay', 'currency', 'originalAmount', 'remainingAmount',
-            'amountInTRY', 'interestRate',
+            'amountInTRY', 'interestRate', 'installmentAmount', 'loanType',
         }
         clean = {k: v for k, v in updates.items() if k in allowed}
         if 'statementCutoffDay' in clean:
             clean['statementCutoffDay'] = max(1, min(int(clean['statementCutoffDay']), 28))
+        if 'loanType' in clean:
+            clean['loanType'] = normalize_loan_type(clean.get('loanType'))
+
+        # Manuel / yeniden hesaplanan taksit: bekleyen satırları güncelle
+        if (
+            'installmentAmount' in clean
+            or 'loanType' in clean
+            or (
+                'interestRate' in clean
+                and debt.get('kind') == 'loan'
+                and updates.get('recalcSchedule')
+            )
+        ):
+            await self._apply_loan_installment_update(user_id, debt, clean, updates)
+
         clean['updatedAt'] = firestore.SERVER_TIMESTAMP
+        # _apply may have set remainingAmount / installmentAmount
         doc_ref.update(clean)
         return True
+
+    async def _apply_loan_installment_update(
+        self,
+        user_id: str,
+        debt: Dict[str, Any],
+        clean: Dict[str, Any],
+        updates: Dict[str, Any],
+    ) -> None:
+        kind = debt.get('kind')
+        if kind not in ('loan', 'payable', 'receivable'):
+            clean.pop('installmentAmount', None)
+            return
+
+        schedule = await self.get_debt_schedule(user_id, debt['id'])
+        pending = [s for s in schedule if s.get('status') == 'pending']
+        if not pending and not schedule:
+            return
+
+        rate = float(
+            clean.get('interestRate')
+            if clean.get('interestRate') is not None
+            else (debt.get('interestRate') or 0)
+        )
+        loan_type = normalize_loan_type(
+            clean.get('loanType') if clean.get('loanType') is not None else debt.get('loanType')
+        )
+        principal = float(debt.get('originalAmount') or 0)
+        count = int(debt.get('installmentCount') or len(schedule) or 1)
+
+        override = None
+        if 'installmentAmount' in clean and not updates.get('recalcSchedule'):
+            try:
+                override = float(clean.get('installmentAmount'))
+            except (TypeError, ValueError):
+                raise ValueError('installmentAmount geçersiz')
+            if override <= 0:
+                raise ValueError('installmentAmount pozitif olmalı')
+        elif updates.get('recalcSchedule') or 'loanType' in clean or (
+            'interestRate' in clean and 'installmentAmount' not in updates
+        ):
+            # Tür / faiz değişince formülden yeniden hesapla (manuel override yoksa)
+            if 'installmentAmount' in updates and updates.get('installmentAmount') not in (None, ''):
+                try:
+                    override = float(updates.get('installmentAmount'))
+                except (TypeError, ValueError):
+                    override = None
+            else:
+                override = None
+        else:
+            return
+
+        if override is not None and override > 0:
+            unit = round(override, 2)
+        else:
+            unit = compute_loan_installment_amount(principal, rate, count, None, loan_type)
+
+        clean['installmentAmount'] = unit
+        clean['interestRate'] = rate
+        clean['loanType'] = loan_type
+
+        schedule_ref = self.get_debt_schedule_ref(user_id, debt['id'])
+        # Tüm satırların tutarını güncelle; paid/pending status korunur
+        for item in schedule:
+            schedule_ref.document(item['id']).update({
+                'amount': unit,
+                'updatedAt': firestore.SERVER_TIMESTAMP,
+            })
+
+        still_pending = [s for s in schedule if s.get('status') == 'pending']
+        new_remaining = round(unit * len(still_pending), 2) if still_pending else 0.0
+        clean['remainingAmount'] = new_remaining
+        if new_remaining <= 1e-9 and schedule:
+            clean['status'] = 'paid'
 
     async def delete_debt(self, user_id: str, debt_id: str) -> bool:
         doc_ref = self.get_user_debts_ref(user_id).document(debt_id)

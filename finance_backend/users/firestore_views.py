@@ -1332,6 +1332,8 @@ class FirestoreDebtDetailView(BaseFirestoreView):
             if not ok:
                 return Response({'error': 'Borç bulunamadı'}, status=status.HTTP_404_NOT_FOUND)
             return Response({'message': 'Borç güncellendi'})
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except exceptions.PermissionDenied as e:
             return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
         except Exception as e:

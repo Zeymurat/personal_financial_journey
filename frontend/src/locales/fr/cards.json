@@ -12,7 +12,13 @@
     "save": "Enregistrer",
     "cancel": "Annuler",
     "editCharge": "Edit charge",
-    "deleteCharge": "Delete charge"
+    "deleteCharge": "Delete charge",
+    "bulkExpense": "Bulk add expenses",
+    "editCard": "Edit card",
+    "saveAll": "Save all",
+    "saving": "Saving…",
+    "addRow": "Add row",
+    "removeRow": "Remove row"
   },
   "summary": {
     "totalDebt": "Solde total des cartes",
@@ -41,7 +47,16 @@
     "effectivePreview": "Première échéance : {{date}}",
     "chargeHint": "N’apparaît pas dans Transactions. La sortie d’argent a lieu au paiement.",
     "editChargeTitle": "Edit card charge",
-    "editPaidBlocked": "Charges with paid installments cannot be rebuilt; only category/description can change."
+    "editPaidBlocked": "Charges with paid installments cannot be rebuilt; only category/description can change.",
+    "editCardTitle": "Edit card",
+    "editCardHint": "Lower the limit or change statement day here. Existing installment due dates stay; new charges use the new cutoff.",
+    "bulkExpenseTitle": "Bulk expense entry",
+    "bulkExpenseHint": "Add single and installment purchases row by row to catch the card up. Empty amount rows are skipped.",
+    "paidInstallments": "Already paid installments?",
+    "paidInstallmentsNone": "None (all pending)",
+    "paidInstallmentsN": "First {{count}} paid (no cash expense)",
+    "paidInstallmentsHint": "Use when catching up an existing card. Paid rows appear on the plan but no cash expense is created; remaining debt uses pending only.",
+    "paidShort": "Paid #"
   },
   "detail": {
     "remaining": "Restant dû",
@@ -69,7 +84,11 @@
     "error": "Échec",
     "amountInvalid": "Montant invalide",
     "chargeDeleted": "Charge deleted",
-    "chargeUpdated": "Charge updated"
+    "chargeUpdated": "Charge updated",
+    "cardUpdated": "Card updated",
+    "bulkAdded": "{{count}} expenses saved",
+    "bulkPartial": "{{ok}} saved, {{fail}} failed",
+    "categoryRequired": "Pick a category on every filled row"
   },
   "confirm": {
     "deleteTitle": "Supprimer la carte",

@@ -73,6 +73,97 @@ def split_equal_amounts(total: float, count: int) -> List[float]:
     return amounts
 
 
+# TR kredi ürün tipleri → faiz üzerinden KKDF / BSMV (hesaplama araçları ile uyumlu)
+# Konut: muaf | Özel: 15/5 | İhtiyaç / Taşıt / İş yeri: 15/15
+LOAN_TYPE_CONSUMER = 'consumer'  # bireysel ihtiyaç
+LOAN_TYPE_VEHICLE = 'vehicle'  # taşıt
+LOAN_TYPE_COMMERCIAL = 'commercial'  # yatırım amaçlı iş yeri
+LOAN_TYPE_HOUSING = 'housing'  # konut
+LOAN_TYPE_SPECIAL = 'special'  # özel
+
+LOAN_TAX_PROFILES = {
+    LOAN_TYPE_HOUSING: (0.0, 0.0),
+    LOAN_TYPE_SPECIAL: (0.15, 0.05),
+    LOAN_TYPE_CONSUMER: (0.15, 0.15),
+    LOAN_TYPE_VEHICLE: (0.15, 0.15),
+    LOAN_TYPE_COMMERCIAL: (0.15, 0.15),
+}
+
+DEFAULT_LOAN_TYPE = LOAN_TYPE_CONSUMER
+
+
+def normalize_loan_type(loan_type: Optional[str]) -> str:
+    key = (loan_type or DEFAULT_LOAN_TYPE).strip().lower()
+    if key not in LOAN_TAX_PROFILES:
+        return DEFAULT_LOAN_TYPE
+    return key
+
+
+def loan_tax_rates(loan_type: Optional[str] = None) -> Tuple[float, float]:
+    """Returns (kkdf_rate, bsmv_rate) as decimals."""
+    return LOAN_TAX_PROFILES[normalize_loan_type(loan_type)]
+
+
+def loan_effective_monthly_rate(
+    monthly_interest_percent: float,
+    loan_type: Optional[str] = None,
+) -> float:
+    """Aylık akdi faiz (%) → KKDF+BSMV dahil efektif aylık oran (ondalık)."""
+    r = max(0.0, float(monthly_interest_percent or 0)) / 100.0
+    if r <= 0:
+        return 0.0
+    kkdf, bsmv = loan_tax_rates(loan_type)
+    return r * (1.0 + kkdf + bsmv)
+
+
+def annuity_payment(principal: float, monthly_rate: float, count: int) -> float:
+    """Eşit taksit (annuity). monthly_rate ondalık (örn. 0.05265)."""
+    n = max(1, int(count))
+    p = float(principal)
+    r = float(monthly_rate)
+    if n == 1:
+        return round(p, 2)
+    if r <= 1e-12:
+        return round(p / n, 2)
+    raw = p * r * (1.0 + r) ** n / ((1.0 + r) ** n - 1.0)
+    return round(raw, 2)
+
+
+def compute_loan_installment_amount(
+    principal: float,
+    monthly_interest_percent: float,
+    installment_count: int,
+    installment_override: Optional[float] = None,
+    loan_type: Optional[str] = None,
+) -> float:
+    """
+    Kredi aylık taksit tutarı.
+    installment_override > 0 ise banka tutarı elle geçer; aksi halde
+    aylık faiz + ürün tipine göre KKDF/BSMV ile annuity.
+    """
+    if installment_override is not None:
+        try:
+            ov = float(installment_override)
+        except (TypeError, ValueError):
+            ov = 0.0
+        if ov > 0:
+            return round(ov, 2)
+
+    n = max(1, int(installment_count))
+    p = float(principal)
+    r_eff = loan_effective_monthly_rate(monthly_interest_percent, loan_type)
+    if r_eff <= 0:
+        return split_equal_amounts(p, n)[0] if n else round(p, 2)
+    return annuity_payment(p, r_eff, n)
+
+
+def build_fixed_installment_amounts(installment_amount: float, count: int) -> List[float]:
+    """Aynı taksit tutarını N kez (kuruş yuvarlı)."""
+    n = max(1, int(count))
+    unit = round(float(installment_amount), 2)
+    return [unit] * n
+
+
 def compute_cc_min_payment(credit_limit: float, statement_balance: float) -> Tuple[float, float]:
     """
     BDDK-style: limit <= 50_000 → 20%, else 40%.

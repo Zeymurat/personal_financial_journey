@@ -13,7 +13,9 @@
     "save": "Save",
     "payNext": "Pay this installment",
     "payEarly": "Early payment",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "editInstallment": "Edit installment amount",
+    "recalcInstallment": "Recalculate by type"
   },
   "filters": {
     "all": "All",
@@ -63,11 +65,17 @@
     "counterpartyPayable": "Creditor",
     "counterpartyReceivable": "Debtor",
     "amountLoan": "Loan amount",
-    "interestRate": "Interest rate (%)",
-    "interestRateHint": "You can enter 0. Stored for reference.",
+    "interestRate": "Monthly interest rate (%)",
+    "interestRateHint": "Bank monthly contractual rate. Installment uses KKDF/BSMV for the selected loan type. 0 = equal principal split.",
     "payInstallmentCount": "How many installments",
     "nextInstallment": "Next installment",
-    "earlyHint": "Only full next installment(s). Partial amounts are rejected."
+    "earlyHint": "Only full next installment(s). Partial amounts are rejected.",
+    "effectiveRate": "Monthly cost incl. KKDF+BSMV ≈ %{rate}",
+    "installmentAmount": "Monthly installment",
+    "installmentAmountHint": "Auto-calculated; edit if it doesn’t match your bank.",
+    "useSuggested": "Use calculated ({{amount}})",
+    "loanType": "Loan type",
+    "loanTypeTaxHint": "For this type: KKDF %{kkdf}, BSMV %{bsmv}"
   },
   "detail": {
     "remaining": "Remaining",
@@ -86,7 +94,8 @@
     "paidAmount": "Paid",
     "interestRate": "Interest",
     "selectHint": "Select a record on the left",
-    "limitUsed": "Limit used"
+    "limitUsed": "Limit used",
+    "installmentAmount": "Monthly installment"
   },
   "toast": {
     "created": "Created",
@@ -103,5 +112,12 @@
   "confirm": {
     "deleteTitle": "Eintrag löschen",
     "deleteMessage": "Möchten Sie „{{name}}“ wirklich löschen? Dies kann nicht rückgängig gemacht werden."
+  },
+  "loanTypes": {
+    "consumer": "Consumer loan",
+    "vehicle": "Vehicle loan",
+    "commercial": "Commercial / workplace loan",
+    "housing": "Housing loan",
+    "special": "Special"
   }
 }

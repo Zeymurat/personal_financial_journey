@@ -23,6 +23,7 @@ const AddCardExpenseModal: React.FC<Props> = ({ isOpen, card, onClose, onCreated
   const [description, setDescription] = useState('');
   const [currency, setCurrency] = useState(card.currency || 'TRY');
   const [installmentCount, setInstallmentCount] = useState('1');
+  const [paidInstallmentCount, setPaidInstallmentCount] = useState('0');
   const [saving, setSaving] = useState(false);
 
   const previewDates = useMemo(() => {
@@ -34,6 +35,12 @@ const AddCardExpenseModal: React.FC<Props> = ({ isOpen, card, onClose, onCreated
     const cutoff = card.statementCutoffDay || 1;
     return toLocalDateString(nextStatementDate(parseDateOnly(date), cutoff));
   }, [card.statementCutoffDay, date]);
+
+  const countNum = Math.max(1, parseInt(installmentCount, 10) || 1);
+  const paidNum = Math.min(
+    countNum,
+    Math.max(0, parseInt(paidInstallmentCount, 10) || 0)
+  );
 
   if (!isOpen) return null;
 
@@ -47,6 +54,7 @@ const AddCardExpenseModal: React.FC<Props> = ({ isOpen, card, onClose, onCreated
     setSaving(true);
     try {
       const count = Math.max(1, parseInt(installmentCount, 10) || 1);
+      const paid = Math.min(count, Math.max(0, parseInt(paidInstallmentCount, 10) || 0));
       await debtAPI.addCharge(card.id, {
         amount: parsed,
         date,
@@ -54,15 +62,17 @@ const AddCardExpenseModal: React.FC<Props> = ({ isOpen, card, onClose, onCreated
         category,
         description,
         installmentCount: count,
+        paidInstallmentCount: paid > 0 ? paid : undefined,
       });
       setAmount('');
       setDescription('');
       setCategory('');
       setInstallmentCount('1');
+      setPaidInstallmentCount('0');
       onCreated();
     } catch (err) {
       console.error(err);
-      toast.error(t('toast.error'));
+      toast.error(err instanceof Error ? err.message : t('toast.error'));
     } finally {
       setSaving(false);
     }
@@ -122,7 +132,13 @@ const AddCardExpenseModal: React.FC<Props> = ({ isOpen, card, onClose, onCreated
               <label className="block text-sm font-semibold mb-1">{t('form.installments')}</label>
               <select
                 value={installmentCount}
-                onChange={(e) => setInstallmentCount(e.target.value)}
+                onChange={(e) => {
+                  setInstallmentCount(e.target.value);
+                  const next = Math.max(1, parseInt(e.target.value, 10) || 1);
+                  if ((parseInt(paidInstallmentCount, 10) || 0) > next) {
+                    setPaidInstallmentCount(String(next));
+                  }
+                }}
                 className="w-full p-3 rounded-xl border dark:bg-slate-700 dark:border-slate-600"
               >
                 {[1, 2, 3, 4, 6, 9, 12].map((n) => (
@@ -133,6 +149,26 @@ const AddCardExpenseModal: React.FC<Props> = ({ isOpen, card, onClose, onCreated
               </select>
             </div>
           </div>
+
+          {countNum > 1 && (
+            <div>
+              <label className="block text-sm font-semibold mb-1">{t('form.paidInstallments')}</label>
+              <select
+                value={String(paidNum)}
+                onChange={(e) => setPaidInstallmentCount(e.target.value)}
+                className="w-full p-3 rounded-xl border dark:bg-slate-700 dark:border-slate-600"
+              >
+                {Array.from({ length: countNum + 1 }, (_, i) => i).map((n) => (
+                  <option key={n} value={String(n)}>
+                    {n === 0
+                      ? t('form.paidInstallmentsNone')
+                      : t('form.paidInstallmentsN', { count: n })}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-slate-400 mt-1">{t('form.paidInstallmentsHint')}</p>
+            </div>
+          )}
 
           <p className="text-sm text-slate-500">
             {t('form.effectivePreview', { date: previewEffective })}
