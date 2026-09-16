@@ -374,16 +374,16 @@ const Cards: React.FC = () => {
                               {selected.currency}
                             </p>
                           </div>
-                          {group.allPending && (
-                            <div className="flex gap-1 shrink-0">
-                              <button
-                                type="button"
-                                onClick={() => setEditingCharge(group)}
-                                className="p-2 text-slate-600 hover:bg-slate-200/70 dark:hover:bg-slate-700 rounded-lg"
-                                title={t('actions.editCharge')}
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </button>
+                          <div className="flex gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => setEditingCharge(group)}
+                              className="p-2 text-slate-600 hover:bg-slate-200/70 dark:hover:bg-slate-700 rounded-lg"
+                              title={t('actions.editCharge')}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            {group.allPending && (
                               <button
                                 type="button"
                                 onClick={() => setPendingChargeDelete(group)}
@@ -392,8 +392,8 @@ const Cards: React.FC = () => {
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
                         <ul className="mt-2 space-y-1 border-t border-slate-200/70 dark:border-slate-700/50 pt-2">
                           {group.items.map((item) => (

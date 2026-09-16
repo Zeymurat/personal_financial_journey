@@ -9,6 +9,7 @@ import { TRANSACTION_CURRENCIES } from '../constants';
 import { formatTrMoneyInput, parseTrMoneyString } from '../../../utils/trNumberInput';
 import { toLocalDateString } from '../../../utils/localDate';
 import { buildInstallmentDueDates, nextStatementDate, parseDateOnly } from '../../../utils/creditCardCycle';
+import { CARD_INSTALLMENT_OPTIONS } from '../../../utils/cardInstallments';
 import { useFinance } from '../../../contexts/FinanceContext';
 
 interface AddTransactionModalProps {
@@ -308,7 +309,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                   onChange={(e) => setFormData({ ...formData, installmentCount: e.target.value })}
                   className="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-xl dark:bg-slate-700 dark:text-white"
                 >
-                  {[1, 2, 3, 4, 6, 9, 12].map((n) => (
+                  {CARD_INSTALLMENT_OPTIONS.map((n) => (
                     <option key={n} value={String(n)}>
                       {n === 1 ? t('form.singlePayment') : t('form.nInstallments', { count: n })}
                     </option>

@@ -56,7 +56,12 @@
     "effectivePreview": "İlk kesim / vade: {{date}}",
     "chargeHint": "İşlemler listesine eklenmez. Hesaptan para kartı ödediğinizde çıkar.",
     "editChargeTitle": "Kart harcamasını düzenle",
-    "editPaidBlocked": "Ödenmiş taksit içeren harcama yeniden yapılandırılamaz; yalnızca kategori/açıklama güncellenebilir."
+    "editChargeHint": "Ödenmiş taksitler korunur. Vade tarihlerini satır satır düzeltebilir veya ilk bekleyen vadeyi girip hizalayabilirsiniz.",
+    "editPaidBlocked": "Ödenmiş taksit içeren harcama yeniden yapılandırılamaz; yalnızca kategori/açıklama güncellenebilir.",
+    "firstPendingDueDate": "İlk bekleyen taksit tarihi",
+    "firstPendingDueDateHint": "Örn. 2 taksit ödendiyse 3. taksitin vadesi. Kalan taksitler bundan aylık ilerler.",
+    "alignDueDates": "Vadeleri hizala",
+    "installmentDueDates": "Taksit vadeleri"
   },
   "detail": {
     "remaining": "Kalan borç",

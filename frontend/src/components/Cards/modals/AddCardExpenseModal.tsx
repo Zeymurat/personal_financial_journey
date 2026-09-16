@@ -6,7 +6,13 @@ import { debtAPI } from '../../../services/apiService';
 import { TRANSACTION_CURRENCIES, TRANSACTION_CATEGORIES } from '../../Transactions/constants';
 import { formatTrMoneyInput, parseTrMoneyString } from '../../../utils/trNumberInput';
 import { toLocalDateString } from '../../../utils/localDate';
-import { buildInstallmentDueDates, nextStatementDate, parseDateOnly } from '../../../utils/creditCardCycle';
+import {
+  buildDueDatesFromFirstPending,
+  buildInstallmentDueDates,
+  nextStatementDate,
+  parseDateOnly,
+} from '../../../utils/creditCardCycle';
+import { CARD_INSTALLMENT_OPTIONS } from '../../../utils/cardInstallments';
 
 interface Props {
   isOpen: boolean;
@@ -24,23 +30,29 @@ const AddCardExpenseModal: React.FC<Props> = ({ isOpen, card, onClose, onCreated
   const [currency, setCurrency] = useState(card.currency || 'TRY');
   const [installmentCount, setInstallmentCount] = useState('1');
   const [paidInstallmentCount, setPaidInstallmentCount] = useState('0');
+  const [firstPendingDueDate, setFirstPendingDueDate] = useState('');
   const [saving, setSaving] = useState(false);
-
-  const previewDates = useMemo(() => {
-    const cutoff = card.statementCutoffDay || 1;
-    return buildInstallmentDueDates(date, cutoff, parseInt(installmentCount, 10) || 1);
-  }, [card.statementCutoffDay, date, installmentCount]);
-
-  const previewEffective = useMemo(() => {
-    const cutoff = card.statementCutoffDay || 1;
-    return toLocalDateString(nextStatementDate(parseDateOnly(date), cutoff));
-  }, [card.statementCutoffDay, date]);
 
   const countNum = Math.max(1, parseInt(installmentCount, 10) || 1);
   const paidNum = Math.min(
     countNum,
     Math.max(0, parseInt(paidInstallmentCount, 10) || 0)
   );
+  const useCatchUp = paidNum > 0 && paidNum < countNum && Boolean(firstPendingDueDate);
+
+  const previewDates = useMemo(() => {
+    const cutoff = card.statementCutoffDay || 1;
+    if (useCatchUp) {
+      return buildDueDatesFromFirstPending(firstPendingDueDate, countNum, paidNum);
+    }
+    return buildInstallmentDueDates(date, cutoff, countNum);
+  }, [card.statementCutoffDay, date, countNum, paidNum, firstPendingDueDate, useCatchUp]);
+
+  const previewEffective = useMemo(() => {
+    if (useCatchUp) return firstPendingDueDate;
+    const cutoff = card.statementCutoffDay || 1;
+    return toLocalDateString(nextStatementDate(parseDateOnly(date), cutoff));
+  }, [card.statementCutoffDay, date, firstPendingDueDate, useCatchUp]);
 
   if (!isOpen) return null;
 
@@ -63,12 +75,15 @@ const AddCardExpenseModal: React.FC<Props> = ({ isOpen, card, onClose, onCreated
         description,
         installmentCount: count,
         paidInstallmentCount: paid > 0 ? paid : undefined,
+        firstPendingDueDate:
+          paid > 0 && paid < count && firstPendingDueDate ? firstPendingDueDate : undefined,
       });
       setAmount('');
       setDescription('');
       setCategory('');
       setInstallmentCount('1');
       setPaidInstallmentCount('0');
+      setFirstPendingDueDate('');
       onCreated();
     } catch (err) {
       console.error(err);
@@ -141,7 +156,7 @@ const AddCardExpenseModal: React.FC<Props> = ({ isOpen, card, onClose, onCreated
                 }}
                 className="w-full p-3 rounded-xl border dark:bg-slate-700 dark:border-slate-600"
               >
-                {[1, 2, 3, 4, 6, 9, 12].map((n) => (
+                {CARD_INSTALLMENT_OPTIONS.map((n) => (
                   <option key={n} value={String(n)}>
                     {n === 1 ? t('form.singlePayment') : t('form.nInstallments', { count: n })}
                   </option>
@@ -167,6 +182,21 @@ const AddCardExpenseModal: React.FC<Props> = ({ isOpen, card, onClose, onCreated
                 ))}
               </select>
               <p className="text-xs text-slate-400 mt-1">{t('form.paidInstallmentsHint')}</p>
+            </div>
+          )}
+
+          {paidNum > 0 && paidNum < countNum && (
+            <div>
+              <label className="block text-sm font-semibold mb-1">
+                {t('form.firstPendingDueDate')}
+              </label>
+              <input
+                type="date"
+                value={firstPendingDueDate}
+                onChange={(e) => setFirstPendingDueDate(e.target.value)}
+                className="w-full p-3 rounded-xl border dark:bg-slate-700 dark:border-slate-600"
+              />
+              <p className="text-xs text-slate-400 mt-1">{t('form.firstPendingDueDateHint')}</p>
             </div>
           )}
 

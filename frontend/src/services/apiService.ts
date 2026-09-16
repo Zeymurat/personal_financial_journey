@@ -482,6 +482,9 @@ export const debtAPI = {
       installmentCount?: number;
       /** İlk N taksit geçmişte ödendi — nakit gider yazılmaz */
       paidInstallmentCount?: number;
+      /** Catch-up: ilk bekleyen taksitin vadesi (ödenenler geriye dizilir) */
+      firstPendingDueDate?: string;
+      firstDueDate?: string;
       category?: string;
       description?: string;
       currency?: string;
@@ -500,8 +503,12 @@ export const debtAPI = {
       amount?: number;
       date?: string;
       installmentCount?: number;
+      paidInstallmentCount?: number;
+      firstPendingDueDate?: string;
+      firstDueDate?: string;
       category?: string;
       description?: string;
+      scheduleItems?: Array<{ id: string; dueDate: string }>;
     }
   ) {
     return await apiRequest(`/auth/debts/${id}/charges/${chargeId}/`, {

@@ -45,6 +45,19 @@ export function buildInstallmentDueDates(
   return Array.from({ length: count }, (_, i) => toLocalDateString(addMonths(first, i)));
 }
 
+/** Catch-up: ilk bekleyen vadeden geriye/ileriye aylık dizi. */
+export function buildDueDatesFromFirstPending(
+  firstPendingDue: Date | string,
+  installmentCount: number,
+  paidInstallmentCount: number = 0
+): string[] {
+  const base =
+    typeof firstPendingDue === 'string' ? parseDateOnly(firstPendingDue) : firstPendingDue;
+  const n = Math.max(1, Math.floor(installmentCount) || 1);
+  const paid = Math.max(0, Math.min(Math.floor(paidInstallmentCount) || 0, n));
+  return Array.from({ length: n }, (_, i) => toLocalDateString(addMonths(base, i - paid)));
+}
+
 export function buildLoanDueDates(startDate: Date | string, installmentCount: number): string[] {
   const base = typeof startDate === 'string' ? parseDateOnly(startDate) : startDate;
   const count = Math.max(1, Math.floor(installmentCount) || 1);

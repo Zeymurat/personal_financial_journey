@@ -57,6 +57,29 @@ def build_installment_due_dates(
     return [add_months(first, i) for i in range(count)]
 
 
+def build_due_dates_from_first_pending(
+    first_pending_due: date,
+    installment_count: int,
+    paid_installment_count: int = 0,
+) -> List[date]:
+    """
+    Catch-up: ilk bekleyen vade biliniyor (örn. 3. taksit = 3 Ekim).
+    Ödenen taksitler geriye, kalanlar ileriye aylık dizilir.
+    """
+    n = max(1, int(installment_count))
+    paid = max(0, min(int(paid_installment_count or 0), n))
+    return [add_months(first_pending_due, i - paid) for i in range(n)]
+
+
+def build_due_dates_from_first(
+    first_due: date,
+    installment_count: int,
+) -> List[date]:
+    """1. taksit vadinden itibaren eşit aylık."""
+    n = max(1, int(installment_count))
+    return [add_months(first_due, i) for i in range(n)]
+
+
 def build_loan_due_dates(start_date: date, installment_count: int) -> List[date]:
     count = max(1, int(installment_count))
     return [add_months(start_date, i) for i in range(count)]

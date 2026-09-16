@@ -7,6 +7,7 @@ import { debtAPI } from '../../../services/apiService';
 import { TRANSACTION_CATEGORIES } from '../../Transactions/constants';
 import { formatTrMoneyInput, parseTrMoneyString } from '../../../utils/trNumberInput';
 import { toLocalDateString } from '../../../utils/localDate';
+import { CARD_INSTALLMENT_OPTIONS } from '../../../utils/cardInstallments';
 
 interface Props {
   isOpen: boolean;
@@ -23,6 +24,7 @@ type DraftRow = {
   description: string;
   installmentCount: string;
   paidInstallmentCount: string;
+  firstPendingDueDate: string;
 };
 
 function newRow(defaults?: Partial<DraftRow>): DraftRow {
@@ -34,6 +36,7 @@ function newRow(defaults?: Partial<DraftRow>): DraftRow {
     description: '',
     installmentCount: '1',
     paidInstallmentCount: '0',
+    firstPendingDueDate: '',
     ...defaults,
   };
 }
@@ -96,6 +99,10 @@ const BulkAddCardExpensesModal: React.FC<Props> = ({ isOpen, card, onClose, onCr
           description: r.description,
           installmentCount: r.count,
           paidInstallmentCount: r.paid > 0 ? r.paid : undefined,
+          firstPendingDueDate:
+            r.paid > 0 && r.paid < r.count && r.firstPendingDueDate
+              ? r.firstPendingDueDate
+              : undefined,
         });
         ok += 1;
       }
@@ -186,7 +193,7 @@ const BulkAddCardExpensesModal: React.FC<Props> = ({ isOpen, card, onClose, onCr
                       }}
                       className="w-full p-2 rounded-lg border text-sm dark:bg-slate-700 dark:border-slate-600"
                     >
-                      {[1, 2, 3, 4, 6, 9, 12].map((n) => (
+                      {CARD_INSTALLMENT_OPTIONS.map((n) => (
                         <option key={n} value={String(n)}>
                           {n === 1
                             ? t('form.singlePayment')
@@ -229,6 +236,23 @@ const BulkAddCardExpensesModal: React.FC<Props> = ({ isOpen, card, onClose, onCr
                     </select>
                   </div>
                 </div>
+                {(parseInt(row.paidInstallmentCount, 10) || 0) > 0 &&
+                  (parseInt(row.paidInstallmentCount, 10) || 0) <
+                    (parseInt(row.installmentCount, 10) || 1) && (
+                    <div>
+                      <label className="block text-xs font-semibold mb-1">
+                        {t('form.firstPendingDueDate')}
+                      </label>
+                      <input
+                        type="date"
+                        value={row.firstPendingDueDate}
+                        onChange={(e) =>
+                          updateRow(row.id, { firstPendingDueDate: e.target.value })
+                        }
+                        className="w-full p-2 rounded-lg border text-sm dark:bg-slate-700 dark:border-slate-600"
+                      />
+                    </div>
+                  )}
                 <div>
                   <label className="block text-xs font-semibold mb-1">{t('form.description')}</label>
                   <input
