@@ -70,6 +70,7 @@
     "periodBalance": "Dönem borcu",
     "minPayment": "Asgari ödeme",
     "statementDate": "Kesim tarihi",
+    "paymentDueDate": "Son ödeme",
     "schedule": "Taksit / kesim planı",
     "pending": "Bekleyen",
     "paid": "Ödendi",
@@ -79,7 +80,17 @@
     "goDebtsHint": "Kart ödemesi ve dönem özeti Borçlar sayfasında da görünür.",
     "charges": "Harcamalar",
     "chargeFallback": "Harcama",
-    "chargeTotal": "Toplam {{amount}}"
+    "chargeTotal": "Toplam {{amount}}",
+    "availableLimit": "Kullanılabilir limit",
+    "availableLimitHint": "Limit − kalan borç (provizyon hariç)",
+    "tabCharges": "Harcamalar",
+    "tabPeriod": "Dönem içi",
+    "tabPending": "Bekleyen taksitler",
+    "monthAll": "Tümü",
+    "chargesCollapsedHint": "Satıra dokunarak taksitleri aç",
+    "paidOfTotal": "{{paid}}/{{total}} ödendi",
+    "noPeriodItems": "Bu kesim döneminde bekleyen taksit yok",
+    "noPendingItems": "Bekleyen taksit yok"
   },
   "toast": {
     "created": "Kart eklendi",

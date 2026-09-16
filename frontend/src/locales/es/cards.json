@@ -70,6 +70,7 @@
     "periodBalance": "Saldo del periodo",
     "minPayment": "Pago mínimo",
     "statementDate": "Fecha de extracto",
+    "paymentDueDate": "Payment due",
     "schedule": "Plan de cuotas / cortes",
     "pending": "Pendiente",
     "paid": "Pagado",
@@ -79,7 +80,17 @@
     "goDebtsHint": "Los pagos y extractos también aparecen en Deudas.",
     "charges": "Charges",
     "chargeFallback": "Charge",
-    "chargeTotal": "Total {{amount}}"
+    "chargeTotal": "Total {{amount}}",
+    "availableLimit": "Available limit",
+    "availableLimitHint": "Limit − outstanding (excludes authorizations)",
+    "tabCharges": "Charges",
+    "tabPeriod": "Current period",
+    "tabPending": "Pending installments",
+    "monthAll": "All",
+    "chargesCollapsedHint": "Tap a row to expand installments",
+    "paidOfTotal": "{{paid}}/{{total}} paid",
+    "noPeriodItems": "No pending installments in this statement period",
+    "noPendingItems": "No pending installments"
   },
   "toast": {
     "created": "Tarjeta creada",

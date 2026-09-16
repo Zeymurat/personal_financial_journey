@@ -70,6 +70,7 @@
     "periodBalance": "Solde de période",
     "minPayment": "Paiement minimum",
     "statementDate": "Date de relevé",
+    "paymentDueDate": "Payment due",
     "schedule": "Plan d’échéances",
     "pending": "En attente",
     "paid": "Payé",
@@ -79,7 +80,17 @@
     "goDebtsHint": "Les paiements et relevés apparaissent aussi dans Dettes.",
     "charges": "Charges",
     "chargeFallback": "Charge",
-    "chargeTotal": "Total {{amount}}"
+    "chargeTotal": "Total {{amount}}",
+    "availableLimit": "Available limit",
+    "availableLimitHint": "Limit − outstanding (excludes authorizations)",
+    "tabCharges": "Charges",
+    "tabPeriod": "Current period",
+    "tabPending": "Pending installments",
+    "monthAll": "All",
+    "chargesCollapsedHint": "Tap a row to expand installments",
+    "paidOfTotal": "{{paid}}/{{total}} paid",
+    "noPeriodItems": "No pending installments in this statement period",
+    "noPendingItems": "No pending installments"
   },
   "toast": {
     "created": "Carte créée",

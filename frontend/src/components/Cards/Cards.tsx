@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { CreditCard, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, CreditCard, Pencil, Plus, Trash2 } from 'lucide-react';
 import PageHeader from '../common/PageHeader';
 import { useTokenValidation } from '../../hooks/useTokenValidation';
 import { useFinance } from '../../contexts/FinanceContext';
@@ -17,9 +17,29 @@ import BulkAddCardExpensesModal from './modals/BulkAddCardExpensesModal';
 import EditCardChargeModal from './modals/EditCardChargeModal';
 import ConfirmModal from '../common/ConfirmModal';
 import { groupCharges, type ChargeGroup } from '../../utils/groupCardCharges';
+import { addDaysToDateString, formatDisplayDate } from '../../utils/localDate';
+
+type DetailTab = 'charges' | 'period' | 'pending';
+
+function monthKey(dueDate: string): string {
+  return (dueDate || '').slice(0, 7);
+}
+
+function formatMonthLabel(ym: string, locale: string): string {
+  const [y, m] = ym.split('-').map(Number);
+  if (!y || !m) return ym;
+  try {
+    return new Date(y, m - 1, 1).toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'long',
+    });
+  } catch {
+    return ym;
+  }
+}
 
 const Cards: React.FC = () => {
-  const { t } = useTranslation('cards');
+  const { t, i18n } = useTranslation('cards');
   useTokenValidation();
   const { exchangeRates, refreshTransactions, refreshDebts } = useFinance();
 
@@ -38,8 +58,48 @@ const Cards: React.FC = () => {
   const [editingCharge, setEditingCharge] = useState<ChargeGroup | null>(null);
   const [pendingChargeDelete, setPendingChargeDelete] = useState<ChargeGroup | null>(null);
   const [deletingCharge, setDeletingCharge] = useState(false);
+  const [detailTab, setDetailTab] = useState<DetailTab>('charges');
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [pendingMonth, setPendingMonth] = useState<string>('all');
+  const [focusChargeId, setFocusChargeId] = useState<string | null>(null);
 
   const chargeGroups = useMemo(() => groupCharges(schedule), [schedule]);
+
+  const availableLimit = useMemo(() => {
+    if (!selected) return null;
+    const limit = selected.creditLimit || 0;
+    if (limit <= 0) return null;
+    return Math.max(0, limit - (selected.remainingAmount || 0));
+  }, [selected]);
+
+  const pendingItems = useMemo(
+    () =>
+      schedule
+        .filter((s) => s.status === 'pending')
+        .sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || '')),
+    [schedule]
+  );
+
+  const pendingMonths = useMemo(() => {
+    const keys = new Set<string>();
+    for (const item of pendingItems) {
+      const mk = monthKey(item.dueDate);
+      if (mk.length === 7) keys.add(mk);
+    }
+    return Array.from(keys).sort();
+  }, [pendingItems]);
+
+  const filteredPending = useMemo(() => {
+    if (pendingMonth === 'all') return pendingItems;
+    return pendingItems.filter((s) => monthKey(s.dueDate) === pendingMonth);
+  }, [pendingItems, pendingMonth]);
+
+  const pendingMonthTotal = useMemo(
+    () => filteredPending.reduce((sum, s) => sum + (s.amount || 0), 0),
+    [filteredPending]
+  );
+
+  const periodItems = summary?.items || [];
 
   const toTry = useCallback(
     (amount: number, currency: string) => {
@@ -70,14 +130,45 @@ const Cards: React.FC = () => {
     void loadCards();
   }, [loadCards]);
 
+  useEffect(() => {
+    if (!focusChargeId) return;
+    const el = document.querySelector(
+      `[data-charge-id="${CSS.escape(focusChargeId)}"]`
+    ) as HTMLElement | null;
+    if (el) {
+      el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+    const timer = window.setTimeout(() => setFocusChargeId(null), 400);
+    return () => window.clearTimeout(timer);
+  }, [focusChargeId, chargeGroups]);
+
   const openDetail = async (card: Debt) => {
     setSelected(card);
     setSummary(null);
     setSchedule([]);
+    setDetailTab('charges');
+    setExpandedIds(new Set());
+    setPendingMonth('all');
     try {
       const sched = await debtAPI.getSchedule(card.id);
       setSchedule(Array.isArray(sched?.data) ? sched.data : []);
       const sum = await debtAPI.getStatementSummary(card.id);
+      setSummary(sum?.data || null);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const refreshSelected = async (cardId: string, preferCard?: Debt) => {
+    await loadCards();
+    const refreshed = await debtAPI.get(cardId);
+    const next = refreshed?.data || preferCard;
+    if (!next) return;
+    setSelected(next);
+    try {
+      const sched = await debtAPI.getSchedule(cardId);
+      setSchedule(Array.isArray(sched?.data) ? sched.data : []);
+      const sum = await debtAPI.getStatementSummary(cardId);
       setSummary(sum?.data || null);
     } catch (e) {
       console.error(e);
@@ -123,9 +214,7 @@ const Cards: React.FC = () => {
       await debtAPI.deleteCharge(selected.id, pendingChargeDelete.chargeId);
       toast.success(t('toast.chargeDeleted'));
       setPendingChargeDelete(null);
-      await loadCards();
-      const refreshed = await debtAPI.get(selected.id);
-      await openDetail(refreshed?.data || selected);
+      await refreshSelected(selected.id, selected);
       await refreshDebts();
     } catch (err) {
       console.error(err);
@@ -135,7 +224,55 @@ const Cards: React.FC = () => {
     }
   };
 
+  const toggleExpanded = (chargeId: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(chargeId)) next.delete(chargeId);
+      else next.add(chargeId);
+      return next;
+    });
+  };
+
   const progress = selected ? debtProgress(selected) : null;
+  const locale = i18n.language || 'tr';
+
+  const tabBtn = (id: DetailTab, label: string) => (
+    <button
+      type="button"
+      onClick={() => setDetailTab(id)}
+      className={`px-3 py-2 text-sm font-semibold rounded-lg transition ${
+        detailTab === id
+          ? 'bg-brand-ink text-white dark:bg-brand-champagne dark:text-brand-ink'
+          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+      }`}
+    >
+      {label}
+    </button>
+  );
+
+  const renderScheduleRow = (item: DebtScheduleItem) => (
+    <li
+      key={item.id}
+      className="flex justify-between gap-2 text-sm text-slate-600 dark:text-slate-300 py-1.5 border-b border-slate-100 dark:border-slate-700/40 last:border-0"
+    >
+      <div className="min-w-0">
+        <p className="font-medium truncate">
+          {item.description?.trim() || item.category || t('detail.chargeFallback')}
+        </p>
+        <p className="text-xs text-slate-400">
+          {formatDisplayDate(item.dueDate)}
+          {item.sequence ? ` · #${item.sequence}` : ''}
+          {item.installmentCount && item.installmentCount > 1
+            ? ` / ${item.installmentCount}`
+            : ''}
+        </p>
+      </div>
+      <span className="tabular-nums font-semibold shrink-0">
+        {(item.amount || 0).toLocaleString('tr-TR', { maximumFractionDigits: 2 })}{' '}
+        {selected?.currency}
+      </span>
+    </li>
+  );
 
   return (
     <div className="p-8 min-h-screen space-y-8 bg-[radial-gradient(ellipse_at_top,_rgba(196,165,116,0.08),_transparent_55%)]">
@@ -236,192 +373,353 @@ const Cards: React.FC = () => {
           )}
         </div>
 
-        <div className="lg:col-span-3 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 bg-white/95 dark:bg-brand-surface-dark shadow-sm min-h-[360px] sticky top-6">
+        <div className="lg:col-span-3 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 bg-white/95 dark:bg-brand-surface-dark shadow-sm min-h-[520px] lg:min-h-[calc(100vh-12rem)] flex flex-col">
           {!selected || !progress ? (
-            <div className="h-full min-h-[280px] flex items-center justify-center">
+            <div className="flex-1 min-h-[280px] flex items-center justify-center">
               <p className="text-slate-400 text-center max-w-xs">{t('detail.selectHint')}</p>
             </div>
           ) : (
-            <div className="space-y-5">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                    {selected.name}
-                  </h2>
-                  <p className="text-sm text-slate-500 mt-0.5">
-                    {selected.counterparty ? `${selected.counterparty} · ` : ''}
-                    {t('detail.cutoff')}: {selected.statementCutoffDay}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setShowEditCard(true)}
-                    className="p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 rounded-lg"
-                    title={t('actions.editCard')}
-                  >
-                    <Pencil className="w-5 h-5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPendingDelete(selected)}
-                    className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg"
-                    title={t('actions.delete')}
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/40 p-4 border border-slate-100 dark:border-slate-700/50">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
-                  {t('detail.remaining')}
-                </p>
-                <p className="font-black text-xl tabular-nums">
-                  {(selected.remainingAmount || 0).toLocaleString('tr-TR', {
-                    maximumFractionDigits: 2,
-                  })}{' '}
-                  <span className="text-sm font-semibold text-slate-400">{selected.currency}</span>
-                </p>
-                {(selected.creditLimit || 0) > 0 && (
-                  <p className="text-xs text-slate-400 mt-1">
-                    {t('detail.limit')}:{' '}
-                    {selected.creditLimit!.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}{' '}
-                    {selected.currency}
-                  </p>
-                )}
-              </div>
-
-              {summary && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-xl border border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/20">
-                    <p className="text-xs text-slate-500">{t('detail.periodBalance')}</p>
-                    <p className="font-bold tabular-nums">
-                      {summary.periodBalance.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}{' '}
-                      {summary.currency}
+            <div className="grid grid-cols-1 min-[1200px]:grid-cols-[minmax(240px,300px)_minmax(0,1fr)] gap-4 flex-1 min-h-0">
+              {/* Sol: kart özeti + aksiyonlar */}
+              <aside className="flex flex-col gap-3 min-[1200px]:overflow-y-auto min-[1200px]:pr-1 min-h-0">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight truncate">
+                      {selected.name}
+                    </h2>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                      {selected.counterparty ? `${selected.counterparty} · ` : ''}
+                      {t('detail.cutoff')}: {selected.statementCutoffDay}
                     </p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setShowEditCard(true)}
+                      className="p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 rounded-lg"
+                      title={t('actions.editCard')}
+                    >
+                      <Pencil className="w-5 h-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPendingDelete(selected)}
+                      className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg"
+                      title={t('actions.delete')}
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/40 p-4 border border-slate-100 dark:border-slate-700/50">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                    {t('detail.remaining')}
+                  </p>
+                  <p className="font-black text-xl tabular-nums">
+                    {(selected.remainingAmount || 0).toLocaleString('tr-TR', {
+                      maximumFractionDigits: 2,
+                    })}{' '}
+                    <span className="text-sm font-semibold text-slate-400">{selected.currency}</span>
+                  </p>
+                  {(selected.creditLimit || 0) > 0 && (
                     <p className="text-xs text-slate-400 mt-1">
-                      {t('detail.statementDate')}: {summary.statementDate}
+                      {t('detail.limit')}:{' '}
+                      {selected.creditLimit!.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}{' '}
+                      {selected.currency}
                     </p>
-                  </div>
-                  <div className="p-3 rounded-xl border border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/20">
-                    <p className="text-xs text-slate-500">{t('detail.minPayment')}</p>
-                    <p className="font-bold tabular-nums">
-                      {summary.minPayment.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}{' '}
-                      {summary.currency}
-                    </p>
-                  </div>
+                  )}
                 </div>
-              )}
 
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowExpense(true)}
-                  className="py-3.5 rounded-xl bg-brand-ink text-white font-semibold hover:bg-brand-ink-light shadow-sm transition"
-                >
-                  {t('actions.addExpense')}
-                </button>
-                {selected.status === 'active' && (
+                {availableLimit != null && (
+                  <div className="rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/20 p-4 border border-emerald-500/20">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700/70 dark:text-emerald-300/70 mb-1">
+                      {t('detail.availableLimit')}
+                    </p>
+                    <p className="font-black text-xl tabular-nums text-emerald-800 dark:text-emerald-200">
+                      {availableLimit.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}{' '}
+                      <span className="text-sm font-semibold opacity-70">{selected.currency}</span>
+                    </p>
+                    {/* <p className="text-xs text-slate-400 mt-1">{t('detail.availableLimitHint')}</p> */}
+                  </div>
+                )}
+
+                {summary && (
+                  <>
+                    <div className="p-3 rounded-xl border border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/20">
+                      <p className="text-xs text-slate-500">{t('detail.periodBalance')}</p>
+                      <p className="font-bold tabular-nums">
+                        {summary.periodBalance.toLocaleString('tr-TR', {
+                          maximumFractionDigits: 2,
+                        })}{' '}
+                        {summary.currency}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        {t('detail.statementDate')}: {formatDisplayDate(summary.statementDate)}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-xl border border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/20">
+                      <p className="text-xs text-slate-500">{t('detail.minPayment')}</p>
+                      <p className="font-bold tabular-nums">
+                        {summary.minPayment.toLocaleString('tr-TR', {
+                          maximumFractionDigits: 2,
+                        })}{' '}
+                        {summary.currency}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        {t('detail.paymentDueDate')}:{' '}
+                        {formatDisplayDate(addDaysToDateString(summary.statementDate, 10))}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                <div className="flex flex-col gap-2 pt-1">
                   <button
                     type="button"
-                    onClick={() => setShowPay(true)}
-                    className="py-3.5 rounded-xl border border-slate-300 dark:border-slate-600 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                    onClick={() => setShowExpense(true)}
+                    className="w-full py-3 rounded-xl bg-brand-ink text-white font-semibold hover:bg-brand-ink-light shadow-sm transition"
                   >
-                    {t('actions.payCard')}
+                    {t('actions.addExpense')}
                   </button>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowBulkExpense(true)}
-                className="w-full py-3 rounded-xl border border-dashed border-brand-ink/30 dark:border-brand-champagne/30 text-sm font-semibold hover:bg-brand-champagne/20 dark:hover:bg-brand-ink/30 transition"
-              >
-                {t('actions.bulkExpense')}
-              </button>
+                  {selected.status === 'active' && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPay(true)}
+                      className="w-full py-3 rounded-xl border border-slate-300 dark:border-slate-600 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                    >
+                      {t('actions.payCard')}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setShowBulkExpense(true)}
+                    className="w-full py-3 rounded-xl border border-dashed border-brand-ink/30 dark:border-brand-champagne/30 text-sm font-semibold hover:bg-brand-champagne/20 dark:hover:bg-brand-ink/30 transition"
+                  >
+                    {t('actions.bulkExpense')}
+                  </button>
+                </div>
+              </aside>
 
-              <p className="text-xs text-slate-400">{t('detail.goDebtsHint')}</p>
+              {/* Sağ: sekmeler + liste (viewport yüksekliği) */}
+              <section className="flex flex-col min-h-[28rem] min-[1200px]:min-h-0 flex-1 gap-3">
+                <div className="flex flex-wrap gap-1 p-1 rounded-xl bg-slate-100/80 dark:bg-slate-800/50 shrink-0">
+                  {tabBtn('charges', t('detail.tabCharges'))}
+                  {tabBtn('period', t('detail.tabPeriod'))}
+                  {tabBtn('pending', t('detail.tabPending'))}
+                </div>
 
-              <div>
-                <h3 className="font-semibold mb-2 text-slate-800 dark:text-slate-100">
-                  {t('detail.charges')}
-                </h3>
-                {chargeGroups.length === 0 ? (
-                  <p className="text-sm text-slate-500">{t('detail.noSchedule')}</p>
-                ) : (
-                  <ul className="space-y-3 max-h-80 overflow-y-auto pr-1">
-                    {chargeGroups.map((group) => (
-                      <li
-                        key={group.chargeId}
-                        className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700/40"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="font-semibold text-slate-900 dark:text-white truncate">
-                              {group.description?.trim() || t('detail.chargeFallback')}
-                            </p>
-                            {group.category ? (
-                              <p className="text-xs text-slate-400 mt-0.5 truncate">{group.category}</p>
-                            ) : null}
-                            <p className="text-xs text-slate-500 mt-0.5">
-                              {group.purchaseDate}
-                              {group.installmentCount > 1
-                                ? ` · ${t('form.nInstallments', { count: group.installmentCount })}`
-                                : ` · ${t('form.singlePayment')}`}
-                            </p>
-                            <p className="text-sm font-bold tabular-nums mt-1">
-                              {group.total.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}{' '}
-                              {selected.currency}
-                            </p>
-                          </div>
-                          <div className="flex gap-1 shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => setEditingCharge(group)}
-                              className="p-2 text-slate-600 hover:bg-slate-200/70 dark:hover:bg-slate-700 rounded-lg"
-                              title={t('actions.editCharge')}
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </button>
-                            {group.allPending && (
-                              <button
-                                type="button"
-                                onClick={() => setPendingChargeDelete(group)}
-                                className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg"
-                                title={t('actions.deleteCharge')}
+                <div className="flex-1 min-h-0 flex flex-col border border-slate-200/70 dark:border-slate-700/50 rounded-2xl overflow-hidden bg-slate-50/50 dark:bg-slate-900/20">
+                  {detailTab === 'charges' && (
+                    <>
+                      <div className="px-4 py-2.5 border-b border-slate-200/70 dark:border-slate-700/50 flex items-center justify-between shrink-0">
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-100">
+                          {t('detail.charges')}
+                        </h3>
+                        <span className="text-xs text-slate-400">
+                          {chargeGroups.length} · {t('detail.chargesCollapsedHint')}
+                        </span>
+                      </div>
+                      {chargeGroups.length === 0 ? (
+                        <p className="text-sm text-slate-500 p-4">{t('detail.noSchedule')}</p>
+                      ) : (
+                        <ul className="flex-1 overflow-y-auto p-3 space-y-2">
+                          {chargeGroups.map((group) => {
+                            const expanded = expandedIds.has(group.chargeId);
+                            const paidN = group.items.filter((i) => i.status === 'paid').length;
+                            return (
+                              <li
+                                key={group.chargeId}
+                                data-charge-id={group.chargeId}
+                                className="rounded-xl bg-white dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/40"
                               >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        <ul className="mt-2 space-y-1 border-t border-slate-200/70 dark:border-slate-700/50 pt-2">
-                          {group.items.map((item) => (
-                            <li
-                              key={item.id}
-                              className="flex justify-between text-xs text-slate-600 dark:text-slate-300"
-                            >
-                              <span>
-                                #{item.sequence} · {item.dueDate}
-                              </span>
-                              <span className="tabular-nums font-semibold">
-                                {item.amount.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}{' '}
-                                <span
-                                  className={
-                                    item.status === 'paid' ? 'text-emerald-600' : 'text-amber-600'
-                                  }
-                                >
-                                  {item.status === 'paid' ? t('detail.paid') : t('detail.pending')}
-                                </span>
-                              </span>
-                            </li>
-                          ))}
+                                <div className="flex items-start gap-1 p-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleExpanded(group.chargeId)}
+                                    className="p-1.5 mt-0.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg shrink-0"
+                                    aria-expanded={expanded}
+                                  >
+                                    {expanded ? (
+                                      <ChevronDown className="w-4 h-4" />
+                                    ) : (
+                                      <ChevronRight className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleExpanded(group.chargeId)}
+                                    className="flex-1 min-w-0 text-left"
+                                  >
+                                    <p className="font-semibold text-slate-900 dark:text-white truncate">
+                                      {group.description?.trim() || t('detail.chargeFallback')}
+                                    </p>
+                                    {group.category ? (
+                                      <p className="text-xs text-slate-400 mt-0.5 truncate">
+                                        {group.category}
+                                      </p>
+                                    ) : null}
+                                    <p className="text-xs text-slate-500 mt-0.5">
+                                      {formatDisplayDate(group.purchaseDate)}
+                                      {group.installmentCount > 1
+                                        ? ` · ${t('form.nInstallments', {
+                                            count: group.installmentCount,
+                                          })}`
+                                        : ` · ${t('form.singlePayment')}`}
+                                      {group.installmentCount > 1
+                                        ? ` · ${t('detail.paidOfTotal', {
+                                            paid: paidN,
+                                            total: group.items.length,
+                                          })}`
+                                        : ''}
+                                    </p>
+                                    <p className="text-sm font-bold tabular-nums mt-1">
+                                      {group.total.toLocaleString('tr-TR', {
+                                        maximumFractionDigits: 2,
+                                      })}{' '}
+                                      {selected.currency}
+                                    </p>
+                                  </button>
+                                  <div className="flex gap-1 shrink-0">
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingCharge(group)}
+                                      className="p-2 text-slate-600 hover:bg-slate-200/70 dark:hover:bg-slate-700 rounded-lg"
+                                      title={t('actions.editCharge')}
+                                    >
+                                      <Pencil className="w-4 h-4" />
+                                    </button>
+                                    {group.allPending && (
+                                      <button
+                                        type="button"
+                                        onClick={() => setPendingChargeDelete(group)}
+                                        className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg"
+                                        title={t('actions.deleteCharge')}
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                                {expanded && (
+                                  <ul className="px-3 pb-3 space-y-1 border-t border-slate-200/70 dark:border-slate-700/50 pt-2 ml-8">
+                                    {group.items.map((item) => (
+                                      <li
+                                        key={item.id}
+                                        className="flex justify-between text-xs text-slate-600 dark:text-slate-300"
+                                      >
+                                        <span>
+                                          #{item.sequence} · {formatDisplayDate(item.dueDate)}
+                                        </span>
+                                        <span className="tabular-nums font-semibold">
+                                          {item.amount.toLocaleString('tr-TR', {
+                                            maximumFractionDigits: 2,
+                                          })}{' '}
+                                          <span
+                                            className={
+                                              item.status === 'paid'
+                                                ? 'text-emerald-600'
+                                                : 'text-amber-600'
+                                            }
+                                          >
+                                            {item.status === 'paid'
+                                              ? t('detail.paid')
+                                              : t('detail.pending')}
+                                          </span>
+                                        </span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </li>
+                            );
+                          })}
                         </ul>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+                      )}
+                    </>
+                  )}
+
+                  {detailTab === 'period' && (
+                    <>
+                      <div className="px-4 py-2.5 border-b border-slate-200/70 dark:border-slate-700/50 shrink-0">
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-100">
+                          {t('detail.tabPeriod')}
+                        </h3>
+                        {summary && (
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            {formatDisplayDate(summary.periodStart)} →{' '}
+                            {formatDisplayDate(summary.statementDate)} ·{' '}
+                            {t('detail.periodBalance')}:{' '}
+                            {summary.periodBalance.toLocaleString('tr-TR', {
+                              maximumFractionDigits: 2,
+                            })}{' '}
+                            {summary.currency}
+                          </p>
+                        )}
+                      </div>
+                      {periodItems.length === 0 ? (
+                        <p className="text-sm text-slate-500 p-4">{t('detail.noPeriodItems')}</p>
+                      ) : (
+                        <ul className="flex-1 overflow-y-auto px-4 py-2">
+                          {periodItems.map(renderScheduleRow)}
+                        </ul>
+                      )}
+                    </>
+                  )}
+
+                  {detailTab === 'pending' && (
+                    <>
+                      <div className="px-4 py-2.5 border-b border-slate-200/70 dark:border-slate-700/50 space-y-2 shrink-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="font-semibold text-slate-800 dark:text-slate-100">
+                            {t('detail.tabPending')}
+                          </h3>
+                          <span className="text-xs font-semibold tabular-nums text-slate-500">
+                            {pendingMonthTotal.toLocaleString('tr-TR', {
+                              maximumFractionDigits: 2,
+                            })}{' '}
+                            {selected.currency}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setPendingMonth('all')}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                              pendingMonth === 'all'
+                                ? 'bg-brand-ink text-white'
+                                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600'
+                            }`}
+                          >
+                            {t('detail.monthAll')}
+                          </button>
+                          {pendingMonths.map((ym) => (
+                            <button
+                              key={ym}
+                              type="button"
+                              onClick={() => setPendingMonth(ym)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                                pendingMonth === ym
+                                  ? 'bg-brand-ink text-white'
+                                  : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600'
+                              }`}
+                            >
+                              {formatMonthLabel(ym, locale)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      {filteredPending.length === 0 ? (
+                        <p className="text-sm text-slate-500 p-4">{t('detail.noPendingItems')}</p>
+                      ) : (
+                        <ul className="flex-1 overflow-y-auto px-4 py-2">
+                          {filteredPending.map(renderScheduleRow)}
+                        </ul>
+                      )}
+                    </>
+                  )}
+                </div>
+              </section>
             </div>
           )}
         </div>
@@ -447,9 +745,7 @@ const Cards: React.FC = () => {
           onCreated={async () => {
             setShowExpense(false);
             toast.success(t('toast.expenseAdded'));
-            await loadCards();
-            const refreshed = await debtAPI.get(selected.id);
-            await openDetail(refreshed?.data || selected);
+            await refreshSelected(selected.id, selected);
             await refreshTransactions();
             await refreshDebts();
           }}
@@ -463,9 +759,7 @@ const Cards: React.FC = () => {
           onClose={() => setShowBulkExpense(false)}
           onCreated={async () => {
             setShowBulkExpense(false);
-            await loadCards();
-            const refreshed = await debtAPI.get(selected.id);
-            await openDetail(refreshed?.data || selected);
+            await refreshSelected(selected.id, selected);
             await refreshTransactions();
             await refreshDebts();
           }}
@@ -481,9 +775,7 @@ const Cards: React.FC = () => {
           onSaved={async () => {
             setShowEditCard(false);
             toast.success(t('toast.cardUpdated'));
-            await loadCards();
-            const refreshed = await debtAPI.get(selected.id);
-            await openDetail(refreshed?.data || selected);
+            await refreshSelected(selected.id, selected);
             await refreshDebts();
           }}
         />
@@ -498,9 +790,7 @@ const Cards: React.FC = () => {
           onPaid={async () => {
             setShowPay(false);
             toast.success(t('toast.paid'));
-            await loadCards();
-            const refreshed = await debtAPI.get(selected.id);
-            await openDetail(refreshed?.data || selected);
+            await refreshSelected(selected.id, selected);
             await refreshTransactions();
             await refreshDebts();
           }}
@@ -527,11 +817,15 @@ const Cards: React.FC = () => {
           charge={editingCharge}
           onClose={() => setEditingCharge(null)}
           onSaved={async () => {
+            const keepId = editingCharge?.chargeId || null;
             setEditingCharge(null);
             toast.success(t('toast.chargeUpdated'));
-            await loadCards();
-            const refreshed = await debtAPI.get(selected.id);
-            await openDetail(refreshed?.data || selected);
+            if (keepId) {
+              setDetailTab('charges');
+              setExpandedIds((prev) => new Set(prev).add(keepId));
+              setFocusChargeId(keepId);
+            }
+            await refreshSelected(selected.id, selected);
             await refreshDebts();
           }}
         />
