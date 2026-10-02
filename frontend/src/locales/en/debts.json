@@ -25,7 +25,12 @@
     "loan": "Loans",
     "credit_card": "Cards",
     "active": "Active",
-    "paid": "Paid"
+    "paid": "Paid",
+    "status": {
+      "open": "Open",
+      "done": "Completed",
+      "any": "All statuses"
+    }
   },
   "kinds": {
     "payable": "Debt",
@@ -34,9 +39,9 @@
     "credit_card": "Credit card"
   },
   "summary": {
-    "totalPayable": "Total debt",
+    "totalPayable": "Total active debt",
     "totalReceivable": "Total receivable",
-    "dueThisMonth": "Due this month",
+    "dueThisMonth": "Still to pay this month",
     "totalPaid": "Total paid",
     "remainingDebt": "Remaining debt",
     "tryNote": "Approx. TRY"

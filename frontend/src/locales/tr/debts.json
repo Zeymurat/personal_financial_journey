@@ -25,7 +25,12 @@
     "loan": "Krediler",
     "credit_card": "Kartlar",
     "active": "Aktif",
-    "paid": "Ödenmiş"
+    "paid": "Ödenmiş",
+    "status": {
+      "open": "Tamamlanmamış",
+      "done": "Tamamlanan",
+      "any": "Hepsi"
+    }
   },
   "kinds": {
     "payable": "Borç",
@@ -41,9 +46,9 @@
     "special": "Özel"
   },
   "summary": {
-    "totalPayable": "Toplam borç",
+    "totalPayable": "Toplam aktif borç",
     "totalReceivable": "Toplam alacak",
-    "dueThisMonth": "Bu ay vadesi gelen",
+    "dueThisMonth": "Bu ay ödenecek",
     "totalPaid": "Toplam ödenen",
     "remainingDebt": "Kalan borç",
     "tryNote": "TRY karşılığı (yaklaşık)"

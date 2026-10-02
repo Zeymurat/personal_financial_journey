@@ -9,6 +9,7 @@ venv/
 .venv/
 finance_backend/venv/
 finance_backend/.venv/
+finance_backend/.venv-mac/
 
 # macOS AppleDouble metadata (harici disk / exFAT)
 ._*

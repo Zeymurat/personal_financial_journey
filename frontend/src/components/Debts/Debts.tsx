@@ -21,6 +21,7 @@ import DebtListCard, { debtProgress } from './cards/DebtListCard';
 import ConfirmModal from '../common/ConfirmModal';
 
 type FilterKind = 'all' | DebtKind;
+type StatusFilter = 'open' | 'done' | 'any';
 
 const Debts: React.FC = () => {
   const { t } = useTranslation('debts');
@@ -30,6 +31,7 @@ const Debts: React.FC = () => {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterKind>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('open');
   const [showAdd, setShowAdd] = useState(false);
   const [selected, setSelected] = useState<Debt | null>(null);
   const [schedule, setSchedule] = useState<DebtScheduleItem[]>([]);
@@ -60,9 +62,8 @@ const Debts: React.FC = () => {
       const res = await debtAPI.getAll();
       const list: Debt[] = Array.isArray(res?.data) ? res.data : [];
       setDebts(list);
-      const active = list.filter((d) => d.status === 'active');
       const entries = await Promise.all(
-        active.map(async (d) => {
+        list.map(async (d) => {
           try {
             const sched = await debtAPI.getSchedule(d.id);
             return [d.id, Array.isArray(sched?.data) ? sched.data : []] as const;
@@ -205,9 +206,13 @@ const Debts: React.FC = () => {
   };
 
   const filtered = useMemo(() => {
-    if (filter === 'all') return debts;
-    return debts.filter((d) => d.kind === filter);
-  }, [debts, filter]);
+    return debts.filter((d) => {
+      if (filter !== 'all' && d.kind !== filter) return false;
+      if (statusFilter === 'open') return d.status === 'active';
+      if (statusFilter === 'done') return d.status === 'paid' || d.status === 'closed';
+      return true;
+    });
+  }, [debts, filter, statusFilter]);
 
   const totals = useMemo(() => {
     let payable = 0;
@@ -218,45 +223,49 @@ const Debts: React.FC = () => {
     const now = new Date();
     const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     for (const d of debts) {
-      if (d.status !== 'active') continue;
+      const open = d.status === 'active';
       const remaining = Math.max(0, d.remainingAmount || 0);
       const remTry = toTry(remaining, d.currency);
       const items = allSchedules[d.id] || [];
 
       if (d.kind === 'receivable') {
-        receivable += remTry;
+        if (open) receivable += remTry;
+        continue;
+      }
+
+      let paidLocal = 0;
+      let originalLocal = Math.max(0, d.originalAmount || 0);
+      if (items.length > 0) {
+        const paidSched = items
+          .filter((item) => item.status === 'paid')
+          .reduce((sum, item) => sum + (item.amount || 0), 0);
+        const pendingSched = items
+          .filter((item) => item.status === 'pending')
+          .reduce((sum, item) => sum + (item.amount || 0), 0);
+        paidLocal = paidSched;
+        originalLocal = Math.max(originalLocal, paidSched + pendingSched, remaining);
+      } else if (d.status === 'paid' || d.status === 'closed') {
+        const fromPlan = (d.installmentAmount || 0) * (d.installmentCount || 0);
+        paidLocal = Math.max(originalLocal, fromPlan);
+        originalLocal = paidLocal;
+      } else if (d.kind === 'credit_card') {
+        originalLocal = Math.max(originalLocal, remaining);
+        paidLocal = Math.max(0, originalLocal - remaining);
       } else {
+        originalLocal = Math.max(originalLocal, remaining);
+        paidLocal = Math.max(0, originalLocal - remaining);
+      }
+
+      if (open) {
         remainingDebt += remTry;
-
-        let paidLocal = 0;
-        let originalLocal = Math.max(0, d.originalAmount || 0);
-        if (items.length > 0) {
-          const paidSched = items
-            .filter((item) => item.status === 'paid')
-            .reduce((sum, item) => sum + (item.amount || 0), 0);
-          const pendingSched = items
-            .filter((item) => item.status === 'pending')
-            .reduce((sum, item) => sum + (item.amount || 0), 0);
-          paidLocal = paidSched;
-          originalLocal = Math.max(originalLocal, paidSched + pendingSched, remaining);
-        } else if (d.kind === 'credit_card') {
-          // Kartta ana tutar harcamayla büyür; ödenen = max(0, bilinen ana − kalan)
-          originalLocal = Math.max(originalLocal, remaining);
-          paidLocal = Math.max(0, originalLocal - remaining);
-        } else {
-          originalLocal = Math.max(originalLocal, remaining);
-          paidLocal = Math.max(0, originalLocal - remaining);
-        }
-
         payable += toTry(originalLocal, d.currency);
-        totalPaid += toTry(paidLocal, d.currency);
-      }
-
-      for (const item of items) {
-        if (item.status === 'pending' && item.dueDate?.startsWith(ym)) {
-          dueThisMonth += toTry(item.amount || 0, d.currency);
+        for (const item of items) {
+          if (item.status === 'pending' && item.dueDate?.startsWith(ym)) {
+            dueThisMonth += toTry(item.amount || 0, d.currency);
+          }
         }
       }
+      totalPaid += toTry(paidLocal, d.currency);
     }
     return { payable, receivable, dueThisMonth, totalPaid, remainingDebt };
   }, [debts, allSchedules, toTry]);
@@ -341,21 +350,39 @@ const Debts: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-slate-100/80 dark:bg-slate-900/50 w-fit max-w-full">
-        {(['all', 'payable', 'receivable', 'loan', 'credit_card'] as FilterKind[]).map((k) => (
-          <button
-            key={k}
-            type="button"
-            onClick={() => setFilter(k)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
-              filter === k
-                ? 'bg-brand-ink text-white shadow-sm'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-800'
-            }`}
-          >
-            {t(`filters.${k}`)}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-slate-100/80 dark:bg-slate-900/50 w-fit max-w-full">
+          {(['all', 'payable', 'receivable', 'loan', 'credit_card'] as FilterKind[]).map((k) => (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setFilter(k)}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+                filter === k
+                  ? 'bg-brand-ink text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-800'
+              }`}
+            >
+              {t(`filters.${k}`)}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-slate-100/80 dark:bg-slate-900/50 w-fit max-w-full">
+          {(['any', 'open', 'done'] as StatusFilter[]).map((k) => (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setStatusFilter(k)}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+                statusFilter === k
+                  ? 'bg-brand-ink text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-800'
+              }`}
+            >
+              {t(`filters.status.${k}`)}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
