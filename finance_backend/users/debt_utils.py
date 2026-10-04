@@ -47,14 +47,45 @@ def add_months(base: date, months: int) -> date:
     return clamp_day(year, month, base.day)
 
 
+def with_anchor_day(value: date, anchor_day: int) -> date:
+    """Keep year/month; set the day from the purchase (clamped to the month)."""
+    return clamp_day(value.year, value.month, max(1, int(anchor_day)))
+
+
 def build_installment_due_dates(
     purchase_date: date,
     cutoff_day: int,
     installment_count: int,
 ) -> List[date]:
+    """Due day is the statement cutoff. A 26 Sep purchase with cutoff 15 starts 15 Oct."""
     count = max(1, int(installment_count))
     first = next_statement_date(purchase_date, cutoff_day)
     return [add_months(first, i) for i in range(count)]
+
+
+def build_charge_due_dates(
+    purchase_date: date,
+    installment_count: int,
+    paid_installment_count: int = 0,
+    first_pending_due: Optional[date] = None,
+    first_due: Optional[date] = None,
+    cutoff_day: int = 1,
+) -> List[date]:
+    """
+    Card installment calendar on the statement cutoff day.
+    Catch-up with no explicit first pending date anchors the first unpaid
+    slice on that statement date and walks paid slices backward.
+    """
+    n = max(1, int(installment_count))
+    paid = max(0, min(int(paid_installment_count or 0), n))
+    if first_pending_due is not None and 0 < paid < n:
+        return build_due_dates_from_first_pending(first_pending_due, n, paid)
+    if first_due is not None:
+        return build_due_dates_from_first(first_due, n)
+    if 0 < paid < n:
+        anchor = next_statement_date(purchase_date, cutoff_day)
+        return build_due_dates_from_first_pending(anchor, n, paid)
+    return build_installment_due_dates(purchase_date, cutoff_day, n)
 
 
 def build_due_dates_from_first_pending(
@@ -187,6 +218,85 @@ def build_fixed_installment_amounts(installment_amount: float, count: int) -> Li
     return [unit] * n
 
 
+# TCMB azami aylık oranlar (1 Ekim 2026). Dönem borcuna göre tavan.
+# Ekstre faizine KKDF %15 + BSMV %15 biner.
+CC_INTEREST_TAX_FACTOR = 1.30
+CC_INTEREST_TIERS = (
+    (30_000.0, 3.25, 3.55),
+    (180_000.0, 3.75, 4.05),
+    (float('inf'), 4.25, 4.55),
+)
+
+
+def cc_ceiling_rates(statement_balance: float) -> Tuple[float, float]:
+    """Returns (akdi, gecikme) monthly percent ceilings for a statement balance."""
+    balance = max(0.0, float(statement_balance or 0))
+    for ceiling, contractual, late in CC_INTEREST_TIERS:
+        if balance < ceiling or ceiling == float('inf'):
+            return contractual, late
+    return 4.25, 4.55
+
+
+def estimate_revolving_interest(
+    unpaid: float,
+    cycle_paid: float,
+    minimum: float,
+    tier_balance: float,
+) -> Tuple[float, float, str]:
+    """
+    Interest posted when the statement rolls.
+    Minimum met → contractual rate. Below minimum → late rate.
+    Includes KKDF + BSMV. This is a ceiling estimate, not the bank's exact kuruş.
+    """
+    unpaid_amount = round(max(0.0, float(unpaid or 0)), 2)
+    if unpaid_amount <= 0.02:
+        return 0.0, 0.0, 'none'
+    contractual, late = cc_ceiling_rates(tier_balance)
+    if float(cycle_paid or 0) + 0.02 >= float(minimum or 0):
+        rate, kind = contractual, 'contractual'
+    else:
+        rate, kind = late, 'late'
+    interest = round(unpaid_amount * rate / 100.0 * CC_INTEREST_TAX_FACTOR, 2)
+    return interest, rate, kind
+
+
+def card_statement_figures(
+    period_item_sum: float,
+    carried: float,
+    statement_credit: float,
+    cycle_paid: float,
+    credit_limit: float,
+) -> dict:
+    """
+    gross = this statement's installments + carried revolving − credit.
+    periodBalance and minPayment are what is still due after payments this cycle.
+    """
+    credit = max(0.0, float(statement_credit or 0))
+    carried_amount = max(0.0, float(carried or 0))
+    gross = round(max(0.0, float(period_item_sum or 0) + carried_amount - credit), 2)
+    paid = round(max(0.0, float(cycle_paid or 0)), 2)
+    if paid > gross:
+        paid = gross
+    remaining_period = round(max(0.0, gross - paid), 2)
+    minimum, min_rate = compute_cc_min_payment(credit_limit, gross)
+    min_remaining = round(max(0.0, minimum - paid), 2)
+    # Tier uses the bill before this cycle's payments.
+    interest, rate, kind = estimate_revolving_interest(remaining_period, paid, minimum, gross)
+    return {
+        'grossPeriodBalance': gross,
+        'periodBalance': remaining_period,
+        'cyclePaidAmount': paid,
+        'minPayment': min_remaining,
+        'minPaymentOriginal': minimum,
+        'minPaymentRatePercent': min_rate,
+        'estimatedInterest': interest,
+        'interestRatePercent': rate,
+        'interestKind': kind,
+        'carriedBalance': round(carried_amount, 2),
+        'statementCredit': round(credit, 2),
+    }
+
+
 def compute_cc_min_payment(credit_limit: float, statement_balance: float) -> Tuple[float, float]:
     """
     BDDK-style: limit <= 50_000 → 20%, else 40%.
@@ -201,7 +311,9 @@ def compute_cc_min_payment(credit_limit: float, statement_balance: float) -> Tup
 def open_statement_period(as_of: date, cutoff_day: int) -> Tuple[date, date]:
     """
     Open statement window ending at the next statement date after (or on) as_of's cycle.
-    Period: (previous_statement, next_statement] — charges with dueDate == next_statement.
+    Period: (previous_statement, next_statement].
+    A slice belongs to this statement when its due date falls inside the window
+    (3 Oct is in the 15 Oct statement), not only when the due day equals the cutoff.
     """
     day = max(1, min(int(cutoff_day), 28))
     # Next cutoff relative to as_of using same classic rule
@@ -209,3 +321,116 @@ def open_statement_period(as_of: date, cutoff_day: int) -> Tuple[date, date]:
     # Previous cutoff = one month before next
     prev_cut = add_months(next_cut, -1)
     return prev_cut, next_cut
+
+
+def due_in_open_statement(due: date, prev_cut: date, next_cut: date) -> bool:
+    """True when due is inside (prev_cut, next_cut]."""
+    return prev_cut < due <= next_cut
+
+
+def statement_due_date(cycle_end: date, days: int = 10) -> date:
+    """Son ödeme: kesim günü + 10."""
+    return cycle_end + timedelta(days=days)
+
+
+def loan_amortization_slices(
+    original: float,
+    monthly_interest_percent: float,
+    installment_count: int,
+    installment_amount: float,
+    loan_type: Optional[str] = None,
+) -> List[dict]:
+    """Her taksit için faiz+vergi ve anapara. Sıra ödeme sırasıdır."""
+    count = max(1, int(installment_count or 1))
+    installment = round(float(installment_amount or 0), 2)
+    rate = loan_effective_monthly_rate(monthly_interest_percent, loan_type)
+    balance = max(0.0, float(original or 0))
+    slices = []
+    for _ in range(count):
+        interest = max(0.0, balance * rate)
+        principal = installment - interest
+        if principal > balance:
+            principal = balance
+        if principal < 0:
+            principal = 0.0
+        balance = max(0.0, balance - principal)
+        slices.append({
+            'interest': interest,
+            'principal': principal,
+            'balanceAfter': balance,
+        })
+        if balance <= 0.004:
+            break
+    return slices
+
+
+def early_interest_discount(
+    interest: float,
+    due: date,
+    previous_due: Optional[date],
+    as_of: date,
+) -> float:
+    """Erken günde faiz indirimi. Dönemden uzunsa faiz tamamen düşer."""
+    early_days = (due - as_of).days
+    if early_days <= 0:
+        return 0.0
+    if previous_due and due > previous_due:
+        period_days = (due - previous_due).days
+    else:
+        period_days = 30
+    if period_days <= 0:
+        return 0.0
+    fraction = min(1.0, early_days / period_days)
+    return round(max(0.0, float(interest)) * fraction, 2)
+
+
+def quote_loan_prepayment(
+    original: float,
+    monthly_interest_percent: float,
+    installment_count: int,
+    installment_amount: float,
+    loan_type: Optional[str],
+    schedule: List[dict],
+    pay_count: int,
+    as_of: date,
+) -> dict:
+    """Seçilen bekleyen taksitler için tam tutar, taban (anapara) ve tahmini ödeme."""
+    ordered = sorted(schedule, key=lambda s: (s.get('sequence') or 0, s.get('dueDate') or ''))
+    slices = loan_amortization_slices(
+        original,
+        monthly_interest_percent,
+        installment_count or len(ordered),
+        installment_amount,
+        loan_type,
+    )
+    pending_idx = [(i, s) for i, s in enumerate(ordered) if s.get('status') == 'pending']
+    chosen = pending_idx[: max(0, int(pay_count))]
+    full = 0.0
+    suggested = 0.0
+    minimum = 0.0
+    for index, item in chosen:
+        amount = round(float(item.get('amount') or 0), 2)
+        interest = 0.0
+        if index < len(slices):
+            interest = round(min(amount, max(0.0, float(slices[index]['interest']))), 2)
+        try:
+            due = parse_date(item.get('dueDate'))
+        except (TypeError, ValueError):
+            due = as_of
+        previous = None
+        if index > 0 and ordered[index - 1].get('dueDate'):
+            try:
+                previous = parse_date(ordered[index - 1]['dueDate'])
+            except (TypeError, ValueError):
+                previous = None
+        discount = min(interest, early_interest_discount(interest, due, previous, as_of))
+        pay = round(amount - discount, 2)
+        floor = round(max(0.0, amount - interest), 2)
+        full += amount
+        suggested += pay
+        minimum += floor
+    return {
+        'full': round(full, 2),
+        'suggested': round(suggested, 2),
+        'minimum': round(minimum, 2),
+    }

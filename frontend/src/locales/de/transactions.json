@@ -115,7 +115,7 @@
     "installments": "Installments",
     "singlePayment": "One-shot (1)",
     "nInstallments": "{{count}} installments",
-    "effectivePreview": "Erste Abrechnung / Fälligkeit: {{date}}",
+    "effectivePreview": "Erste Fälligkeit: {{date}}",
     "cardChargeHint": "Keine Bargeld-Transaktion — erhöht den Kartensaldo. Die Ausgabe entsteht bei Kartenzahlung."
   },
   "detail": {

@@ -66,10 +66,18 @@ export interface DebtStatementSummary {
   periodStart: string;
   statementDate: string;
   periodBalance: number;
+  grossPeriodBalance?: number;
+  cyclePaidAmount?: number;
   pendingTotal: number;
   remainingAmount: number;
   minPayment: number;
+  minPaymentOriginal?: number;
   minPaymentRatePercent: number;
+  estimatedInterest?: number;
+  interestRatePercent?: number;
+  interestKind?: 'none' | 'contractual' | 'late';
+  carriedBalance?: number;
+  statementCredit?: number;
   currency: string;
   items: DebtScheduleItem[];
 }

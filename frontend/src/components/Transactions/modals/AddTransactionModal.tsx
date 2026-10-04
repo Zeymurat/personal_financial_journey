@@ -7,8 +7,8 @@ import { transactionAPI, debtAPI, tcmbAPI } from '../../../services/apiService';
 import { getExchangeRates } from '../../../services/currencyService';
 import { TRANSACTION_CURRENCIES } from '../constants';
 import { formatTrMoneyInput, parseTrMoneyString } from '../../../utils/trNumberInput';
-import { toLocalDateString } from '../../../utils/localDate';
-import { buildInstallmentDueDates, nextStatementDate, parseDateOnly } from '../../../utils/creditCardCycle';
+import { formatDisplayDate, toLocalDateString } from '../../../utils/localDate';
+import { buildInstallmentDueDates } from '../../../utils/creditCardCycle';
 import { CARD_INSTALLMENT_OPTIONS } from '../../../utils/cardInstallments';
 import { useFinance } from '../../../contexts/FinanceContext';
 
@@ -69,24 +69,17 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   };
 
   const selectedCard = creditCards.find((c) => c.id === formData.creditCardDebtId);
-  const previewEffective =
-    formData.type === 'expense' &&
-    formData.paymentMethod === 'credit_card' &&
-    selectedCard?.statementCutoffDay
-      ? toLocalDateString(
-          nextStatementDate(parseDateOnly(formData.date), selectedCard.statementCutoffDay)
-        )
-      : formData.date;
   const previewInstallments =
     formData.type === 'expense' &&
     formData.paymentMethod === 'credit_card' &&
-    selectedCard?.statementCutoffDay
+    selectedCard
       ? buildInstallmentDueDates(
           formData.date,
-          selectedCard.statementCutoffDay,
+          selectedCard.statementCutoffDay || 1,
           parseInt(formData.installmentCount, 10) || 1
         )
       : [];
+  const previewEffective = previewInstallments[0] || formData.date;
 
   const calculateAmountInTRY = async (amount: number, currency: string): Promise<number> => {
     if (currency === 'TRY') return amount;
@@ -318,8 +311,10 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               </div>
               {selectedCard && (
                 <p className="text-sm text-slate-500">
-                  {t('form.effectivePreview', { date: previewEffective })}
-                  {previewInstallments.length > 1 ? ` · ${previewInstallments.join(', ')}` : ''}
+                  {t('form.effectivePreview', { date: formatDisplayDate(previewEffective) })}
+                  {previewInstallments.length > 1
+                    ? ` · ${previewInstallments.map((d) => formatDisplayDate(d)).join(', ')}`
+                    : ''}
                 </p>
               )}
               <p className="text-xs text-slate-400">{t('form.cardChargeHint')}</p>

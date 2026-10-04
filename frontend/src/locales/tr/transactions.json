@@ -109,7 +109,7 @@
     "installments": "Taksit",
     "singlePayment": "Peşin (1)",
     "nInstallments": "{{count}} taksit",
-    "effectivePreview": "İlk kesim / vade: {{date}}",
+    "effectivePreview": "İlk vade: {{date}}",
     "addTitle": "Yeni İşlem Ekle",
     "addSubtitle": "Gelir veya gider işlemi ekleyin",
     "addButton": "Ekle",

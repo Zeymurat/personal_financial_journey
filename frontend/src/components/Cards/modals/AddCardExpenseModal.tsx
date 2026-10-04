@@ -12,6 +12,7 @@ import {
   nextStatementDate,
   parseDateOnly,
 } from '../../../utils/creditCardCycle';
+import { formatDisplayDate } from '../../../utils/localDate';
 import { CARD_INSTALLMENT_OPTIONS } from '../../../utils/cardInstallments';
 
 interface Props {
@@ -38,21 +39,18 @@ const AddCardExpenseModal: React.FC<Props> = ({ isOpen, card, onClose, onCreated
     countNum,
     Math.max(0, parseInt(paidInstallmentCount, 10) || 0)
   );
-  const useCatchUp = paidNum > 0 && paidNum < countNum && Boolean(firstPendingDueDate);
-
   const previewDates = useMemo(() => {
     const cutoff = card.statementCutoffDay || 1;
-    if (useCatchUp) {
-      return buildDueDatesFromFirstPending(firstPendingDueDate, countNum, paidNum);
+    if (paidNum > 0 && paidNum < countNum) {
+      const anchor =
+        firstPendingDueDate ||
+        toLocalDateString(nextStatementDate(parseDateOnly(date), cutoff));
+      return buildDueDatesFromFirstPending(anchor, countNum, paidNum);
     }
     return buildInstallmentDueDates(date, cutoff, countNum);
-  }, [card.statementCutoffDay, date, countNum, paidNum, firstPendingDueDate, useCatchUp]);
+  }, [card.statementCutoffDay, date, countNum, paidNum, firstPendingDueDate]);
 
-  const previewEffective = useMemo(() => {
-    if (useCatchUp) return firstPendingDueDate;
-    const cutoff = card.statementCutoffDay || 1;
-    return toLocalDateString(nextStatementDate(parseDateOnly(date), cutoff));
-  }, [card.statementCutoffDay, date, firstPendingDueDate, useCatchUp]);
+  const previewEffective = previewDates[0] || date;
 
   if (!isOpen) return null;
 
@@ -201,8 +199,10 @@ const AddCardExpenseModal: React.FC<Props> = ({ isOpen, card, onClose, onCreated
           )}
 
           <p className="text-sm text-slate-500">
-            {t('form.effectivePreview', { date: previewEffective })}
-            {previewDates.length > 1 ? ` · ${previewDates.join(', ')}` : ''}
+            {t('form.effectivePreview', { date: formatDisplayDate(previewEffective) })}
+            {previewDates.length > 1
+              ? ` · ${previewDates.map((d) => formatDisplayDate(d)).join(', ')}`
+              : ''}
           </p>
           <p className="text-xs text-slate-400">{t('form.chargeHint')}</p>
 

@@ -115,7 +115,7 @@
     "installments": "Installments",
     "singlePayment": "One-shot (1)",
     "nInstallments": "{{count}} installments",
-    "effectivePreview": "Primer corte / vencimiento: {{date}}",
+    "effectivePreview": "Primer vencimiento: {{date}}",
     "cardChargeHint": "No es un movimiento de efectivo; aumenta el saldo de la tarjeta. El gasto aparece al pagar."
   },
   "detail": {

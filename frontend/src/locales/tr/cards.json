@@ -18,6 +18,7 @@
     "addRow": "Satır ekle",
     "removeRow": "Satırı sil",
     "editCharge": "Harcamayı düzenle",
+    "alignDueDays": "Taksit günlerini kesim gününe al",
     "deleteCharge": "Harcamayı sil"
   },
   "summary": {
@@ -28,7 +29,7 @@
   "form": {
     "addCardTitle": "Yeni kredi kartı",
     "editCardTitle": "Kartı düzenle",
-    "editCardHint": "Limit düşürme / kesim günü değişikliği burada. Mevcut taksit vadeleri değişmez; yeni harcamalar yeni kesim gününe göre hesaplanır.",
+    "editCardHint": "Kesim günü hem ekstre dönemini hem taksit vadesini belirler. 26 Eylül harcamasının ilk taksiti 15 Ekim kesimindedir.",
     "addExpenseTitle": "Kart harcaması",
     "bulkExpenseTitle": "Toplu harcama girişi",
     "bulkExpenseHint": "Kartı güncellemek için peşin ve taksitli işlemleri satır satır ekleyin. Boş tutarlı satırlar atlanır.",
@@ -53,13 +54,13 @@
     "paidInstallmentsHint": "Kartı sonradan güncellerken kullanın. Ödenen taksitler planda görünür ama nakit gider oluşturulmaz; kalan borç yalnızca bekleyenlerden hesaplanır.",
     "paidShort": "Ödenen #",
     "selectCategory": "Kategori seçin",
-    "effectivePreview": "İlk kesim / vade: {{date}}",
+    "effectivePreview": "İlk vade: {{date}}",
     "chargeHint": "İşlemler listesine eklenmez. Hesaptan para kartı ödediğinizde çıkar.",
     "editChargeTitle": "Kart harcamasını düzenle",
     "editChargeHint": "Ödenmiş taksitler korunur. Vade tarihlerini satır satır düzeltebilir veya ilk bekleyen vadeyi girip hizalayabilirsiniz.",
     "editPaidBlocked": "Ödenmiş taksit içeren harcama yeniden yapılandırılamaz; yalnızca kategori/açıklama güncellenebilir.",
     "firstPendingDueDate": "İlk bekleyen taksit tarihi",
-    "firstPendingDueDateHint": "Örn. 2 taksit ödendiyse 3. taksitin vadesi. Kalan taksitler bundan aylık ilerler.",
+    "firstPendingDueDateHint": "Boş bırakılırsa ilk bekleyen taksit kesim gününe yazılır. Kesim 15 ve harcama 26 Eylül ise ilk vade 15 Ekim’dir.",
     "alignDueDates": "Vadeleri hizala",
     "installmentDueDates": "Taksit vadeleri"
   },
@@ -69,6 +70,9 @@
     "cutoff": "Kesim günü",
     "periodBalance": "Dönem borcu",
     "minPayment": "Asgari ödeme",
+    "cyclePaid": "Bu kesimde ödenen {{amount}}",
+    "estimatedInterest": "Sonraki kesime tahmini faiz {{amount}}",
+    "paymentNotOnRows": "ödeme satırı kapatmaz",
     "statementDate": "Kesim tarihi",
     "paymentDueDate": "Son ödeme",
     "schedule": "Taksit / kesim planı",
@@ -104,7 +108,8 @@
     "error": "İşlem başarısız",
     "amountInvalid": "Geçerli bir tutar girin",
     "chargeDeleted": "Harcama silindi",
-    "chargeUpdated": "Harcama güncellendi"
+    "chargeUpdated": "Harcama güncellendi",
+    "dueDaysAligned": "{{count}} taksit tarihi kesim gününe alındı"
   },
   "confirm": {
     "deleteTitle": "Kartı sil",

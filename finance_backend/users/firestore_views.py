@@ -1410,6 +1410,25 @@ class FirestoreDebtChargeView(BaseFirestoreView):
             return Response({'error': 'Harcama kaydedilemedi.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class FirestoreDebtChargeRealignView(BaseFirestoreView):
+    """POST /api/auth/debts/<id>/charges/realign-due-days/ — vade gününü kesim gününe alır."""
+
+    def post(self, request, debt_id):
+        try:
+            firebase_uid = self.validate_user_access(request)
+            result = _run_async(
+                firestore_service.realign_credit_card_due_days(firebase_uid, debt_id)
+            )
+            return Response({'success': True, 'data': result})
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except exceptions.PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            logger.error(f"Debt charge realign error: {e}", exc_info=True)
+            return Response({'error': 'Taksit tarihleri hizalanamadı.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class FirestoreDebtChargeDetailView(BaseFirestoreView):
     """PUT/DELETE /api/auth/debts/<id>/charges/<charge_id>/"""
 

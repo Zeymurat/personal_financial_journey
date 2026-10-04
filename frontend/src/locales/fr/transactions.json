@@ -115,7 +115,7 @@
     "installments": "Installments",
     "singlePayment": "One-shot (1)",
     "nInstallments": "{{count}} installments",
-    "effectivePreview": "Premier relevé / échéance : {{date}}",
+    "effectivePreview": "Première échéance : {{date}}",
     "cardChargeHint": "Pas une sortie de compte — augmente le solde carte. La dépense apparaît au paiement."
   },
   "detail": {

@@ -25,6 +25,7 @@ from users.firestore_views import (
     FirestoreDebtScheduleView,
     FirestoreDebtPaymentView,
     FirestoreDebtChargeView,
+    FirestoreDebtChargeRealignView,
     FirestoreDebtChargeDetailView,
     FirestoreDebtScheduleItemView,
     FirestoreDebtStatementSummaryView,
@@ -109,6 +110,11 @@ urlpatterns = [
     path('debts/<str:debt_id>/schedule/', FirestoreDebtScheduleView.as_view(), name='firestore_debt_schedule'),
     path('debts/<str:debt_id>/payments/', FirestoreDebtPaymentView.as_view(), name='firestore_debt_payments'),
     path('debts/<str:debt_id>/charges/', FirestoreDebtChargeView.as_view(), name='firestore_debt_charges'),
+    path(
+        'debts/<str:debt_id>/charges/realign-due-days/',
+        FirestoreDebtChargeRealignView.as_view(),
+        name='firestore_debt_charge_realign',
+    ),
     path(
         'debts/<str:debt_id>/charges/<str:charge_id>/',
         FirestoreDebtChargeDetailView.as_view(),

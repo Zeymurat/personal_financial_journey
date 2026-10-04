@@ -34,6 +34,16 @@ export function parseDateOnly(value: string): Date {
   return new Date(y, (m || 1) - 1, d || 1);
 }
 
+/** Year/month stay; day comes from the purchase (clamped to the month). */
+export function withAnchorDay(isoDate: string, anchorDay: number): string {
+  const [y, m] = isoDate.split('-').map(Number);
+  if (!y || !m) return isoDate;
+  const last = new Date(y, m, 0).getDate();
+  const d = Math.max(1, Math.min(Math.floor(anchorDay) || 1, last));
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
+/** Due day is the statement cutoff. A 26 Sep purchase with cutoff 15 starts 15 Oct. */
 export function buildInstallmentDueDates(
   purchaseDate: Date | string,
   cutoffDay: number,

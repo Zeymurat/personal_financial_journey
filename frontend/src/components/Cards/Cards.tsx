@@ -62,6 +62,7 @@ const Cards: React.FC = () => {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [pendingMonth, setPendingMonth] = useState<string>('all');
   const [focusChargeId, setFocusChargeId] = useState<string | null>(null);
+  const [realigning, setRealigning] = useState(false);
 
   const chargeGroups = useMemo(() => groupCharges(schedule), [schedule]);
 
@@ -156,6 +157,22 @@ const Cards: React.FC = () => {
       setSummary(sum?.data || null);
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleRealignDueDays = async () => {
+    if (!selected || realigning) return;
+    setRealigning(true);
+    try {
+      const res = await debtAPI.realignDueDays(selected.id);
+      const updated = res?.data?.updated ?? 0;
+      toast.success(t('toast.dueDaysAligned', { count: updated }));
+      await refreshSelected(selected.id, selected);
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : t('toast.error'));
+    } finally {
+      setRealigning(false);
     }
   };
 
@@ -457,6 +474,16 @@ const Cards: React.FC = () => {
                       <p className="text-xs text-slate-400 mt-1">
                         {t('detail.statementDate')}: {formatDisplayDate(summary.statementDate)}
                       </p>
+                      {(summary.cyclePaidAmount || 0) > 0 && (
+                        <p className="text-xs text-slate-500 mt-1">
+                          {t('detail.cyclePaid', {
+                            amount: summary.cyclePaidAmount!.toLocaleString('tr-TR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }),
+                          })}
+                        </p>
+                      )}
                     </div>
                     <div className="p-3 rounded-xl border border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/20">
                       <p className="text-xs text-slate-500">{t('detail.minPayment')}</p>
@@ -470,6 +497,16 @@ const Cards: React.FC = () => {
                         {t('detail.paymentDueDate')}:{' '}
                         {formatDisplayDate(addDaysToDateString(summary.statementDate, 10))}
                       </p>
+                      {(summary.estimatedInterest || 0) > 0 && (
+                        <p className="text-xs text-slate-500 mt-1">
+                          {t('detail.estimatedInterest', {
+                            amount: summary.estimatedInterest!.toLocaleString('tr-TR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }),
+                          })}
+                        </p>
+                      )}
                     </div>
                   </>
                 )}
@@ -512,13 +549,23 @@ const Cards: React.FC = () => {
                 <div className="flex-1 min-h-0 flex flex-col border border-slate-200/70 dark:border-slate-700/50 rounded-2xl overflow-hidden bg-slate-50/50 dark:bg-slate-900/20">
                   {detailTab === 'charges' && (
                     <>
-                      <div className="px-4 py-2.5 border-b border-slate-200/70 dark:border-slate-700/50 flex items-center justify-between shrink-0">
-                        <h3 className="font-semibold text-slate-800 dark:text-slate-100">
-                          {t('detail.charges')}
-                        </h3>
-                        <span className="text-xs text-slate-400">
-                          {chargeGroups.length} · {t('detail.chargesCollapsedHint')}
-                        </span>
+                      <div className="px-4 py-2.5 border-b border-slate-200/70 dark:border-slate-700/50 flex items-center justify-between gap-2 shrink-0">
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-slate-800 dark:text-slate-100">
+                            {t('detail.charges')}
+                          </h3>
+                          <p className="text-xs text-slate-400">
+                            {chargeGroups.length} · {t('detail.chargesCollapsedHint')}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRealignDueDays}
+                          disabled={realigning || chargeGroups.length === 0}
+                          className="text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50"
+                        >
+                          {realigning ? t('actions.saving') : t('actions.alignDueDays')}
+                        </button>
                       </div>
                       {chargeGroups.length === 0 ? (
                         <p className="text-sm text-slate-500 p-4">{t('detail.noSchedule')}</p>
@@ -654,6 +701,9 @@ const Cards: React.FC = () => {
                               maximumFractionDigits: 2,
                             })}{' '}
                             {summary.currency}
+                            {(summary.cyclePaidAmount || 0) > 0
+                              ? ` · ${t('detail.paymentNotOnRows')}`
+                              : ''}
                           </p>
                         )}
                       </div>
@@ -786,6 +836,7 @@ const Cards: React.FC = () => {
           isOpen={showPay}
           debt={selected}
           schedule={schedule}
+          summary={summary}
           onClose={() => setShowPay(false)}
           onPaid={async () => {
             setShowPay(false);

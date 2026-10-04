@@ -517,6 +517,13 @@ export const debtAPI = {
     });
   },
 
+  async realignDueDays(id: string): Promise<{ success: boolean; data: { updated: number; charges: number } }> {
+    return await apiRequest(`/auth/debts/${id}/charges/realign-due-days/`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  },
+
   async deleteCharge(id: string, chargeId: string) {
     return await apiRequest(`/auth/debts/${id}/charges/${chargeId}/`, {
       method: 'DELETE',

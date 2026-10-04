@@ -17,7 +17,7 @@ import { calculatePercentageChange } from './utils/metrics';
 import { computeUpdatedInvestments } from './utils/updatedInvestments';
 import { transactionRecognitionDate } from '../../utils/transactionRecognition';
 import { toLocalDateString } from '../../utils/localDate';
-import { debtNetWorthAdjustment, dueInMonthTotalTry } from '../../utils/debtDueLogic';
+import { debtNetWorthAdjustment } from '../../utils/debtDueLogic';
 import type { DashboardStatItem } from './types';
 import DashboardHeader from './sections/DashboardHeader';
 import DashboardStatsGrid from './sections/DashboardStatsGrid';
@@ -134,21 +134,8 @@ const Dashboard: React.FC = () => {
       .reduce((sum, t) => sum + convertToTRY(t), 0);
   }, [transactions, thisMonthStart, thisMonthEnd, convertToTRY]);
 
-  const thisMonthDueObligations = useMemo(
-    () =>
-      dueInMonthTotalTry(
-        debts,
-        debtSchedules,
-        exchangeRates,
-        thisMonthStart,
-        thisMonthEnd,
-        toLocalDateString()
-      ),
-    [debts, debtSchedules, exchangeRates, thisMonthStart, thisMonthEnd]
-  );
-
-  // Nakit gider + bu ay vadesi gelen (henüz ödenmemiş) taksit/kesimler
-  const thisMonthExpense = thisMonthExpenseCash + thisMonthDueObligations;
+  // Gider = hesaptan çıkan para. Vadesi gelmiş taksit burada yok; o borç ekranında durur.
+  const thisMonthExpense = thisMonthExpenseCash;
 
   const netIncome = thisMonthIncome - thisMonthExpense;
 
@@ -170,14 +157,6 @@ const Dashboard: React.FC = () => {
       .reduce((sum, t) => sum + convertToTRY(t), 0);
   }, [transactions, lastMonthStart, lastMonthEnd, convertToTRY]);
 
-  const lastMonthDueObligations = useMemo(
-    () =>
-      dueInMonthTotalTry(debts, debtSchedules, exchangeRates, lastMonthStart, lastMonthEnd),
-    [debts, debtSchedules, exchangeRates, lastMonthStart, lastMonthEnd]
-  );
-
-  // Geçmiş ay: yalnızca o ay ödenmiş nakit gider (vadesi geçmiş ayda kalmış ödenmemişler
-  // hâlâ pending ise thisMonthDue'ya düşer; çift saymamak için last month'a due ekleme)
   const lastMonthExpense = lastMonthExpenseCash;
 
   const lastMonthNet = lastMonthIncome - lastMonthExpense;
@@ -195,7 +174,7 @@ const Dashboard: React.FC = () => {
       transactions
         .filter((t) => t.type === 'expense' && transactionRecognitionDate(t) <= today)
         .reduce((sum, t) => sum + convertToTRY(t), 0);
-    // Vadesi gelmemiş taksitler net değere girmez; yalnızca matured pending
+    // Kart: kalan borç. Kredi: kalan anapara. Diğer borçlar: vadesi gelmiş taksit.
     const debtAdj = debtNetWorthAdjustment(debts, debtSchedules, exchangeRates, today);
     return cashFlow + debtAdj;
   }, [transactions, debts, debtSchedules, convertToTRY, exchangeRates]);

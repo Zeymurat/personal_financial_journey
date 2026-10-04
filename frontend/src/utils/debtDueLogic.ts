@@ -1,5 +1,6 @@
 import type { Debt, DebtScheduleItem } from '../types';
 import { toLocalDateString } from './localDate';
+import { remainingLoanPrincipal } from './loanInstallment';
 
 /** Convert debt amount to TRY using rate map (rate = TRY per 1 unit). */
 export function debtAmountToTry(
@@ -57,7 +58,32 @@ export function dueInMonthAmount(
     .reduce((sum, s) => sum + (s.amount || 0), 0);
 }
 
-/** Net varlık borç düzeltmesi: alacak +, borç/kredi/kart (vadesi gelmiş) − */
+/** Kartın kalan borcu, ya da kredinin ödenen taksitlerden sonra kalan anaparası. */
+export function netWorthLiabilityAmount(
+  debt: Debt,
+  schedule: DebtScheduleItem[] | undefined
+): number {
+  if (debt.status !== 'active') return 0;
+  if (debt.kind === 'credit_card') {
+    return Math.max(0, debt.remainingAmount || 0);
+  }
+  if (debt.kind === 'loan') {
+    const items = schedule || [];
+    const paidCount = items.filter((s) => s.status === 'paid').length;
+    const rowAmount = items.find((s) => (s.amount || 0) > 0)?.amount;
+    return remainingLoanPrincipal({
+      originalAmount: debt.originalAmount || 0,
+      monthlyInterestPercent: debt.interestRate,
+      installmentCount: debt.installmentCount || items.length,
+      installmentAmount: debt.installmentAmount || rowAmount,
+      loanType: debt.loanType,
+      paidInstallmentCount: paidCount,
+    });
+  }
+  return maturedLiabilityAmount(debt, schedule);
+}
+
+/** Net varlık borç düzeltmesi: alacak +, kart kalanı ve kredi anaparası − */
 export function debtNetWorthAdjustment(
   debts: Debt[],
   schedulesByDebtId: Record<string, DebtScheduleItem[]>,
@@ -66,7 +92,10 @@ export function debtNetWorthAdjustment(
 ): number {
   return debts.reduce((sum, d) => {
     if (d.status !== 'active') return sum;
-    const local = maturedLiabilityAmount(d, schedulesByDebtId[d.id], asOf);
+    const local =
+      d.kind === 'credit_card' || d.kind === 'loan'
+        ? netWorthLiabilityAmount(d, schedulesByDebtId[d.id])
+        : maturedLiabilityAmount(d, schedulesByDebtId[d.id], asOf);
     const amt = debtAmountToTry(local, d.currency, exchangeRates);
     return d.kind === 'receivable' ? sum + amt : sum - amt;
   }, 0);

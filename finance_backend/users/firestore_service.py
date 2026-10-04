@@ -7,13 +7,18 @@ import logging
 from .debt_utils import (
     parse_date,
     format_date,
-    build_installment_due_dates,
+    build_charge_due_dates,
     build_loan_due_dates,
-    build_due_dates_from_first_pending,
-    build_due_dates_from_first,
     split_equal_amounts,
     compute_cc_min_payment,
     open_statement_period,
+    due_in_open_statement,
+    with_anchor_day,
+    card_statement_figures,
+    estimate_revolving_interest,
+    statement_due_date,
+    add_months,
+    quote_loan_prepayment,
     compute_loan_installment_amount,
     build_fixed_installment_amounts,
     normalize_loan_type,
@@ -1755,14 +1760,14 @@ class FirestoreService:
 
         first_pending_raw = charge_data.get('firstPendingDueDate')
         first_due_raw = charge_data.get('firstDueDate')
-        if first_pending_raw and paid_count > 0:
-            due_dates = build_due_dates_from_first_pending(
-                parse_date(first_pending_raw), count, paid_count
-            )
-        elif first_due_raw:
-            due_dates = build_due_dates_from_first(parse_date(first_due_raw), count)
-        else:
-            due_dates = build_installment_due_dates(purchase, cutoff, count)
+        due_dates = build_charge_due_dates(
+            purchase,
+            count,
+            paid_count,
+            parse_date(first_pending_raw) if first_pending_raw else None,
+            parse_date(first_due_raw) if first_due_raw else None,
+            cutoff,
+        )
 
         category = (charge_data.get('category') or '').strip()
         description = (charge_data.get('description') or '').strip()
@@ -2005,11 +2010,52 @@ class FirestoreService:
             payload['firstDueDate'] = updates['firstDueDate']
         elif paid_count > 0:
             pending = [s for s in items_sorted if s.get('status') == 'pending']
-            if pending:
+            if pending and pending[0].get('dueDate'):
                 payload['firstPendingDueDate'] = pending[0].get('dueDate')
 
         result = await self.add_credit_card_charge(user_id, debt_id, payload)
         return result
+
+    async def realign_credit_card_due_days(self, user_id: str, debt_id: str) -> Dict[str, Any]:
+        """
+        Keep each installment's year and month; set the day back to the card
+        cutoff. 26 Oct + cutoff 15 → 15 Oct, so the slice returns to that statement.
+        """
+        debt = await self.get_debt(user_id, debt_id)
+        if not debt or debt.get('kind') != 'credit_card':
+            raise ValueError('Kredi kartı bulunamadı')
+
+        cutoff = max(1, min(int(debt.get('statementCutoffDay') or 1), 28))
+        schedule = await self.get_debt_schedule(user_id, debt_id)
+        schedule_ref = self.get_debt_schedule_ref(user_id, debt_id)
+        updated = 0
+        charges = 0
+        seen: set = set()
+        for item in schedule:
+            due_raw = item.get('dueDate')
+            if not due_raw or not item.get('id'):
+                continue
+            try:
+                due = parse_date(due_raw)
+            except (TypeError, ValueError):
+                continue
+            charge_key = item.get('chargeId') or item.get('id')
+            if charge_key not in seen:
+                seen.add(charge_key)
+                charges += 1
+            new_due = with_anchor_day(due, cutoff)
+            if new_due == due:
+                continue
+            schedule_ref.document(item['id']).update({
+                'dueDate': format_date(new_due),
+                'updatedAt': firestore.SERVER_TIMESTAMP,
+            })
+            updated += 1
+        return {
+            'debtId': debt_id,
+            'charges': charges,
+            'updated': updated,
+        }
 
     async def delete_debt_schedule_item(
         self, user_id: str, debt_id: str, item_id: str
@@ -2325,6 +2371,119 @@ class FirestoreService:
         items.sort(key=lambda x: (x.get('dueDate') or '', x.get('sequence') or 0))
         return items
 
+    def _pending_in_window(self, schedule: List[Dict], prev_cut, next_cut) -> List[Dict]:
+        items = []
+        for s in schedule:
+            if s.get('status') != 'pending' or not s.get('dueDate'):
+                continue
+            try:
+                due = parse_date(s['dueDate'])
+            except (TypeError, ValueError):
+                continue
+            if due_in_open_statement(due, prev_cut, next_cut):
+                items.append(s)
+        return items
+
+    def _card_cycle_figures(self, debt: Dict[str, Any], schedule: List[Dict], cycle_end):
+        prev_cut = add_months(cycle_end, -1)
+        period_items = self._pending_in_window(schedule, prev_cut, cycle_end)
+        item_sum = sum(float(s.get('amount') or 0) for s in period_items)
+        figures = card_statement_figures(
+            item_sum,
+            float(debt.get('carriedBalance') or 0),
+            float(debt.get('statementCredit') or 0),
+            float(debt.get('cyclePaidAmount') or 0),
+            float(debt.get('creditLimit') or 0),
+        )
+        return prev_cut, period_items, figures
+
+    async def _ensure_card_statement_cycle(
+        self,
+        user_id: str,
+        debt_id: str,
+        debt: Dict[str, Any],
+        schedule: List[Dict],
+        as_of,
+    ):
+        """
+        Keep the payable statement open until kesim + 10 days.
+        After the due date, roll the unpaid bill forward with estimated interest.
+        """
+        cutoff = int(debt.get('statementCutoffDay') or 1)
+        _, natural_end = open_statement_period(as_of, cutoff)
+        debt_ref = self.get_user_debts_ref(user_id).document(debt_id)
+        schedule_ref = self.get_debt_schedule_ref(user_id, debt_id)
+        stored_raw = debt.get('statementCycleEnd')
+
+        if not stored_raw:
+            debt['statementCycleEnd'] = format_date(natural_end)
+            debt['cyclePaidAmount'] = float(debt.get('cyclePaidAmount') or 0)
+            debt['carriedBalance'] = float(debt.get('carriedBalance') or 0)
+            debt['statementCredit'] = float(debt.get('statementCredit') or 0)
+            debt_ref.update({
+                'statementCycleEnd': debt['statementCycleEnd'],
+                'cyclePaidAmount': debt['cyclePaidAmount'],
+                'carriedBalance': debt['carriedBalance'],
+                'statementCredit': debt['statementCredit'],
+                'updatedAt': firestore.SERVER_TIMESTAMP,
+            })
+            return debt, schedule
+
+        guard = 0
+        while guard < 24:
+            guard += 1
+            cycle_end = parse_date(debt['statementCycleEnd'])
+            if as_of <= statement_due_date(cycle_end):
+                break
+            _prev_cut, period_items, _figures = self._card_cycle_figures(debt, schedule, cycle_end)
+            gross_before_credit = round(
+                sum(float(s.get('amount') or 0) for s in period_items)
+                + float(debt.get('carriedBalance') or 0),
+                2,
+            )
+            paid = float(debt.get('cyclePaidAmount') or 0)
+            unpaid = round(max(0.0, gross_before_credit - paid), 2)
+            credit = float(debt.get('statementCredit') or 0)
+            used_credit = min(credit, unpaid)
+            unpaid_after_credit = round(max(0.0, unpaid - used_credit), 2)
+            minimum, _rate = compute_cc_min_payment(
+                float(debt.get('creditLimit') or 0),
+                gross_before_credit,
+            )
+            interest, _interest_rate, _kind = estimate_revolving_interest(
+                unpaid_after_credit,
+                paid,
+                minimum,
+                gross_before_credit,
+            )
+            if unpaid_after_credit <= 0.02:
+                for item in period_items:
+                    schedule_ref.document(item['id']).update({
+                        'status': 'paid',
+                        'paidWithoutTransaction': True,
+                        'updatedAt': firestore.SERVER_TIMESTAMP,
+                    })
+                    item['status'] = 'paid'
+                new_carried = 0.0
+            else:
+                new_carried = round(unpaid_after_credit + interest, 2)
+            remaining = round(float(debt.get('remainingAmount') or 0) + interest, 2)
+            next_end = add_months(cycle_end, 1)
+            debt['statementCycleEnd'] = format_date(next_end)
+            debt['cyclePaidAmount'] = 0.0
+            debt['carriedBalance'] = new_carried
+            debt['statementCredit'] = round(max(0.0, credit - used_credit), 2)
+            debt['remainingAmount'] = remaining
+            debt_ref.update({
+                'statementCycleEnd': debt['statementCycleEnd'],
+                'cyclePaidAmount': 0.0,
+                'carriedBalance': new_carried,
+                'statementCredit': debt['statementCredit'],
+                'remainingAmount': remaining,
+                'updatedAt': firestore.SERVER_TIMESTAMP,
+            })
+        return debt, schedule
+
     async def get_debt_statement_summary(
         self, user_id: str, debt_id: str, as_of: Optional[str] = None
     ) -> Dict[str, Any]:
@@ -2341,31 +2500,33 @@ class FirestoreService:
             from datetime import date as date_cls
             as_of_date = parse_date(as_of) if as_of else date_cls.today()
 
-        cutoff = int(debt.get('statementCutoffDay') or 1)
-        prev_cut, next_cut = open_statement_period(as_of_date, cutoff)
         schedule = await self.get_debt_schedule(user_id, debt_id)
-        period_items = [
-            s for s in schedule
-            if s.get('status') == 'pending' and s.get('dueDate') == format_date(next_cut)
-        ]
-        period_balance = sum(float(s.get('amount') or 0) for s in period_items)
+        debt, schedule = await self._ensure_card_statement_cycle(
+            user_id, debt_id, debt, schedule, as_of_date
+        )
+        cycle_end = parse_date(debt['statementCycleEnd'])
+        prev_cut, period_items, figures = self._card_cycle_figures(debt, schedule, cycle_end)
         pending_total = sum(
             float(s.get('amount') or 0) for s in schedule if s.get('status') == 'pending'
-        )
-        min_payment, rate = compute_cc_min_payment(
-            float(debt.get('creditLimit') or 0),
-            period_balance,
         )
         return {
             'debtId': debt_id,
             'asOf': format_date(as_of_date),
             'periodStart': format_date(prev_cut),
-            'statementDate': format_date(next_cut),
-            'periodBalance': period_balance,
+            'statementDate': format_date(cycle_end),
+            'periodBalance': figures['periodBalance'],
+            'grossPeriodBalance': figures['grossPeriodBalance'],
+            'cyclePaidAmount': figures['cyclePaidAmount'],
             'pendingTotal': pending_total,
             'remainingAmount': float(debt.get('remainingAmount') or 0),
-            'minPayment': min_payment,
-            'minPaymentRatePercent': rate,
+            'minPayment': figures['minPayment'],
+            'minPaymentOriginal': figures['minPaymentOriginal'],
+            'minPaymentRatePercent': figures['minPaymentRatePercent'],
+            'estimatedInterest': figures['estimatedInterest'],
+            'interestRatePercent': figures['interestRatePercent'],
+            'interestKind': figures['interestKind'],
+            'carriedBalance': figures['carriedBalance'],
+            'statementCredit': figures['statementCredit'],
             'currency': debt.get('currency') or 'TRY',
             'items': period_items,
         }
@@ -2389,19 +2550,54 @@ class FirestoreService:
         schedule = await self.get_debt_schedule(user_id, debt_id)
         pending = [s for s in schedule if s.get('status') == 'pending']
         schedule_ref = self.get_debt_schedule_ref(user_id, debt_id)
+        card_cycle_patch = None
 
-        # Kredi / taksitli borç-alacak: yalnızca sıradaki N tam taksit (kısmi yok)
-        if kind in ('loan', 'payable', 'receivable') and pending:
+        # Kredi: sıradaki N taksit. Erken ödemede tutar, anapara ile tam taksit arasında olabilir.
+        # Borç/alacak: yalnızca tam taksit.
+        if kind == 'loan' and pending:
             pay_count = int(payment_data.get('payInstallmentCount') or 1)
             if pay_count < 1:
                 raise ValueError('En az 1 taksit ödenmeli')
             if pay_count > len(pending):
                 raise ValueError(f'En fazla {len(pending)} bekleyen taksit var')
 
+            ordered_pending = sorted(
+                pending,
+                key=lambda s: (s.get('sequence') or 0, s.get('dueDate') or ''),
+            )
+            to_pay = ordered_pending[:pay_count]
+            full_amount = round(sum(float(s.get('amount') or 0) for s in to_pay), 2)
+            quote = quote_loan_prepayment(
+                float(debt.get('originalAmount') or 0),
+                float(debt.get('interestRate') or 0),
+                int(debt.get('installmentCount') or len(schedule) or pay_count),
+                float(debt.get('installmentAmount') or (to_pay[0].get('amount') if to_pay else 0) or 0),
+                debt.get('loanType'),
+                schedule,
+                pay_count,
+                parse_date(pay_date),
+            )
+            amount = quote['suggested'] if quote['suggested'] > 0 else full_amount
+            client_amount = payment_data.get('amount')
+            if client_amount is not None:
+                try:
+                    client_f = float(client_amount)
+                except (TypeError, ValueError):
+                    client_f = -1
+                if client_f + 0.02 < quote['minimum'] or client_f > full_amount + 0.02:
+                    raise ValueError(
+                        f'Ödeme {quote["minimum"]} ile {full_amount} arasında olmalı. '
+                        'İndirim yalnızca işlemiş olmayan faizden düşer.'
+                    )
+                amount = round(client_f, 2)
+        elif kind in ('payable', 'receivable') and pending:
+            pay_count = int(payment_data.get('payInstallmentCount') or 1)
+            if pay_count < 1:
+                raise ValueError('En az 1 taksit ödenmeli')
+            if pay_count > len(pending):
+                raise ValueError(f'En fazla {len(pending)} bekleyen taksit var')
             to_pay = pending[:pay_count]
             amount = round(sum(float(s.get('amount') or 0) for s in to_pay), 2)
-
-            # İstemci amount gönderdiyse tam eşleşmeli
             client_amount = payment_data.get('amount')
             if client_amount is not None:
                 try:
@@ -2413,31 +2609,53 @@ class FirestoreService:
                         f'Ödeme tutarı seçilen taksitlere denk olmalı ({amount}). '
                         'Kısmi taksit ödemesi yapılamaz.'
                     )
-        elif kind == 'credit_card' and pending:
+        elif kind == 'credit_card':
             amount = float(payment_data.get('amount') or 0)
             if amount <= 0:
                 raise ValueError('amount gerekli')
-            # Tam taksit FIFO; kalan artı kabul etme
+            pay_as_of = parse_date(pay_date)
+            debt, schedule = await self._ensure_card_statement_cycle(
+                user_id, debt_id, debt, schedule, pay_as_of
+            )
+            pending = [s for s in schedule if s.get('status') == 'pending']
+            cycle_end = parse_date(debt['statementCycleEnd'])
+            _prev, period_items, figures = self._card_cycle_figures(debt, schedule, cycle_end)
+            statement_due = float(figures['periodBalance'] or 0)
+            balance = float(debt.get('remainingAmount') or 0)
+            if amount > balance + 0.02:
+                raise ValueError('Ödeme kalan borçtan büyük olamaz')
+            period_ids = {s.get('id') for s in period_items}
             to_pay = []
-            running = 0.0
-            for item in pending:
-                next_sum = round(running + float(item.get('amount') or 0), 2)
-                if next_sum <= amount + 0.02:
-                    to_pay.append(item)
-                    running = next_sum
-                else:
-                    break
-            if not to_pay:
-                raise ValueError(
-                    'Tutar en az bir tam taksit / dönem satırına denk olmalı. '
-                    'Kısmi düşüm yapılmaz.'
-                )
-            if abs(running - amount) > 0.02:
-                raise ValueError(
-                    f'Tutar tam satır(lar)a denk olmalı. Ödenebilir: {running} '
-                    f'({len(to_pay)} satır). Artan {round(amount - running, 2)} kabul edilmez.'
-                )
-            amount = running
+            if amount + 0.02 >= statement_due:
+                if statement_due > 0.02:
+                    to_pay.extend(period_items)
+                excess = round(max(0.0, amount - statement_due), 2)
+                future = [s for s in pending if s.get('id') not in period_ids]
+                running = 0.0
+                for item in future:
+                    nxt = round(running + float(item.get('amount') or 0), 2)
+                    if nxt <= excess + 0.02:
+                        to_pay.append(item)
+                        running = nxt
+                    else:
+                        break
+                leftover = round(max(0.0, excess - running), 2)
+                still_open = [s for s in pending if s.get('id') not in {x.get('id') for x in to_pay}]
+                if not still_open:
+                    leftover = 0.0
+                card_cycle_patch = {
+                    'cyclePaidAmount': 0.0,
+                    'carriedBalance': 0.0,
+                    'statementCredit': leftover,
+                    'statementCycleEnd': debt.get('statementCycleEnd'),
+                }
+            else:
+                card_cycle_patch = {
+                    'cyclePaidAmount': round(float(debt.get('cyclePaidAmount') or 0) + amount, 2),
+                    'carriedBalance': float(debt.get('carriedBalance') or 0),
+                    'statementCredit': float(debt.get('statementCredit') or 0),
+                    'statementCycleEnd': debt.get('statementCycleEnd'),
+                }
         else:
             # Schedule yoksa serbest tutar (basit borç)
             amount = float(payment_data.get('amount') or 0)
@@ -2500,20 +2718,28 @@ class FirestoreService:
                 'updatedAt': firestore.SERVER_TIMESTAMP,
             })
 
-        # Kalan = bekleyen schedule toplamı (yoksa eski remaining - amount)
+        # Kart: kalan borç ödemeyle düşer; taksit satırı ancak ekstre kapanınca ödenir.
+        # Diğer borçlar: kalan = bekleyen schedule toplamı.
         refreshed = await self.get_debt_schedule(user_id, debt_id)
         still_pending = [s for s in refreshed if s.get('status') == 'pending']
-        if refreshed:
+        if kind == 'credit_card':
+            new_remaining = round(max(0.0, float(debt.get('remainingAmount') or 0) - amount), 2)
+            status_value = 'paid' if new_remaining <= 1e-9 and not still_pending else 'active'
+        elif refreshed:
             new_remaining = round(sum(float(s.get('amount') or 0) for s in still_pending), 2)
+            status_value = 'paid' if new_remaining <= 1e-9 else 'active'
         else:
             new_remaining = max(0.0, float(debt.get('remainingAmount') or 0) - amount)
+            status_value = 'paid' if new_remaining <= 1e-9 else 'active'
 
-        status_value = 'paid' if new_remaining <= 1e-9 else 'active'
-        self.get_user_debts_ref(user_id).document(debt_id).update({
+        debt_patch: Dict[str, Any] = {
             'remainingAmount': 0.0 if status_value == 'paid' else new_remaining,
             'status': status_value,
             'updatedAt': firestore.SERVER_TIMESTAMP,
-        })
+        }
+        if card_cycle_patch:
+            debt_patch.update(card_cycle_patch)
+        self.get_user_debts_ref(user_id).document(debt_id).update(debt_patch)
 
         return {
             'debtId': debt_id,

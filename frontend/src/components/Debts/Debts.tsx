@@ -12,9 +12,13 @@ import { formatTrMoneyInput, parseTrMoneyString } from '../../utils/trNumberInpu
 import {
   DEFAULT_LOAN_TYPE,
   LOAN_TYPES,
+  estimateEarlyPayDiscount,
+  loanAmortizationSlices,
   normalizeLoanType,
+  remainingLoanPrincipal,
   type LoanType,
 } from '../../utils/loanInstallment';
+import { toLocalDateString } from '../../utils/localDate';
 import AddDebtModal from './modals/AddDebtModal';
 import DebtPaymentModal from './modals/DebtPaymentModal';
 import DebtListCard, { debtProgress } from './cards/DebtListCard';
@@ -270,6 +274,33 @@ const Debts: React.FC = () => {
     return { payable, receivable, dueThisMonth, totalPaid, remainingDebt };
   }, [debts, allSchedules, toTry]);
 
+  const loanView = useMemo(() => {
+    if (!selected || selected.kind !== 'loan') return null;
+    const ordered = [...schedule].sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
+    const slices = loanAmortizationSlices({
+      originalAmount: selected.originalAmount || 0,
+      monthlyInterestPercent: selected.interestRate,
+      installmentCount: selected.installmentCount || ordered.length,
+      installmentAmount:
+        selected.installmentAmount || ordered.find((s) => (s.amount || 0) > 0)?.amount,
+      loanType: selected.loanType,
+    });
+    const sliceById = new Map(ordered.map((item, index) => [item.id, slices[index]]));
+    const nextIdx = ordered.findIndex((item) => item.status === 'pending');
+    const next = nextIdx >= 0 ? ordered[nextIdx] : null;
+    const nextSlice = nextIdx >= 0 ? slices[nextIdx] : null;
+    const early =
+      next && nextSlice
+        ? estimateEarlyPayDiscount({
+            interest: nextSlice.interest,
+            dueDate: next.dueDate,
+            previousDueDate: nextIdx > 0 ? ordered[nextIdx - 1]?.dueDate : null,
+            asOf: toLocalDateString(),
+          })
+        : null;
+    return { sliceById, next, nextSlice, early };
+  }, [selected, schedule]);
+
   const handleDelete = async () => {
     if (!pendingDelete) return;
     setDeleting(true);
@@ -463,6 +494,51 @@ const Debts: React.FC = () => {
                       {total.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}{' '}
                       <span className="text-sm font-semibold text-slate-400">{selected.currency}</span>
                     </p>
+                    {selected.kind === 'loan' && (
+                      <div className="mt-2 space-y-1 text-xs text-slate-500">
+                        <p>
+                          {t('detail.remainingPrincipal')}:{' '}
+                          {remainingLoanPrincipal({
+                            originalAmount: selected.originalAmount || 0,
+                            monthlyInterestPercent: selected.interestRate,
+                            installmentCount: selected.installmentCount || schedule.length,
+                            installmentAmount:
+                              selected.installmentAmount ||
+                              schedule.find((s) => (s.amount || 0) > 0)?.amount,
+                            loanType: selected.loanType,
+                            paidInstallmentCount: schedule.filter((s) => s.status === 'paid').length,
+                          }).toLocaleString('tr-TR', { maximumFractionDigits: 2 })}{' '}
+                          {selected.currency}
+                        </p>
+                        {loanView?.next && loanView.nextSlice && (
+                          <p>
+                            {t('detail.nextSplit', {
+                              seq: loanView.next.sequence,
+                              principal: loanView.nextSlice.principal.toLocaleString('tr-TR', {
+                                maximumFractionDigits: 2,
+                              }),
+                              interest: loanView.nextSlice.interest.toLocaleString('tr-TR', {
+                                maximumFractionDigits: 2,
+                              }),
+                            })}
+                          </p>
+                        )}
+                        {loanView?.early && loanView.early.discount > 0 && loanView.next && (
+                          <p>
+                            {t('detail.earlyPayEstimate', {
+                              days: loanView.early.earlyDays,
+                              discount: loanView.early.discount.toLocaleString('tr-TR', {
+                                maximumFractionDigits: 2,
+                              }),
+                              pay: Math.max(
+                                0,
+                                (loanView.next.amount || 0) - loanView.early.discount
+                              ).toLocaleString('tr-TR', { maximumFractionDigits: 2 }),
+                            })}
+                          </p>
+                        )}
+                      </div>
+                    )}
                     {selected.interestRate !== undefined && selected.interestRate !== null && (
                       <p className="text-xs text-slate-400 mt-1">
                         {t('detail.interestRate')}: %{selected.interestRate}
@@ -586,6 +662,16 @@ const Debts: React.FC = () => {
                       {summary.currency}
                     </p>
                     <p className="text-xs text-slate-400 mt-1">%{summary.minPaymentRatePercent}</p>
+                    {(summary.estimatedInterest || 0) > 0 && (
+                      <p className="text-xs text-slate-500 mt-1">
+                        {t('detail.estimatedInterest', {
+                          amount: summary.estimatedInterest!.toLocaleString('tr-TR', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }),
+                        })}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -612,15 +698,31 @@ const Debts: React.FC = () => {
                   <p className="text-sm text-slate-500">{t('detail.noSchedule')}</p>
                 ) : (
                   <ul className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                    {schedule.map((item) => (
+                    {schedule.map((item) => {
+                      const slice = loanView?.sliceById.get(item.id);
+                      return (
                       <li
                         key={item.id}
-                        className="flex justify-between text-sm p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700/40"
+                        className="flex justify-between gap-3 text-sm p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700/40"
                       >
                         <span className="text-slate-600 dark:text-slate-300">
-                          #{item.sequence} · {item.dueDate}
+                          <span className="block">
+                            #{item.sequence} · {item.dueDate}
+                          </span>
+                          {slice && (
+                            <span className="block text-[11px] text-slate-400 mt-0.5">
+                              {t('detail.sliceSplit', {
+                                principal: slice.principal.toLocaleString('tr-TR', {
+                                  maximumFractionDigits: 2,
+                                }),
+                                interest: slice.interest.toLocaleString('tr-TR', {
+                                  maximumFractionDigits: 2,
+                                }),
+                              })}
+                            </span>
+                          )}
                         </span>
-                        <span className="font-semibold tabular-nums">
+                        <span className="font-semibold tabular-nums shrink-0">
                           {item.amount.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}{' '}
                           <span
                             className={
@@ -631,7 +733,8 @@ const Debts: React.FC = () => {
                           </span>
                         </span>
                       </li>
-                    ))}
+                      );
+                    })}
                   </ul>
                 )}
               </div>
@@ -656,6 +759,7 @@ const Debts: React.FC = () => {
           isOpen={showPay}
           debt={selected}
           schedule={schedule}
+          summary={selected.kind === 'credit_card' ? summary : null}
           onClose={() => setShowPay(false)}
           onPaid={async () => {
             setShowPay(false);

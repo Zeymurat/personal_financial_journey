@@ -115,7 +115,7 @@
     "installments": "Installments",
     "singlePayment": "One-shot (1)",
     "nInstallments": "{{count}} installments",
-    "effectivePreview": "First statement / due: {{date}}",
+    "effectivePreview": "First due: {{date}}",
     "cardChargeHint": "This is not a cash transaction. It increases your card balance. A cash expense is created when you pay the card."
   },
   "detail": {
